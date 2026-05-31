@@ -1,5 +1,7 @@
-apps/logs/
 /docs
+!/docs/deployment
+/docs/*
+!/docs/deployment/**
 
 .env
 .env.*
