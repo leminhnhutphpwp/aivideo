@@ -1,0 +1,3 @@
+# Prometheus web configuration with basic auth
+basic_auth_users:
+  admin: $2b$12$iszfRqAUk6BHAXwHvhQe8uFgnKdC2nSFqC0KrtP7eFlGxifmX/LJq

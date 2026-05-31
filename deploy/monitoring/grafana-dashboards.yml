@@ -1,0 +1,11 @@
+# Grafana dashboard provisioning provider
+apiVersion: 1
+
+providers:
+  - name: "AI Video Platform"
+    orgId: 1
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 10
+    options:
+      path: /etc/grafana/provisioning/dashboards

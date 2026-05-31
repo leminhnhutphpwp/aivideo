@@ -1,0 +1,21 @@
+# Grafana datasource provisioning
+# Automatically connects to Prometheus on container start
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://localhost:9090
+    isDefault: true
+    editable: false
+    basicAuth: true
+    basicAuthUser: admin
+    basicAuthPassword: admin
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://localhost:3100
+    isDefault: false
+    editable: false

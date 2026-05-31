@@ -1,0 +1,704 @@
+{
+  "title": "AI Video Platform",
+  "timezone": "browser",
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Daemon Uptime",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "daemon_uptime_seconds",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "id": 2,
+      "title": "Daemon Tasks by Status",
+      "type": "bargauge",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "daemon_tasks_total{status=\"running\"}",
+          "legendFormat": "Running"
+        },
+        {
+          "expr": "daemon_tasks_total{status=\"queued\"}",
+          "legendFormat": "Queued"
+        },
+        {
+          "expr": "daemon_tasks_total{status=\"done\"}",
+          "legendFormat": "Done"
+        },
+        {
+          "expr": "daemon_tasks_total{status=\"failed\"}",
+          "legendFormat": "Failed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "id": 3,
+      "title": "Projects & Users",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "daemon_projects_total",
+          "legendFormat": "Projects"
+        },
+        {
+          "expr": "daemon_users_total",
+          "legendFormat": "Users"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "id": 4,
+      "title": "Laravel Users",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_users_total",
+          "legendFormat": "Total"
+        },
+        {
+          "expr": "laravel_users_verified_total",
+          "legendFormat": "Verified"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "id": 5,
+      "title": "Active Subscriptions by Plan",
+      "type": "barchart",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_subscriptions_active_total",
+          "legendFormat": "{{plan}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "id": 6,
+      "title": "Render Jobs by Status",
+      "type": "barchart",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_render_jobs_total{status=\"completed\"}",
+          "legendFormat": "Completed"
+        },
+        {
+          "expr": "laravel_render_jobs_total{status=\"processing\"}",
+          "legendFormat": "Processing"
+        },
+        {
+          "expr": "laravel_render_jobs_total{status=\"failed\"}",
+          "legendFormat": "Failed"
+        },
+        {
+          "expr": "laravel_render_jobs_total{status=\"pending\"}",
+          "legendFormat": "Pending"
+        }
+      ],
+      "gridPos": {
+        "x": 8,
+        "y": 4,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "id": 7,
+      "title": "Queue Depth",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_queue_depth",
+          "legendFormat": "Queue depth"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 4,
+        "w": 8,
+        "h": 6
+      }
+    },
+    {
+      "id": 8,
+      "title": "Credits Overview",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_credits_reserved_today",
+          "legendFormat": "Reserved today"
+        },
+        {
+          "expr": "laravel_credits_spent_total",
+          "legendFormat": "Spent total"
+        },
+        {
+          "expr": "laravel_credits_purchased_total",
+          "legendFormat": "Purchased total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 12,
+        "h": 4
+      }
+    },
+    {
+      "id": 9,
+      "title": "System Health Checks",
+      "type": "table",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_database_up",
+          "legendFormat": "Database"
+        },
+        {
+          "expr": "laravel_redis_up",
+          "legendFormat": "Redis"
+        },
+        {
+          "expr": "laravel_daemon_up",
+          "legendFormat": "Daemon"
+        },
+        {
+          "expr": "daemon_up",
+          "legendFormat": "Daemon (direct)"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 10,
+        "w": 12,
+        "h": 4
+      }
+    },
+    {
+      "id": 10,
+      "title": "Daemon Memory Usage",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "daemon_memory_bytes{type=\"heapUsed\"}",
+          "legendFormat": "Heap Used"
+        },
+        {
+          "expr": "daemon_memory_bytes{type=\"heapTotal\"}",
+          "legendFormat": "Heap Total"
+        },
+        {
+          "expr": "daemon_memory_bytes{type=\"rss\"}",
+          "legendFormat": "RSS"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 12,
+        "h": 6
+      }
+    },
+    {
+      "id": 11,
+      "title": "DB & Disk Usage",
+      "type": "gauge",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "daemon_db_size_bytes",
+          "legendFormat": "SQLite DB"
+        },
+        {
+          "expr": "daemon_projects_disk_bytes",
+          "legendFormat": "Projects Disk"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 500000000
+              },
+              {
+                "color": "red",
+                "value": 1000000000
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
+        "h": 6
+      }
+    },
+    {
+      "id": 12,
+      "title": "Queue Depth by Name",
+      "type": "barchart",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_queue_depth_by_name",
+          "legendFormat": "{{queue}}"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "id": 13,
+      "title": "Horizon Failed Jobs",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_horizon_failed_jobs_total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 20,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "id": 14,
+      "title": "Horizon Job Throughput (per min)",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "laravel_horizon_job_throughput",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 4
+      }
+    },
+    {
+      "id": 15,
+      "title": "Last DB VACUUM",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "daemon_db_last_vacuum_timestamp"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 86400
+              },
+              {
+                "color": "red",
+                "value": 259200
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "id": 16,
+      "title": "Laravel Request Rate",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "targets": [
+        {
+          "expr": "rate(laravel_horizon_measured_jobs_total[5m])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "req/s",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        }
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 6
+      }
+    },
+    {
+      "id": 17,
+      "title": "Failed Jobs",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "targets": [
+        {
+          "expr": "laravel_horizon_failed_jobs_total"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 34,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "id": 18,
+      "title": "Queue Depth by Name",
+      "type": "barchart",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "targets": [
+        {
+          "expr": "laravel_queue_depth_by_name",
+          "legendFormat": "{{queue}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        }
+      },
+      "options": {
+        "orientation": "auto",
+        "groupWidth": 0.7,
+        "barWidth": 0.97,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "showValue": "auto",
+        "stacking": "normal",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 8,
+        "h": 4
+      }
+    }
+  ]
+}
