@@ -4,15 +4,23 @@
 
 ---
 
-## 🔄 Active Tasks
+## ✅ Recently Completed
 
-### Server-Render Landing Page Text cho SEO — "Server Shell + Client Islands"
-- **Priority**: 🟡 Medium
-- **Scope**: web
-- **Plan**: `docs/plans/ui/server-render-landing-seo.md`
-- **Status**: 📋 Plan complete — ready for implementation
-- **Effort**: ~6h
-- **Steps**:
+### Pricing System + Landing Page — Big Update
+- **Completed**: 2026-05-31
+- **Agent**: @coordinator (@backend + @planner + @web + @tester)
+- **Worklog**: `worklogs/2026-05-31-pricing-plan-final.md`
+- **Summary**: 
+  - Chốt giá Pro 210k/18k credits, DurationTier margin tăng dần 10%→50%
+  - Thống nhất CreditCalculator về PricingCalculator, quality tier không nhân giá
+  - Xóa PricingAddon, sync CreditSettings, thêm email plan_upgraded
+  - Landing page settings: 44 fields quản lý từ admin, 13 server shells cho SEO
+  - Mobile optimization: Forge, Workflow, Ecosystem, Sound
+  - Visual fixes: giảm độ tối ảnh, tăng glow, fix buttons, preloader
+  - SEO: fix og-image, sitemap 17 URLs, server-render text
+- **Verification**: ✅ Tests 19/19, tsc web+daemon clean, API pricing/landing-page đúng
+
+---
   - [ ] Phase 1: Tạo 13 Server Shell files trong `sections/server/` (2h)
   - [ ] Phase 2: Thêm `hideText` prop vào 13 Client Components (2.5h)
   - [ ] Phase 3: Refactor `page.tsx` — import shells, bỏ dynamic cho above-fold (0.5h)
@@ -137,12 +145,14 @@
 - **Status**: ✅ Backend done — cần @web cập nhật UI
 - **Effort remaining**: ~3.5h (web UI)
 - **Steps**:
-  - [x] Backend: DurationTier multipliers (5s=0.78, 10s=1.75, 15s=3.0, 20s=4.67, 30s=8.40)
-  - [x] Backend: PlanSeeder (Free=2.000, Pro=18.000/210k, Studio=coming_soon)
-  - [x] Backend: CreditSettingsSeeder cleanup (còn 3 settings, validation sync DB)
+  - [x] Backend: DurationTier multipliers
+  - [x] Backend: PlanSeeder
+  - [x] Backend: CreditSettingsSeeder
+  - [x] Backend: Landing page settings (44 fields admin)
+  - [x] Frontend: Landing page dynamic text
+  - [x] Frontend: Server-render SEO
   - [ ] Web: Cập nhật trang /pricing với giá mới Pro 210k, Studio "Sắp ra mắt"
-  - [ ] Web: Credit pack purchase UI (50k/100k/200k)
-  - [ ] Web: Plan selector hiển thị watermark indicator cho Free
+  - [ ] Web: Credit pack purchase UI
 
 ### ElevenLabs Voice UI
 - **Priority**: 🟡 Medium
