@@ -62,6 +62,22 @@
   - [ ] Phase 2.4: Web — Integrate context vào page.tsx
 - **Dependencies**: Backend trước, Web sau; cần Refactor ManageGeneralSettings hoàn tất trước Phase 1.2
 
+### Remove Scene Repeater — Video Pages → Single Scene Form
+- **Priority**: 🔴 High
+- **Scope**: web
+- **Plan**: `docs/plans/ui/remove-scene-repeater.md`
+- **Status**: 📋 Plan complete — ready for implementation
+- **Effort**: ~1.5h
+- **Steps**:
+  - [ ] Sửa `video/[feature]/page.tsx`: single scene state, bỏ loop/add/remove, đơn giản generate (45m)
+  - [ ] Sửa `video-scene-editor.tsx`: bỏ `index`/`onRemove`, đổi header (20m)
+  - [ ] Sửa `video-sidebar.tsx`: bỏ scene count, đổi text button (15m)
+  - [ ] Xóa/redirect `multi-scene/page.tsx` → `/studio/storyboard` (10m)
+  - [ ] Cập nhật i18n keys (10m)
+  - [ ] tsc check + verify (10m)
+- **Dependencies**: Không — có thể làm ngay
+- **Notes**: Storyboard đã làm multi-scene tốt hơn. Form 1 scene đơn giản hơn UX. Backend không cần thay đổi.
+
 ### Storyboard Dual Mode — Phase 0 Refactor → Single-Flow Narrative
 - **Priority**: 🔴 High
 - **Scope**: web (cross-cutting: all shared, multi-scene, single-flow)
