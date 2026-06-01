@@ -94,11 +94,28 @@ Web app calls Laravel API for auth/credits/billing, and daemon proxy (through La
 ## Best Practices & Patterns
 
 ### Storyboard Architecture (Multi-Scene vs One-Shot)
-- **Multi-scene** (`render_mode: multi_scene`): Traditional scene-by-scene storyboard. Each scene has independent camera/style/mood/lighting. FFmpeg concatenates at end.
-- **One-Shot** (`render_mode: single_flow`): Single compiled prompt → one generation job. Shared skills (camera, style, mood, lighting, narration) at storyboard level, not per-scene. Skip FFmpeg concat.
+- **Multi-scene** (`render_mode: multi_scene`): Traditional scene-by-scene storyboard. Each scene has independent camera/style/mood/lighting/driving_audio/first_frame/last_frame. FFmpeg concatenates at end.
+- **One-Shot** (`render_mode: single_flow`): Single compiled prompt → one generation job. Shared skills (camera, style, mood, lighting, narration, driving_audio, first_frame, last_frame) at storyboard level, not per-scene. Skip FFmpeg concat.
 - **Mode toggle**: `RenderModeProvider` context + pill toggle ("Ghép cảnh / One-Shot") with confirm dialog.
 - **URL routing**: `/studio/storyboards/flow?mode=multi` or `?mode=single`. Always use plural `/storyboards/`.
 - **Compiled prompt**: `POST /api/storyboards/{uuid}/compile-prompt` via `AiPromptCompiler` (CKey gpt-4o-mini). Status badge: idle/compiling/compiled/stale/error.
+
+### Media Types (First/Last Frame, Driving Audio)
+- **One-Shot mode**: `driving_audio`, `first_frame_image`, `last_frame_image` are **storyboard-level** fields (same pattern as skills/camera/style/mood/lighting). Stored on `storyboards` table.
+- **Multi-scene mode**: `driving_audio`, `first_frame_image`, `last_frame_image` are **per-scene** fields. Each scene can have different reference media. Stored on `scenes` table.
+- **Why the split?** One-Shot = one generation job → one set of reference media. Multi-scene = N generation jobs → each scene may need different reference media.
+- **Payload routing**: `buildPayload()` checks render mode and places fields at the correct level.
+- **Always verify model support**: Wan2.7 I2V supports first_frame + last_frame + driving_audio. Wan2.6 may differ. Check official DashScope API docs before assuming.
+
+### ⚠️ MANDATORY: Search Model API Docs Before Implementing
+When adding/modifying features for a specific model (Wan2.7, Wan2.6, etc.):
+1. **ALWAYS search official API documentation first** — never assume parameters
+2. Check what parameters the model actually supports (names, types, required vs optional)
+3. Verify valid combinations (e.g., first_frame + last_frame + driving_audio may not all work together)
+4. Don't assume — verify with official docs. Model capabilities change between versions.
+- Alibaba Cloud Model Studio: https://help.aliyun.com/zh/model-studio/
+- DashScope API: https://dashscope.console.aliyun.com/ → API docs
+- Anti-pattern: Copying parameters from one model to another without checking
 
 ### Asset Security
 - **NEVER expose raw daemon paths** to the frontend. Use `fetchRawFile(projectId, fileName)` which returns `{ blobUrl, blob }`.
@@ -266,10 +283,11 @@ Every agent MUST write a worklog after completing any task. No exceptions.
 5. Verify env files are synced across `.env.example`, `.env.docker`, `.env.local`
 
 ### 📊 BA workflow
-1. Read official API docs (QwenCloud, CKey) before implementing
+1. Read official API docs (QwenCloud/DashScope, CKey, etc.) BEFORE implementing — **mandatory, not optional**
 2. Compare our implementation with docs for gaps
 3. Propose missing features with effort estimates
 4. Default to cheapest model for each feature (cost-optimized)
+5. **Never assume model parameters** — always verify names, types, valid combos from official docs
 
 ### 🚀 Deploy checklist
 - [ ] `node apps/daemon/scripts/verify-media-models.mjs` → PASS

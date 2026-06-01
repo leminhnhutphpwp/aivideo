@@ -6,6 +6,17 @@
 
 ## ✅ Recently Completed
 
+### Pricing System Review — Full Analysis
+- **Completed**: 2026-06-01
+- **Agent**: @coordinator
+- **Plan**: `docs/plans/billing/pricing-review.md`
+- **Summary**: 
+  - Phân tích margin cho tất cả combinations (wan2.6, wan2.7, happyhorse × 720p/1080p × 5s-30s)
+  - Phát hiện: Quality tier multiplier = 1.0 → KHÔNG phân biệt standard/premium/ultra
+  - Phát hiện: HappyHorse margin âm (-25% đến -42%) cho video ngắn
+  - Đề xuất: Tăng quality multiplier (premium=1.5, ultra=2.5), provider multiplier (happyhorse=3.0), resolution multiplier (1080p=1.8)
+  - Sau fix: Tất cả combinations sẽ có margin dương (34%+)
+
 ### Pricing System + Landing Page — Big Update
 - **Completed**: 2026-05-31
 - **Agent**: @coordinator (@backend + @planner + @web + @tester)
@@ -110,6 +121,13 @@
 
 ## ✅ Recently Completed
 
+### Pricing System Review — Full Analysis
+- **Completed**: 2026-06-01
+- **Agent**: @coordinator
+- **Plan**: `docs/plans/billing/pricing-review.md`
+- **Summary**: Phân tích margin toàn diện, phát hiện quality tier multiplier = 1.0导致happyhorse lỗ, đề xuất fix multipliers
+- **Next**: Cần @backend thực hiện fix multipliers trong PricingSystemSeeder
+
 ### Pricing Plan Final — DurationTier + PlanSeeder + CreditSettings
 - **Completed**: 2026-05-31
 - **Agent**: @coordinator (@backend + @planner + @tester)
@@ -161,6 +179,23 @@
 
 ## 📋 Backlog
 
+### Fix Pricing Multipliers — Quality, Provider, Resolution
+- **Priority**: 🔴 High (Critical - đang lỗ)
+- **Scope**: backend
+- **Plan**: `docs/plans/billing/pricing-review.md`
+- **Status**: 📋 Plan complete — ready for implementation
+- **Effort**: ~1.5h
+- **Steps**:
+  - [ ] Fix quality multiplier: standard=1.0, premium=1.5, ultra=2.5
+  - [ ] Fix provider multiplier: happyhorse=3.0, kling=2.0, luma=2.5, runway=3.0
+  - [ ] Fix resolution multiplier: 1080p=1.8
+  - [ ] Add min_duration for ultra (happyhorse min=20s)
+  - [ ] Run seeder: `docker exec backend-app-1 php artisan db:seed --class=PricingSystemSeeder`
+  - [ ] Verify API pricing calculate
+  - [ ] Verify frontend pricing display
+  - [ ] Update final-pricing-plan.md
+  - [ ] Write worklog
+
 ### VN Market Pricing Strategy — Cập nhật PlanSeeder + Credit Pack + Pricing UI
 - **Priority**: 🔴 High
 - **Scope**: backend, web
@@ -199,6 +234,7 @@
 
 | Date | Agent | Worklog | Result |
 |------|-------|---------|--------|
+| 2026-06-01 | @coordinator | `docs/plans/billing/pricing-review.md` | ✅ Done |
 | 2026-05-31 | @coordinator | `worklogs/2026-05-31-pricing-plan-final.md` | ✅ Done |
 | 2026-05-30 | @coordinator | `worklogs/2026-05-30-security-hardening-scale-optimization.md` | ✅ Done |
 | 2026-05-28 | @coordinator | `worklogs/2026-05-28-doc-overhaul-model-sync-fix.md` | ✅ Done |
