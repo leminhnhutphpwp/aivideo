@@ -1,8 +1,6 @@
-/docs
-!/docs/deployment
 /docs/*
-!/docs/deployment/**
-!/docs/deployment/**
+!/docs/deployment/
+/docs/deployment/*
 
 .env
 .env.*

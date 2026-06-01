@@ -81,23 +81,30 @@
 ### Storyboard Dual Mode — Phase 0 Refactor → Single-Flow Narrative
 - **Priority**: 🔴 High
 - **Scope**: web (cross-cutting: all shared, multi-scene, single-flow)
-- **Plan**: `docs/plans/storyboard/single-flow-narrative.md`
-- **Status**: 📋 Planning complete — ready for Phase 0
+- **Architecture Plan**: `docs/plans/storyboard/single-flow-narrative.md`
+- **Detailed Plan**: `docs/plans/storyboard/phase0-refactor-detail.md` ← **READY**
+- **Status**: 📋 Detailed plan complete — 1019 lines, 32 files to create, 6 files to edit
 - **Effort**: ~12.5 giờ tổng (Phase 0: 4.5h, Phase 1-5: 8h)
+- **Current State**:
+  - 6 hooks exist (useCanvasState, useUndoRedo, useSceneForm, useCanvasActions, useEdgeManager, useAutoTags)
+  - 3 shared components exist (SceneNode, CtxMenu, Section)
+  - 2 constants files, build-payload.ts, render-mode-provider/toggle exist
+  - **BUT** page.tsx NEVER updated — still 1456 lines with all inline code
+  - Remaining: 10 hooks, 4 components, 5 UI layouts, 8 multi-scene files, thin router
 - **Steps**:
-  - [ ] Phase 0.1: Tách types & constants (15m)
-  - [ ] Phase 0.2: Tách components: SceneNode, CtxMenu, Section, LoadingScreen, Modals (45m)
-  - [ ] Phase 0.3: Tách 16 hooks từ FlowEditorPage (1h)
-  - [ ] Phase 0.4: Tách lib utilities: buildPayload, topologicalSort (15m)
-  - [ ] Phase 0.5: Tách UI layout: Toolbar, LayersPanel, CanvasWrapper, BottomBar (45m)
-  - [ ] Phase 0.6: Tách multi-scene specifics: PropertyPanel + sections + handleSave (45m)
-  - [ ] Phase 0.7: Entry point thin router + RenderModeProvider + verify regression (30m)
-  - [ ] Phase 0.8: Cập nhật viewer page (15m)
+  - [ ] Phase 0.1: Wire constants — remove inline genId/ACCENT/COLORS/inputC/pill* from page.tsx, add imports (10m)
+  - [ ] Phase 0.2: Complete components — create 4 (LoadingScreen, AiDraftModal, TemplateModal, ConfirmMerge) + wire 3 existing (35m)
+  - [ ] Phase 0.3: Extract 10 remaining hooks — useCreditEstimation, usePlayback, useAiDraft, useTemplateImport, useReferencePicker, useLoadStoryboard, useSyncRefs, useKeyboardShortcuts, useZoomTracker, useTierConfig (50m)
+  - [ ] Phase 0.4: Complete lib utils — topological-sort.ts + verify build-payload.ts (10m)
+  - [ ] Phase 0.5: Extract UI layout — Toolbar, LayersPanel, CanvasWrapper, BottomBar, EdgeLabelPopup (40m)
+  - [ ] Phase 0.6: Extract multi-scene — PropertyPanel + 4 sections + handleSave + handleRender + MultiSceneEditor (40m)
+  - [ ] Phase 0.7: Thin router + verify regression — page.tsx → ~15 lines, 20 test cases (25m)
+  - [ ] Phase 0.8: Viewer badge + verify storyboard-types.ts (10m)
   - [ ] Phase 1-3: Backend migration, AI compile pipeline, single-flow render (@backend + @daemon)
   - [ ] Phase 4: Frontend single-flow: editor, prompt panel, hooks, save/render (3h)
   - [ ] Phase 5: Testing (1h)
 - **Dependencies**: Backend agent cho Phase 1-3, Daemon agent cho Phase 2-3
-- **Notes**: Phase 0 bắt buộc trước khi thêm single-flow — file 1313 dòng hiện tại không thể extend thêm
+- **Notes**: Phase 0 bắt buộc trước khi thêm single-flow — file 1456 dòng hiện tại không thể extend thêm
 
 ---
 
@@ -169,6 +176,16 @@
   - [x] Frontend: Server-render SEO
   - [ ] Web: Cập nhật trang /pricing với giá mới Pro 210k, Studio "Sắp ra mắt"
   - [ ] Web: Credit pack purchase UI
+    - **Plan**: `docs/plans/billing/credit-pack-ui.md`
+    - **Status**: 📋 Plan complete — ready for implementation
+    - **Effort**: ~4.5h (web only)
+    - **Steps**:
+      - [ ] Add PACK_OPTIONS constant + i18n keys
+      - [ ] Create CreditPackSection.tsx (3 pack cards + select + confirm)
+      - [ ] Refactor BillingModals.tsx: extract BankInfoModal, remove manual input
+      - [ ] Modify BillingHero: "Nạp ngay" → scroll to packs
+      - [ ] Modify billing/page.tsx: wire all components
+      - [ ] tsc + visual verify + worklog
 
 ### ElevenLabs Voice UI
 - **Priority**: 🟡 Medium
