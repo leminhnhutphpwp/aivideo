@@ -21,3 +21,4 @@ coverage/
 .codegraph/
 apps/
 backend/
+colab-demo.ipynb
