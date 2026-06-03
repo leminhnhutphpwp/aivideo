@@ -12,7 +12,7 @@ metadata:
 ### Plan Tiers
 - **Free**: 100 credits/month, 5s max, 720p, 1 concurrent job
 - **Pro**: 500 credits/month, 30s max, 1080p, 3 concurrent jobs
-- **Studio**: 2000 credits/month, 60s max, 4K, 10 concurrent jobs
+- **Studio**: 100,000 credits/month, 60s max, 4K, 10 concurrent jobs
 
 ### Credit System
 - 1 credit = 1 second of video generation

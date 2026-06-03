@@ -53,6 +53,11 @@ bash scripts/dev.sh restart daemon
 bash scripts/dev.sh test
 bash scripts/dev.sh test daemon
 
+# Build assets
+bash scripts/dev.sh build backend   # Build Filament theme (inside Docker)
+bash scripts/dev.sh build web       # Build Next.js
+bash scripts/dev.sh build all       # Build all
+
 # Monitoring stack
 bash scripts/dev.sh start monitoring
 bash scripts/dev.sh stop monitoring

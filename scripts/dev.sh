@@ -444,6 +444,38 @@ do_exec() {
 }
 
 # ──────────────────────────────────────────────────
+# Build
+# ──────────────────────────────────────────────────
+do_build() {
+  local service="$1"
+  
+  print_section "Building $service"
+  
+  case "$service" in
+    backend)
+      log "Building Filament theme (inside Docker)..."
+      docker_exec "app" npm install --silent 2>/dev/null
+      docker_exec "app" npm run build
+      log_info "Backend build complete"
+      ;;
+    web)
+      log "Building Next.js app..."
+      cd "$(get_service_dir "web")"
+      npm install --silent 2>/dev/null
+      npm run build
+      log_info "Web build complete"
+      ;;
+    all)
+      do_build "backend"
+      do_build "web"
+      ;;
+    *)
+      log_warn "Unknown service: $service. Use: backend, web, or all"
+      ;;
+  esac
+}
+
+# ──────────────────────────────────────────────────
 # Main
 # ──────────────────────────────────────────────────
 case "$CMD" in
@@ -468,6 +500,9 @@ case "$CMD" in
   test)
     do_test "$SERVICE"
     ;;
+  build)
+    do_build "$SERVICE"
+    ;;
   verify)
     print_section "Verifying models"
     node "$ROOT/apps/daemon/scripts/verify-media-models.mjs"
@@ -486,6 +521,7 @@ case "$CMD" in
     printf "  ${CYAN}%-15s${RESET} %s\n" "start" "Start (all | daemon | web | backend | monitoring)"
     printf "  ${CYAN}%-15s${RESET} %s\n" "stop" "Stop (all | daemon | web | backend)"
     printf "  ${CYAN}%-15s${RESET} %s\n" "restart" "Restart (all | daemon | web | backend)"
+    printf "  ${CYAN}%-15s${RESET} %s\n" "build" "Build assets (all | backend | web)"
     printf "  ${CYAN}%-15s${RESET} %s\n" "status" "Show status"
     printf "  ${CYAN}%-15s${RESET} %s\n" "logs" "Show logs (last 50 lines)"
     printf "  ${CYAN}%-15s${RESET} %s\n" "test" "Run tests"
@@ -504,6 +540,9 @@ case "$CMD" in
     printf "  ${CYAN}monitoring - Prometheus + Grafana\n"
     echo ""
     print_subsection "Examples"
+    printf "  ${DIM}bash scripts/dev.sh build backend            # Build Filament theme${RESET}\n"
+    printf "  ${DIM}bash scripts/dev.sh build web                # Build Next.js${RESET}\n"
+    printf "  ${DIM}bash scripts/dev.sh build all                # Build all assets${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh start                    # Start all${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh start web                # Start web only${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh start backend            # Start backend only${RESET}\n"

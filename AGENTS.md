@@ -263,6 +263,7 @@ Every agent MUST write a worklog after completing any task. No exceptions.
 | Daemon `skills/` (SKILL.md) | Same as above |
 | Daemon `.env` | Same as above (force recreate, not just restart) |
 | Backend PHP (Laravel) | `bash scripts/dev.sh restart backend` |
+| Backend Filament theme | `bash scripts/dev.sh build backend` |
 | Web `apps/web/` (Next.js) | `bash scripts/dev.sh restart web` |
 | Docker compose config | `bash scripts/dev.sh restart` |
 | Daemon models.ts (add/remove models) | Daemon restart + run `node apps/daemon/scripts/verify-media-models.mjs` |
@@ -290,6 +291,8 @@ Every agent MUST write a worklog after completing any task. No exceptions.
 5. **Never assume model parameters** — always verify names, types, valid combos from official docs
 
 ### 🚀 Deploy checklist
+- [ ] `bash scripts/dev.sh build backend` → Filament theme built
+- [ ] `bash scripts/dev.sh build web` → Next.js built
 - [ ] `node apps/daemon/scripts/verify-media-models.mjs` → PASS
 - [ ] `docker exec backend-app-1 php artisan test` → 18/18 PASS
 - [ ] `cd apps/daemon && npx tsc --noEmit` → 0 errors

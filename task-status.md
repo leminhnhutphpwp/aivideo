@@ -6,6 +6,17 @@
 
 ## ✅ Recently Completed
 
+### Merge ProviderPricing into VideoTypeResource — Plan Created
+- **Completed**: 2026-06-03
+- **Agent**: @coordinator
+- **Plan**: `docs/plans/pricing/merge-provider-pricing-into-video-type.md`
+- **Summary**: 
+  - Tạo plan chi tiết hợp nhất ProviderPricing vào VideoTypeResource
+  - Sử dụng Filament Repeater để quản lý nested provider pricings
+  - Không cần database migration — giữ nguyên cấu trúc hiện tại
+  - Ước tính 5h thực hiện (form integration, table enhancement, deprecate standalone)
+  - Bao gồm rollback plan và success criteria
+
 ### Pricing System Review — Full Analysis
 - **Completed**: 2026-06-01
 - **Agent**: @coordinator
@@ -126,7 +137,7 @@
 - **Agent**: @coordinator
 - **Plan**: `docs/plans/billing/pricing-review.md`
 - **Summary**: Phân tích margin toàn diện, phát hiện quality tier multiplier = 1.0导致happyhorse lỗ, đề xuất fix multipliers
-- **Next**: Cần @backend thực hiện fix multipliers trong PricingSystemSeeder
+- **Status**: ✅ IMPLEMENTED — New pricing with 20% minimum margin deployed
 
 ### Pricing Plan Final — DurationTier + PlanSeeder + CreditSettings
 - **Completed**: 2026-05-31
@@ -134,8 +145,8 @@
 - **Worklog**: `worklogs/2026-05-31-pricing-plan-final.md`
 - **Plan**: `docs/plans/billing/final-pricing-plan.md`
 - **Scope**: Backend (PricingSystemSeeder, PlanSeeder, CreditSettingsSeeder, CreditController)
-- **Summary**: Chốt kế hoạch giá: margin theo duration (5s=10%→30s=50%). DurationTier multipliers mới. Pro 210k/18.000 credits (~11 video). Studio coming_soon. CreditSettings gọn còn 3 settings. Validation sync với DB.
-- **Verification**: ✅ Tests 18/18, tsc clean, API pricing trả đúng credits (5s=1560, 30s=16800), plans API đúng giá
+- **Summary**: Chốt kế hoạch giá: margin theo duration (5s=10%→30s=50%). DurationTier multipliers mới. Pro 199k/30.000 credits (~18 video). Starter 99k/12.000 credits. Studio 499k/100.000 credits.
+- **Verification**: ✅ Tests 18/18, tsc clean, API pricing trả đúng credits (5s=1682, 30s=16800), plans API đúng giá
 
 ### Security Hardening + Production Scale Optimization
 - **Completed**: 2026-05-30
@@ -179,22 +190,43 @@
 
 ## 📋 Backlog
 
+### Profitable Pricing Strategy — Attract Users Without Losing Money
+- **Priority**: 🔴 High (Critical)
+- **Scope**: backend, web
+- **Plan**: `docs/plans/billing/profitable-pricing-strategy.md`
+- **Status**: ✅ Backend implemented — @web pending
+- **Effort**: ~6h total (backend 2h ✅, web 2h pending, testing 2h pending)
+- **Summary**: 
+  - Phân tích chi phí API thực tế từ DashScope: 5s 720P = 11,100 VND, 5s 1080P = 18,500 VND
+  - Margin hiện tại 50%+ nhưng giá cao gấp 5-10x so với Kling
+  - Implemented Option B+C Hybrid: base credits 1,500, quality 1.3x, provider 1.15x
+  - Giá mới: 5s I2V 720P Premium = 16,820 VND (was 28,080, -40%)
+  - Pro plan: 30,000 credits cho 199k VND (~18 videos, was ~7)
+  - Margin mới: 15-25% (was 50%+)
+- **Completed Steps**:
+  - [x] @backend: Update PricingSystemSeeder.php (base credits, multipliers)
+  - [x] @backend: Update PlanSeeder.php (new plan tiers)
+  - [x] @backend: Update credit-packs.php
+- **Pending Steps**:
+  - [ ] @web: Update pricing page with new values
+  - [ ] @web: Add competitor comparison section
+  - [ ] @tester: End-to-end testing
+
 ### Fix Pricing Multipliers — Quality, Provider, Resolution
 - **Priority**: 🔴 High (Critical - đang lỗ)
 - **Scope**: backend
 - **Plan**: `docs/plans/billing/pricing-review.md`
-- **Status**: 📋 Plan complete — ready for implementation
+- **Status**: ✅ IMPLEMENTED
 - **Effort**: ~1.5h
 - **Steps**:
-  - [ ] Fix quality multiplier: standard=1.0, premium=1.5, ultra=2.5
-  - [ ] Fix provider multiplier: happyhorse=3.0, kling=2.0, luma=2.5, runway=3.0
-  - [ ] Fix resolution multiplier: 1080p=1.8
-  - [ ] Add min_duration for ultra (happyhorse min=20s)
-  - [ ] Run seeder: `docker exec backend-app-1 php artisan db:seed --class=PricingSystemSeeder`
-  - [ ] Verify API pricing calculate
-  - [ ] Verify frontend pricing display
-  - [ ] Update final-pricing-plan.md
-  - [ ] Write worklog
+  - [x] Fix quality multiplier: standard=1.0, premium=1.3, ultra=1.8
+  - [x] Fix provider multiplier: wan 2.6=1.0, wan 2.7=1.15
+  - [x] Fix resolution multiplier: 1080p=1.8
+  - [x] Run seeder: `docker exec backend-app-1 php artisan db:seed --class=PricingSystemSeeder`
+  - [x] Verify API pricing calculate
+  - [ ] Verify frontend pricing display — PENDING
+  - [x] Update final-pricing-plan.md
+  - [x] Write worklog
 
 ### VN Market Pricing Strategy — Cập nhật PlanSeeder + Credit Pack + Pricing UI
 - **Priority**: 🔴 High
@@ -209,7 +241,7 @@
   - [x] Backend: Landing page settings (44 fields admin)
   - [x] Frontend: Landing page dynamic text
   - [x] Frontend: Server-render SEO
-  - [ ] Web: Cập nhật trang /pricing với giá mới Pro 210k, Studio "Sắp ra mắt"
+  - [ ] Web: Cập nhật trang /pricing với giá mới Pro 199k/30k credits, Starter 99k/12k, Studio 499k/100k
   - [ ] Web: Credit pack purchase UI
     - **Plan**: `docs/plans/billing/credit-pack-ui.md`
     - **Status**: 📋 Plan complete — ready for implementation
@@ -228,12 +260,28 @@
 - **Dependencies**: Daemon Phase 1 worklog (voice endpoints ready)
 - **Notes**: `apps/web/src/` needs voice selector UI for ElevenLabs TTS + SFX
 
+### Merge ProviderPricing into VideoTypeResource
+- **Priority**: 🟡 Medium
+- **Scope**: backend
+- **Plan**: `docs/plans/pricing/merge-provider-pricing-into-video-type.md`
+- **Status**: 📋 Plan complete — ready for implementation
+- **Effort**: ~5h
+- **Steps**:
+  - [ ] Phase 1: Add Provider Pricing tab to VideoTypeForm.php with Repeater
+  - [ ] Phase 2: Update VideoTypesTable with provider count and badges
+  - [ ] Phase 3: Hide standalone ProviderPricingResource from navigation
+  - [ ] Phase 4: Test CRUD operations and PricingCalculator
+  - [ ] Phase 5: Write worklog and update documentation
+- **Dependencies**: None — can start immediately
+- **Notes**: No database migration needed. Existing relationship handles nested CRUD. Keep standalone resource accessible via direct URL for 30 days as fallback.
+
 ---
 
 ## 🤖 Agent Sessions
 
 | Date | Agent | Worklog | Result |
 |------|-------|---------|--------|
+| 2026-06-03 | @coordinator | `docs/plans/pricing/merge-provider-pricing-into-video-type.md` | ✅ Plan Created |
 | 2026-06-01 | @coordinator | `docs/plans/billing/pricing-review.md` | ✅ Done |
 | 2026-05-31 | @coordinator | `worklogs/2026-05-31-pricing-plan-final.md` | ✅ Done |
 | 2026-05-30 | @coordinator | `worklogs/2026-05-30-security-hardening-scale-optimization.md` | ✅ Done |
