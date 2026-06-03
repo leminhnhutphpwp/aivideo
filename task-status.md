@@ -6,6 +6,18 @@
 
 ## ✅ Recently Completed
 
+### CreditSettings Refactor — Key-Value Routing + Single Source of Truth
+- **Completed**: 2026-06-03
+- **Agent**: @tester
+- **Worklog**: `backend/worklogs/2026-06-03-credit-settings-refactor.md`
+- **Summary**:
+  - ✅ Admin URL uses KEY instead of ID: `/admin/credit-settings/exchange_rate/edit`
+  - ✅ All pricing uses exchange_rate as single source of truth
+  - ✅ Everywhere: `credits = ceil(VND × exchange_rate)`
+  - ✅ exchange_rate = 0.1: 500k VND = 50k credits, Pro plan = 24.9k credits
+  - ✅ Credit packs config cleaned up (no per-pack rates)
+- **Verification**: ✅ PricingCalculator 10/10, RenderJob 19/19
+
 ### 6 High Priority Backlog Tasks — All Verified Complete
 - **Completed**: 2026-06-03
 - **Agent**: @general + @tester
@@ -293,6 +305,8 @@
 
 | Date | Agent | Worklog | Result |
 |------|-------|---------|--------|
+| 2026-06-03 | @tester | `backend/worklogs/2026-06-03-credit-settings-refactor.md` | ✅ Done |
+| 2026-06-03 | @general + @tester | `backend/worklogs/2026-06-03-test-report-backlog.md` | ✅ Done |
 | 2026-06-03 | @coordinator | `docs/plans/pricing/merge-provider-pricing-into-video-type.md` | ✅ Plan Created |
 | 2026-06-01 | @coordinator | `docs/plans/billing/pricing-review.md` | ✅ Done |
 | 2026-05-31 | @coordinator | `worklogs/2026-05-31-pricing-plan-final.md` | ✅ Done |
