@@ -1,10 +1,22 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-05-31
+> Last updated: 2026-06-03
 
 ---
 
 ## ✅ Recently Completed
+
+### 6 High Priority Backlog Tasks — All Verified Complete
+- **Completed**: 2026-06-03
+- **Agent**: @general + @tester
+- **Summary**: 
+  - ✅ Refactor ManageGeneralSettings → Tab-per-file (20 tabs created)
+  - ✅ Remove Scene Repeater (single scene form, no multi-scene)
+  - ✅ Merge ProviderPricing into VideoTypeResource (Repeater in VideoTypeForm)
+  - ✅ Credit Pack UI (CreditPackSection.tsx + BankInfoModal.tsx)
+  - ✅ Landing Page Settings (44 fields, API endpoint, admin tabs)
+  - ✅ Storyboard Phase 0 Refactor (1456→19 lines, 17 hooks extracted)
+- **Verification**: ✅ Backend tests 29/29, daemon tsc clean, web tsc clean
 
 ### Merge ProviderPricing into VideoTypeResource — Plan Created
 - **Completed**: 2026-06-03
