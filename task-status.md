@@ -6,37 +6,41 @@
 
 ## 📋 In Progress
 
-### Multi-Panel Image Storyboard Mode — Option A + Option C
+### Multi-Panel Image Storyboard Mode — Option A + Option C (Phase 1 ✅, Phase 2 ⏳)
 - **Priority**: 🔴 High
 - **Scope**: daemon, backend, web
 - **Plan**: `docs/plans/storyboard/multi-panel-image-mode.md`
-- **Status**: 📋 Plan complete — ready for implementation
-- **Effort**: ~14h total (Phase 1: 8.5h, Phase 2: 5.5h)
+- **Status**: ✅ Phase 1 implemented (~95%), ⏳ Phase 2 ready for implementation
+- **Effort**: ~14h total (Phase 1: 8.5h ✅, Phase 2: 5.5h pending)
 - **Dependencies**: Storyboard Phase 0 Refactor must be complete (✅ Done)
 - **Summary**: Add 3rd render mode "Storyboard Ảnh". Option A: user uploads multi-panel image → R2V with shot_type:"multi". Option C: AI generates multi-panel image from scenes → pipes into R2V.
-- **Phase 1 Tasks**:
-  - [ ] 1.1 Daemon: Add `shotType` to MediaContext + route (30m) @daemon
-  - [ ] 1.2 Daemon: Update QwenCloud R2V for shot_type:"multi" (45m) @daemon
-  - [ ] 1.3 Backend: Migration + Model fillable (20m) @backend
-  - [ ] 1.4 Backend: StoryboardController accept new fields (30m) @backend
-  - [ ] 1.5 Backend: StoryboardRenderer pass shotType + multi_panel_image (45m) @backend
-  - [ ] 1.6 Backend: DaemonClient accept shotType (10m) @backend
-  - [ ] 1.7 Web: Update RenderMode types to 3-way (1h) @web
-  - [ ] 1.8 Web: Create MultiPanelImagePanel component (2h) @web
-  - [ ] 1.9 Web: Integrate into MultiSceneEditor (1h) @web
-  - [ ] 1.10 Web: Update buildPayload (15m) @web
-  - [ ] 1.11 Web: Update save/render handlers (30m) @web
-  - [ ] 1.12 Web: Update useLoadStoryboard (20m) @web
-  - [ ] 1.13 Web: Update credit estimation (15m) @web
-  - [ ] 1.14 Web: Update API client types (15m) @web
-- **Phase 2 Tasks**:
+- **Phase 1 Tasks** (✅ ~95% done — verified by @tester 2026-06-04):
+  - [x] 1.1 Daemon: Add `shotType` to MediaContext + route @daemon
+  - [x] 1.2 Daemon: Update QwenCloud R2V for shot_type:"multi" @daemon
+  - [x] 1.3 Backend: Migration + Model fillable @backend
+  - [x] 1.4 Backend: StoryboardController accept new fields @backend
+  - [x] 1.5 Backend: StoryboardRenderer pass shotType + multi_panel_image @backend
+  - [x] 1.6 Backend: DaemonClient accept shotType @backend
+  - [x] 1.7 Web: Update RenderMode types to 3-way @web
+  - [x] 1.8 Web: Create MultiPanelImagePanel component (as StoryboardImagePanel) @web
+  - [x] 1.9 Web: Integrate into MultiSceneEditor @web
+  - [x] 1.10 Web: Update buildPayload @web
+  - [x] 1.11 Web: Update save/render handlers @web
+  - [x] 1.12 Web: Update useLoadStoryboard @web
+  - [x] 1.13 Web: Update credit estimation @web
+  - [-] 1.14 Web: Update API client types — storyboard-types.ts missing `'storyboard_image'` ⚠️ FIXED
+- **Phase 1 Bugs Found & Fixed** (2026-06-04):
+  - [x] `storyboard-types.ts` — missing `'storyboard_image'` in render_mode union ✅ Fixed
+  - [x] `Storyboard::calculateCreditsCost()` — storyboard_image fell into multi-scene pricing (wrong) ✅ Fixed
+  - [ ] StoryboardImagePanel — missing tests
+- **Phase 2 Tasks** (⏳ pending):
   - [ ] 2.1 Research: Verify wan2.7-image image_set_mode support (1h) @explorer
   - [ ] 2.2 Backend: Extend AiPromptCompiler for image generation (1.5h) @backend
   - [ ] 2.3 Backend: Add generate-multi-panel-image endpoint (1h) @backend
   - [ ] 2.4 Backend: Update renderSingleFlow for 2-stage pipeline (30m) @backend
   - [ ] 2.5 Web: Add "Generate Multi-Panel" button (1h) @web
   - [ ] 2.6 Web: Add API method (10m) @web
-  - [ ] 2.7 Daemon: Register wan2.7-image model if missing (15m) @daemon
+  - [x] 2.7 Daemon: Register wan2.7-image model if missing — ✅ already registered
   - [ ] 2.8 Backend: Sync model to Laravel pricing (20m) @backend
 
 ## ✅ Recently Completed
