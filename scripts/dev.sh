@@ -511,6 +511,26 @@ case "$CMD" in
     shift
     do_exec "$SERVICE" "$@"
     ;;
+  simulate)
+    if [ "$SERVICE" = "on" ]; then
+      print_section "Enabling simulation mode"
+      curl -s -X POST http://localhost:7456/api/media/simulation \
+        -H 'Content-Type: application/json' \
+        -d '{"enabled":true}' | python3 -m json.tool 2>/dev/null || echo "{\"enabled\":true}"
+      log_info "Simulation mode ON — all API calls will return fake files"
+    elif [ "$SERVICE" = "off" ]; then
+      print_section "Disabling simulation mode"
+      curl -s -X POST http://localhost:7456/api/media/simulation \
+        -H 'Content-Type: application/json' \
+        -d '{"enabled":false}' | python3 -m json.tool 2>/dev/null || echo "{\"enabled\":false}"
+      log_info "Simulation mode OFF — real API calls will be made"
+    elif [ "$SERVICE" = "status" ]; then
+      curl -s http://localhost:7456/api/media/simulation | python3 -m json.tool 2>/dev/null || echo "Daemon not reachable"
+    else
+      # Default: show status
+      curl -s http://localhost:7456/api/media/simulation | python3 -m json.tool 2>/dev/null || echo "Daemon not reachable"
+    fi
+    ;;
   *)
     print_header "AI Video Platform - Dev Manager"
     echo ""
@@ -526,6 +546,7 @@ case "$CMD" in
     printf "  ${CYAN}%-15s${RESET} %s\n" "logs" "Show logs (last 50 lines)"
     printf "  ${CYAN}%-15s${RESET} %s\n" "test" "Run tests"
     printf "  ${CYAN}%-15s${RESET} %s\n" "exec" "Exec into container"
+    printf "  ${CYAN}%-15s${RESET} %s\n" "simulate" "Toggle simulation mode (on | off | status)"
     echo ""
     print_subsection "Services"
     printf "  ${CYAN}all       - All services\n"
@@ -548,6 +569,9 @@ case "$CMD" in
     printf "  ${DIM}bash scripts/dev.sh start backend            # Start backend only${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh start monitoring         # Start Prometheus + Grafana${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh stop daemon              # Stop daemon only${RESET}\n"
+    printf "  ${DIM}bash scripts/dev.sh simulate on              # Enable simulation mode (fake files)${RESET}\n"
+    printf "  ${DIM}bash scripts/dev.sh simulate off             # Disable simulation mode (real API calls)${RESET}\n"
+    printf "  ${DIM}bash scripts/dev.sh simulate status          # Check simulation mode status${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh restart web              # Restart web only${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh logs web 100             # Web logs (100 lines)${RESET}\n"
     printf "  ${DIM}bash scripts/dev.sh logs prometheus          # Prometheus logs${RESET}\n"
