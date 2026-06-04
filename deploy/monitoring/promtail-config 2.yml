@@ -1,0 +1,44 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://localhost:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: laravel
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: laravel
+          service: backend
+          __path__: /logs/laravel/*.log
+    pipeline_stages:
+      - regex:
+          expression: '\[(?P<level>\w+)\]'
+      - labels:
+          level:
+      - timestamp:
+          source: time
+          format: RFC3339
+
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels: [__meta_docker_container_name]
+        regex: '/(.+)'
+        target_label: container
+      - source_labels: [__meta_docker_container_name]
+        regex: '/(aivideo-daemon|backend-daemon-1|backend-app-1)'
+        action: keep
+      - source_labels: [__meta_docker_image]
+        target_label: image
+      - source_labels: [__meta_docker_container_log_stream]
+        target_label: log_stream
+    pipeline_stages:
+      - docker: {}

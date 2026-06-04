@@ -1,0 +1,104 @@
+groups:
+  - name: aivideo-platform
+    interval: 30s
+    rules:
+      # --- Daemon ---
+      - alert: DaemonDown
+        expr: up{job="daemon"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Daemon is down"
+          description: "Daemon has been unreachable for >1 minute"
+
+      - alert: DaemonHighTaskFailureRate
+        expr: rate(daemon_tasks_total{status="failed"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High task failure rate on daemon"
+          description: "Failure rate is {{ $value }} per second over 5m"
+
+      - alert: DaemonSlowGeneration
+        expr: daemon_generation_duration_seconds > 300
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow media generation detected"
+          description: "Generation duration {{ $value }}s for task {{ $labels.task_id }}"
+
+      - alert: DaemonMemoryHigh
+        expr: daemon_memory_bytes{type="heapUsed"} / daemon_memory_bytes{type="heapTotal"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Daemon memory usage > 90%"
+          description: "Heap usage at {{ $value | humanizePercentage }}"
+
+      - alert: DaemonDBTooLarge
+        expr: daemon_db_size_bytes > 1e9
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "SQLite database > 1GB"
+          description: "DB size is {{ $value | humanize1024 }}. Consider archiving old tasks."
+
+      # --- Laravel ---
+      - alert: LaravelDown
+        expr: laravel_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Laravel application is down"
+          description: "Laravel API has been unreachable for >1 minute"
+
+      - alert: LaravelDatabaseDown
+        expr: laravel_database_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection lost"
+          description: "Laravel cannot connect to the database"
+
+      - alert: LaravelRedisDown
+        expr: laravel_redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis connection lost"
+          description: "Laravel cannot connect to Redis"
+
+      - alert: LaravelDaemonUnreachable
+        expr: laravel_daemon_up == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Laravel cannot reach daemon"
+          description: "Daemon health check from Laravel has been failing for >2 minutes"
+
+      - alert: LaravelQueueBacklog
+        expr: laravel_queue_depth > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Queue backlog > 100 jobs"
+          description: "Default queue has {{ $value }} pending jobs"
+
+      - alert: LaravelHighJobFailureRate
+        expr: rate(laravel_render_jobs_total{status="failed"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High render job failure rate"
+          description: "Failure rate {{ $value }} per second over 5m"
