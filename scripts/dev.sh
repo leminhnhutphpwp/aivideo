@@ -514,21 +514,21 @@ case "$CMD" in
   simulate)
     if [ "$SERVICE" = "on" ]; then
       print_section "Enabling simulation mode"
-      curl -s -X POST http://localhost:7456/api/media/simulation \
-        -H 'Content-Type: application/json' \
-        -d '{"enabled":true}' | python3 -m json.tool 2>/dev/null || echo "{\"enabled\":true}"
+      # Daemon is inside Docker with no port exposed — use docker exec
+      docker exec backend-daemon-1 sh -c 'mkdir -p /app && echo "{\"enabled\":true,\"latency\":{\"image\":1000,\"video\":2000,\"audio\":1000,\"jitter\":0.3}}" > /app/media-simulation.json' 2>/dev/null && \
+        echo "{\"enabled\":true}" || \
+        echo "Warning: daemon container not running, simulation file not written"
       log_info "Simulation mode ON — all API calls will return fake files"
     elif [ "$SERVICE" = "off" ]; then
       print_section "Disabling simulation mode"
-      curl -s -X POST http://localhost:7456/api/media/simulation \
-        -H 'Content-Type: application/json' \
-        -d '{"enabled":false}' | python3 -m json.tool 2>/dev/null || echo "{\"enabled\":false}"
+      docker exec backend-daemon-1 sh -c 'echo "{\"enabled\":false,\"latency\":{\"image\":1000,\"video\":2000,\"audio\":1000,\"jitter\":0.3}}" > /app/media-simulation.json' 2>/dev/null && \
+        echo "{\"enabled\":false}" || \
+        echo "Warning: daemon container not running, simulation file not written"
       log_info "Simulation mode OFF — real API calls will be made"
     elif [ "$SERVICE" = "status" ]; then
-      curl -s http://localhost:7456/api/media/simulation | python3 -m json.tool 2>/dev/null || echo "Daemon not reachable"
+      docker exec backend-daemon-1 cat /app/media-simulation.json 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "Simulation not configured"
     else
-      # Default: show status
-      curl -s http://localhost:7456/api/media/simulation | python3 -m json.tool 2>/dev/null || echo "Daemon not reachable"
+      docker exec backend-daemon-1 cat /app/media-simulation.json 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "Simulation not configured"
     fi
     ;;
   *)

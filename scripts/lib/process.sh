@@ -114,20 +114,20 @@ kill_port() {
   if [ -z "$port_pids" ]; then
     return 0  # port already free
   fi
-  # Kill parents first to prevent respawn
-  local parents=""
+  # Only kill known dev server processes (node/next), not Chrome or other apps
   for pid in $port_pids; do
-    local ppid=$(ps -o ppid= "$pid" 2>/dev/null | tr -d ' ')
-    if [ -n "$ppid" ] && [ "$ppid" -gt 1 ]; then
-      parents="$parents $ppid"
-    fi
-  done
-  for pid in $(echo "$parents" | tr ' ' '\n' | sort -u); do
-    kill_process "$pid" || true
-  done
-  # Now kill the processes on the port
-  for pid in $port_pids; do
-    kill_process "$pid" || true
+    local comm=$(ps -p "$pid" -o comm= 2>/dev/null || echo "")
+    case "$comm" in
+      *node*|*next*)
+        kill_process "$pid" || true
+        # Also kill direct parent if it's also node (prevent respawn)
+        local ppid=$(ps -o ppid= "$pid" 2>/dev/null | tr -d ' ')
+        if [ -n "$ppid" ] && [ "$ppid" -gt 1 ]; then
+          local pcomm=$(ps -p "$ppid" -o comm= 2>/dev/null || echo "")
+          [[ "$pcomm" == *node* || "$pcomm" == *next* ]] && kill_process "$ppid" || true
+        fi
+        ;;
+    esac
   done
   wait_port_free "$port" 10 && return 0
   return 1
