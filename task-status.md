@@ -1,6 +1,6 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-05 (verified by @coordinator)
+> Last updated: 2026-06-06 (verified by @coordinator)
 
 ---
 
@@ -31,6 +31,20 @@
   - ✅ **Part 1 (Frontend)**: Viewer page at `flow/[uuid]/page.tsx` now auto-checks and auto-compiles prompt before calling render for `single_flow`/`storyboard_image` modes
   - ✅ **Part 2 (Backend)**: `StoryboardController::render()` now auto-compiles if `compiled_prompt` is empty for `single_flow`/`storyboard_image` modes (safety net)
 - **Verification**: ✅ Web tsc clean (0 errors), ✅ Backend tests 116 passed (4 pre-existing failures unrelated)
+
+---
+
+## ✅ Download Filename Standardization — Complete
+
+### Status: Complete
+- **Completed**: 2026-06-06
+- **Agent**: @coordinator
+- **Worklog**: `backend/worklogs/2026-06-06-download-filename-standardization.md`, `apps/web/worklogs/2026-06-06-download-filename-standardization.md`
+- **Summary**: Standardized download filename format across backend and frontend. Backend generates `{prefix}_{shortUuid}_{timestamp}_{dd-mm-yyyy}.{ext}` and passes to `response()->download()`; frontend `downloadBlob` reads Content-Disposition header instead of overriding with JS timestamp.
+- **Files Changed**:
+  - `backend/app/Http/Controllers/API/StoryboardController.php` — Generate custom filename, pass 2nd arg to `response()->download()`
+  - `apps/web/src/lib/download.ts` — Extract filename from Content-Disposition header
+- **Verification**: ✅ `php -l` no errors, ✅ Web tsc 0 errors
 
 ---
 
@@ -228,3 +242,4 @@
 | 2026-06-04 | @general + @tester | `worklogs/2026-06-04-tester-verify-and-update.md` | ✅ Multi-Panel Phase 2 + CompetitorComparison + Documentation |
 | 2026-06-04 | @tester | `worklogs/2026-06-04-env-audit.md` | ✅ Full env config audit across all 3 services |
 | 2026-06-05 | @coordinator | — | ✅ Verified backlog: Profitable Pricing UI, Pricing Multipliers frontend, VN Market Pricing UI, Merge ProviderPricing — tất cả đã done |
+| 2026-06-06 | @coordinator | `backend/worklogs/2026-06-06-download-filename-standardization.md` + `apps/web/worklogs/2026-06-06-download-filename-standardization.md` | ✅ Download filename standardization — video_/image_ prefix + timestamp format, backend Content-Disposition, frontend read from header |
