@@ -9,8 +9,8 @@
 | Sub-agent | Scope | AGENTS.md | Work Logs |
 |-----------|-------|-----------|-----------|
 | **Backend** | `backend/` (Laravel only) | `backend/AGENTS.md` | `backend/worklogs/` |
-| **Web App** | `apps/web/` (Next.js only) | `apps/web/AGENTS.md` | `apps/web/worklogs/` (TBD) |
-| **Daemon** | `apps/daemon/` (Express only) | `apps/daemon/AGENTS.md` | `apps/daemon/worklogs/` (TBD) |
+| **Web App** | `apps/web/` (Next.js only) | `apps/web/AGENTS.md` | `apps/web/worklogs/` |
+| **Daemon** | `apps/daemon/` (Express only) | `apps/daemon/AGENTS.md` | `apps/daemon/worklogs/` |
 
 Each sub-agent has a `worklogs/` directory with `.md` files documenting their changes.
 Read those to get the full picture before planning new work.
@@ -18,7 +18,7 @@ Read those to get the full picture before planning new work.
 ## Project Structure
 
 ```
-/var/www/AIVideoPaltfom/
+/home/minhnhut/DataSwap/www/AIVideoPaltfom/
 ├── .opencode/                # OpenCode configuration
 │   ├── skills/               # Agent skills (loaded on-demand)
 │   ├── rules/                # Coding standards
@@ -57,7 +57,7 @@ Read those to get the full picture before planning new work.
 4. **Read `.opencode/README.md`** — OpenCode configuration & agents
 5. **Read `backend/worklogs/`** — latest backend changes
 6. **Read `docs/plans/README.md`** — architecture overview
-7. **Read `docs/plans/update-plan.md`** — roadmap
+7. **Read `HISTORY.md`** — archived completed tasks
 8. **Determine task type and delegate:**
    - Backend work → `@backend` or `backend/AGENTS.md`
    - Web frontend → `@web` or `apps/web/AGENTS.md`
@@ -74,6 +74,7 @@ Invoke specialized agents with `@name` in chat:
 | `@backend` | `backend/` | Subagent | Laravel, auth, credits, queue |
 | `@web` | `apps/web/` | Subagent | Next.js, UI, components |
 | `@daemon` | `apps/daemon/` | Subagent | Media engine, providers |
+| `@planner` | Global | Subagent | Feature planning, task breakdown, coordination |
 | `@explorer` | Global | Subagent | Read-only code search |
 | `@tester` | Global | Subagent | Write & run tests |
 
@@ -152,9 +153,9 @@ When adding/modifying features for a specific model (Wan2.7, Wan2.6, etc.):
 | OpenCode config | `.opencode/README.md` |
 | Backend work logs | `backend/worklogs/` |
 | Architecture overview | `docs/plans/README.md` |
-| Development roadmap | `docs/plans/update-plan.md` |
+| Development roadmap | `docs/plans/README.md` |
 | Daemon API endpoints | `apps/daemon/AGENTS.md` |
-| Laravel API routes | `backend/.agents/skills/api-contract-daemon.md` |
+| Laravel API routes | `.opencode/skills/api-contract-daemon/SKILL.md` |
 | Coding rules | `.opencode/rules/coding-rules/` |
 | Product scope | `.opencode/rules/product-scope/` |
 
@@ -184,9 +185,9 @@ Use native grep/read only for **literal text** (strings, comments, logs).
 | "What files exist under path/?" | `codegraph_files` |
 
 Pass `projectPath` when querying code in a subdirectory:
-- Backend PHP: `projectPath: "/var/www/AIVideoPaltfom/backend"`
-- Web frontend: `projectPath: "/var/www/AIVideoPaltfom/apps/web"`
-- Daemon: `projectPath: "/var/www/AIVideoPaltfom/apps/daemon"`
+- Backend PHP: `projectPath: "/home/minhnhut/DataSwap/www/AIVideoPaltfom/backend"`
+- Web frontend: `projectPath: "/home/minhnhut/DataSwap/www/AIVideoPaltfom/apps/web"`
+- Daemon: `projectPath: "/home/minhnhut/DataSwap/www/AIVideoPaltfom/apps/daemon"`
 
 ## Conventions
 
@@ -220,8 +221,7 @@ Every agent MUST write a worklog after completing any task. No exceptions.
 ## Development Environment
 
 ### Project Paths
-- Primary: `/var/www/AIVideoPaltfom/`
-- Mirror (DataSwap): `/home/minnhut/DataSwap/www/AIVideoPaltfom/`
+- Primary: `/home/minhnhut/DataSwap/www/AIVideoPaltfom/`
 
 ### Docker Setup
 - Backend runs in Docker container via `bash scripts/dev.sh start backend`
