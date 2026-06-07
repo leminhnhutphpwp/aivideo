@@ -1,6 +1,6 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-06 (verified by @coordinator)
+> Last updated: 2026-06-07 (verified by @coordinator)
 
 ---
 
@@ -48,6 +48,20 @@
 
 ---
 
+## ✅ Storyboard Asset Creation — Complete
+
+### Status: Complete
+- **Completed**: 2026-06-07
+- **Agent**: @coordinator
+- **Worklog**: `backend/worklogs/2026-06-07-storyboard-asset-creation.md`
+- **Summary**: ConcatStoryboardJob now creates an Asset record via AssetService after successful compilation, ensuring the final storyboard video is tracked in the asset library and accessible from the UI. Asset type is `video`, linked to the storyboard. Tests updated to cover the new AssetService dependency and credit release flow.
+- **Files Changed**:
+  - `backend/app/Jobs/ConcatStoryboardJob.php` — Add AssetService::storeFromPath after successful concat + releaseStoryboardReserved on FFmpeg failure
+  - `backend/tests/Feature/ConcatStoryboardJobTest.php` — Mock AssetService and releaseStoryboardReserved
+- **Verification**: ✅ ConcatStoryboardJobTest 4/4 passed
+
+---
+
 ## ✅ Recently Completed
 
 ### Multi-Panel Image Storyboard Mode — Phase 1 + Phase 2 ✅ Complete
@@ -74,7 +88,7 @@
 - **Phase 1 Bugs Found & Fixed** (2026-06-04):
   - [x] `storyboard-types.ts` — missing `'storyboard_image'` in render_mode union ✅ Fixed
   - [x] `Storyboard::calculateCreditsCost()` — storyboard_image fell into multi-scene pricing (wrong) ✅ Fixed
-  - [ ] StoryboardImagePanel — missing tests
+  - [x] StoryboardImagePanel — missing tests ✅ FIXED — 20 tests exist
 - **Phase 2 Tasks** (✅ Done — verified by @tester 2026-06-04):
   - [x] 2.1 Research: Verify wan2.7-image image_set_mode support @explorer
   - [x] 2.2 Backend: Extend AiPromptCompiler with compileForImage() @backend
@@ -225,10 +239,46 @@
 
 ---
 
+## 🔴 Active: Project Viewer UX Fix
+
+### Plan: `docs/plans/ui/project-viewer-ux-fix.md`
+- **Created**: 2026-06-07
+- **Priority**: 🔴 High
+- **Assignee**: @web (primary) + @backend (Phase 2.1 only)
+- **Estimated**: ~4.5h total
+
+### Phase 1 Tasks (Critical + High)
+
+| # | Task | Agent | Status | Est. |
+|---|------|-------|--------|------|
+| 1.1 | Add video/audio player to `FileInfo` in `task-card.tsx` | @web | 🔲 Todo | 1h |
+| 1.2 | Pass `hasOutput`/`onViewResult` from `page.tsx` | @web | 🔲 Todo | 30m |
+| 1.3 | Auto-load video/audio previews (in 1.1) | @web | 🔲 Todo | — |
+| 1.4 | Add media previews to `JobHistory` | @web | 🔲 Todo | 45m |
+| 1.5 | Fix stale closure in WS effect (`useRef` pattern) | @web | 🔲 Todo | 15m |
+
+### Phase 2 Tasks (Medium)
+
+| # | Task | Agent | Status | Est. |
+|---|------|-------|--------|------|
+| 2.1 | Add `output_url`/`assets` to RenderJob index response | @backend | 🔲 Todo | 30m |
+| 2.2 | Add `output_url`, `assets`, `mime_type` to `RenderJobRecord` type | @web | 🔲 Todo | 10m |
+| 2.3 | Fix race condition with fetch debounce | @web | 🔲 Todo | 15m |
+
+### Phase 3 Tasks (UI Polish)
+
+| # | Task | Agent | Status | Est. |
+|---|------|-------|--------|------|
+| 3.1 | Add success animation to `CinematicGenerationStatus` | @web | 🔲 Todo | 30m |
+| 3.2 | Add WebSocket fallback "still waiting" indicator | @web | 🔲 Todo | 20m |
+
+---
+
 ## 🤖 Agent Sessions
 
 | Date | Agent | Worklog | Result |
 |------|-------|---------|--------|
+| 2026-06-07 | @planner | `docs/plans/ui/project-viewer-ux-fix.md` | ✅ Plan created — 10 issues, 3 phases, 4.5h estimate |
 | 2026-06-03 | @tester | `backend/worklogs/2026-06-03-credit-settings-refactor.md` | ✅ Done |
 | 2026-06-03 | @general + @tester | `backend/worklogs/2026-06-03-test-report-backlog.md` | ✅ Done |
 | 2026-06-03 | @coordinator | `docs/plans/pricing/merge-provider-pricing-into-video-type.md` | ✅ Plan Created |
