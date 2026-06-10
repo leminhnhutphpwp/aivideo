@@ -108,3 +108,55 @@
 ### ✅ Merge ProviderPricing into VideoTypeResource — Complete
 - **Priority**: 🟡 Medium
 - **Plan**: `docs/plans/pricing/merge-provider-pricing-into-video-type.md`
+
+---
+
+## ✅ Project Viewer UX Fix — Complete
+
+### Status: Complete (verified 2026-06-08)
+### Plan: `docs/plans/ui/project-viewer-ux-fix.md`
+- **Completed**: 2026-06-08
+- **Worklog**: `apps/web/worklogs/2026-06-08-job-history-media-preview.md`
+- **Summary**: Full audit revealed 9/10 tasks were already implemented but not tracked. Only Task 1.4 (media previews in JobHistory) was truly missing — now complete.
+
+---
+
+## ✅ Storyboard Asset Creation — Complete
+
+### Status: Complete
+- **Completed**: 2026-06-07
+- **Worklog**: `backend/worklogs/2026-06-07-storyboard-asset-creation.md`
+- **Summary**: ConcatStoryboardJob now creates an Asset record via AssetService after successful compilation.
+
+---
+
+## ✅ Download Filename Standardization — Complete
+
+### Status: Complete
+- **Completed**: 2026-06-06
+- **Worklog**: `backend/worklogs/2026-06-06-download-filename-standardization.md`, `apps/web/worklogs/2026-06-06-download-filename-standardization.md`
+- **Summary**: Standardized download filename format across backend and frontend.
+
+---
+
+## ✅ Full Backlog Verification — Complete
+
+### Status: Complete (verified 2026-06-10)
+- **Completed**: 2026-06-10
+- **Agent**: @coordinator
+- **Summary**: Verified all remaining pending items from `docs/plans/next-tasks.md` across all 3 layers (web, backend, daemon). All items confirmed done:
+  - TypeScript errors fixed (0 errors web + daemon)
+  - PricingPlans.test.tsx fixed
+  - VN Market Pricing UI complete
+  - Credit Pack UI complete
+  - ManageGeneralSettings refactor → 20 Tab files
+  - Landing Page Settings complete (backend + frontend + API)
+  - Scene Repeater removed
+  - ElevenLabs Voice UI complete
+  - Storyboard Phase 0 refactor complete (1456→20 lines)
+  - Simulation mode (daemon) complete
+  - Character animation (daemon) complete
+  - Multi-panel image storyboard (daemon) complete
+  - Realtime progress WebSocket complete
+  - Server Render SEO Phase 3 complete (server shells wired into page.tsx)
+- **Verification**: ✅ Web tsc 0 errors, ✅ Daemon tsc 0 errors
