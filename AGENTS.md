@@ -270,8 +270,8 @@ Every agent MUST write a worklog after completing any task. No exceptions.
 
 ### 🧪 Testing rules
 - Backend tests run inside Docker: `docker exec backend-app-1 php artisan test`
-- Target: `--filter="RenderJobPipelineTest|RenderJobTest"` (18 tests, related to our code)
-- Pre-existing test failures in CreditApiTest, SocialiteTest, SecurityTest are NOT our bugs
+- Target: `--filter="RenderJobPipelineTest|RenderJobTest"` (19 tests, related to our code) — green
+- ⚠️ Full suite (2026-06-11): **45 failed / 409 passed / 1 skipped** — failures are test/seed/contract **drift**, NOT production regressions. See `task-status.md` → Test Suite Health. (The old "4 pre-existing failures" note was inaccurate.)
 - Verify daemon compiles: `cd apps/daemon && npx tsc --noEmit`
 - Verify web compiles: `cd apps/web && npx tsc --noEmit`
 - Verify model sync: `node apps/daemon/scripts/verify-media-models.mjs`

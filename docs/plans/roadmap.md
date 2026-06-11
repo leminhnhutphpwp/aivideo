@@ -1,6 +1,6 @@
 # AI Video Platform — Development Roadmap
 
-> **Last updated**: 2026-06-05
+> **Last updated**: 2026-06-11
 > **Status**: Pre-MVP, active development
 
 ---
@@ -34,9 +34,9 @@
 | 1.2 | Formal roadmap document | 1h | docs | 🔄 In Progress |
 | 1.3 | Triage test failures | 2-3h | backend | ✅ Completed |
 | 1.4 | StoryboardImagePanel tests | 3-4h | web | ✅ Completed |
-| 1.5 | Viewer cancel/retry/progress | 4h | web+backend | ⬜ Not Started |
-| 1.6 | Realtime progress via WebSocket | 6-8h | web+backend | ⬜ Not Started |
-| 1.7 | Error boundaries & 404 pages | 3-4h | web | ⬜ Not Started |
+| 1.5 | Viewer cancel/retry/progress | 4h | web+backend | ✅ Done (verified 2026-06-11) |
+| 1.6 | Realtime progress via WebSocket | 6-8h | web+backend | ✅ Done (verified 2026-06-11) |
+| 1.7 | Error boundaries & 404 pages | 3-4h | web | ✅ Done (verified 2026-06-11) |
 
 ### 1.1 — Memory Files Regeneration
 **Files**: `.opencode/memory/*.md`
@@ -160,13 +160,14 @@ Memory Files ──► Roadmap
 
 ## Success Criteria
 - [ ] All P0 tasks complete — no critical bugs open
-- [ ] Backend tests: 120/120 passing (or 4 documented pre-existing)
-- [ ] Web tsc --noEmit: 0 errors
-- [ ] Daemon tsc --noEmit: 0 errors
+- [x] Targeted backend suite green — `--filter="RenderJobPipelineTest|RenderJobTest"` → 19 pass (verified 2026-06-11)
+- [ ] Full backend suite — currently **45 failed / 409 passed / 1 skipped** (2026-06-11). Failures are test/seed/contract **drift**, not production regressions (see `task-status.md` → Test Suite Health). Target: triage to 0 failed.
+- [x] Web `tsc --noEmit`: 0 errors (verified 2026-06-11)
+- [x] Daemon `tsc --noEmit`: 0 errors (verified 2026-06-11)
 - [ ] Model sync verified
-- [ ] All 3 render modes functional (multi_scene, single_flow, storyboard_image)
-- [ ] Realtime progress working for all job types
-- [ ] Error states handled gracefully with user-friendly messages
+- [x] All 3 render modes functional (multi_scene, single_flow, storyboard_image)
+- [x] Realtime progress working for all job types
+- [x] Error states handled gracefully with user-friendly messages
 
 ## Rollback Plan
 If a P0 task introduces regressions:

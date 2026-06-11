@@ -1,6 +1,6 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-10
+> Last updated: 2026-06-11
 
 ---
 
@@ -40,9 +40,39 @@ All tasks from `docs/plans/next-tasks.md` and previous `task-status.md` have bee
 | 5 Alibaba Quick Wins | Daemon | ✅ Done |
 
 ### Verification Results
-- ✅ Web TypeScript: **0 errors**
-- ✅ Daemon TypeScript: **0 errors**
+- ✅ Web TypeScript: **0 errors** (re-verified 2026-06-11)
+- ✅ Daemon TypeScript: **0 errors** (re-verified 2026-06-11)
 - ✅ Server shells wired into page.tsx (above-fold SSR, below-fold lazy)
+- ✅ Targeted backend suite (`RenderJobPipelineTest|RenderJobTest`): **19 passed** (re-verified 2026-06-11)
+- ✅ Roadmap 1.5 / 1.6 / 1.7 (viewer cancel-retry, realtime WS, error boundaries): confirmed **implemented** in code (2026-06-11)
+
+---
+
+## ⚠️ Test Suite Health — Needs Attention
+
+> Verified 2026-06-11. Corrects the earlier claim of "4 pre-existing failures".
+
+Full `docker exec backend-app-1 php artisan test`: **45 failed · 409 passed · 1 skipped**.
+
+The failures are **NOT production regressions** — they are test/seed/contract **drift** (tests
+encode outdated expectations). Each failure reproduces in isolation, so they are deterministic,
+not state-pollution. Categories:
+
+| Category | Example | Nature |
+|----------|---------|--------|
+| Response-shape drift | `AssetApiTest` expects `data` to be the array; pagination now nests it at `data.data` | Update test to current contract |
+| Route-binding drift | `AssetApiTest::show` uses `{id}`; route now binds by `{uuid}` → 404 | Update test |
+| Security policy choice | other-user asset returns **404** (hides existence); test expects **403** | Product decision |
+| Seed/count drift | `PricingApiTest` expects 3 options; current seed yields 2 | Decide seeder vs test is source of truth |
+| Mockery setup | `SocialiteTest` — `no expectations were specified` | Fix test doubles |
+
+**Fixed so far (2026-06-11):**
+- ✅ `ExampleTest` — added missing `RefreshDatabase` (health endpoint hit empty `:memory:` DB → 500)
+- ✅ `AssetApiTest` — wrong column key `'size'` → `'size_bytes'` (NOT NULL crash on insert)
+
+**Recommendation:** triage drift feature-by-feature (decide test-vs-code source of truth per
+assertion). Do **not** blindly edit assertions to match current output — that removes the tests'
+value. Owner decision needed on 403-vs-404 and pricing seed counts.
 
 ---
 
