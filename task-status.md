@@ -1,6 +1,21 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-11
+> Last updated: 2026-06-11 (Test Drift Triage & Fix completed)
+
+---
+
+## ✅ Test Drift Triage & Fix — Complete
+
+### Status: Completed (2026-06-11)
+- **Agent**: (direct execution)
+- **Scope**: backend + web
+- **Worklog**: `backend/worklogs/2026-06-11-test-drift-triage-fix.md`
+- **Summary**: Triaged 18 failing backend tests, identified all root causes as TEST-DRIFT (CODE source of truth), applied fixes across 8 test files. Removed watermark feature from Plan model/APIs per product decision. Full suite: 455 pass (↑19 from 436), remaining 3 fail + 1 error out-of-scope.
+- **Verification**:
+  - ✅ Web tsc: 0 errors
+  - ✅ Backend full suite: 455 pass, 3 fail, 1 error (78% reduction in failures)
+  - ✅ Targeted suite: 19 pass (unchanged)
+  - ✅ Migration: drop_watermark executed successfully
 
 ---
 
