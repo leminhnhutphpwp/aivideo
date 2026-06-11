@@ -120,8 +120,17 @@ node apps/daemon/scripts/verify-media-models.mjs   # model sync
 | OpenCode guide (origin) | `AGENTS.md` |
 | Scripts | `scripts/README.md` |
 
-## CodeGraph (optional)
+## CodeGraph MCP
 
-A CodeGraph index exists at `.codegraph/` (used heavily by the OpenCode setup via `codegraph_*` MCP
-tools). If those MCP tools are available in your session, prefer them for structural queries
-(symbol defs, callers, callees, impact). Otherwise use Grep/Glob/Read — both work.
+Wired for Claude Code via `.mcp.json` (server `codegraph`, runs `codegraph serve --mcp`).
+After a Claude Code **restart** + approving the server, `mcp__codegraph__*` tools become available
+(`.claude/settings.json` auto-allows them). Prefer them for structural queries — symbol defs,
+callers, callees, impact — they're far cheaper on context than reading whole files. Grep/Glob/Read
+remain valid fallbacks. Index lives at `.codegraph/codegraph.db` (~838 files, rebuilt 2026-06-11).
+
+> ⚠️ **Do NOT run `codegraph sync` / `codegraph index` from the project root.** The root
+> `.gitignore` ignores `apps/` and `backend/` (they're tracked separately), and CodeGraph honors
+> gitignore — a plain sync/index will **wipe** the index down to ~8 root files. The MCP server runs
+> with `--no-watch` for exactly this reason (the auto-sync watcher would corrupt the index on the
+> first file change). To rebuild manually: temporarily remove the `apps/` + `backend/` lines from
+> `.gitignore`, run `codegraph index -f`, then restore `.gitignore` (verify md5 unchanged).
