@@ -4,6 +4,7 @@ Coordinator-level worklogs covering cross-cutting changes across the entire plat
 
 | Date | File | Summary |
 |------|------|---------|
+| 2026-06-13 | `2026-06-13-testing-coverage-improvement.md` | Testing coverage improvement: 37→259 tests across daemon/web/backend |
 | 2026-05-28 | `2026-05-28-doc-overhaul-model-sync-fix.md` | Documentation system overhaul + model sync fix |
 | 2026-05-28 | `2026-05-28-vite-high-cpu-fix.md` | Fixed Vite high CPU usage (236%) |
 | 2026-05-29 | `2026-05-29-skills-upgrade-storyboard-fixes.md` | Skills upgrade + storyboard fixes + responsive |
