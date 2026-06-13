@@ -1,6 +1,32 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-13 (Testing Coverage Improvement completed)
+> Last updated: 2026-06-13 (Community Features Implementation completed)
+
+---
+
+## ✅ Community Features Implementation — Complete
+
+### Status: Completed (2026-06-13)
+- **Agent**: @general
+- **Scope**: Backend + Frontend (full stack)
+- **Worklog**: `worklogs/2026-06-13-community-features.md`
+- **Summary**: Implemented all 6 missing community features: Follow/Unfollow Creator, Comments, Notifications, Report Content, Social Share, and Search by Creator.
+- **Verification**:
+  - ✅ Migrations: 3/3 ran successfully (follows, comments, reports)
+  - ✅ Routes: All routes registered (follow, unfollow, followers, following, comments, report, creators/search)
+  - ✅ TypeScript: No errors in community files
+  - ✅ Backend restarted successfully
+
+### Features Implemented
+
+| Feature | Backend | Frontend | Status |
+|---------|---------|----------|--------|
+| Follow/Unfollow Creator | Migration, Model, Controller, Routes | Types, API client, FollowButton, Profile integration | ✅ Complete |
+| Comments | Migration, Model, Controller, Routes | Types, API client, CommentSection, RemixModal integration | ✅ Complete |
+| Notifications | UserNotificationService, triggers in like/comment/follow | NotificationBell (topbar already has built-in) | ✅ Complete |
+| Report Content | Migration, Model, Controller, Routes | Types, API client, ReportModal | ✅ Complete |
+| Social Share | No backend needed | ShareButtons, RemixModal integration | ✅ Complete |
+| Search by Creator | Updated search query, new endpoint | API client updated | ✅ Complete |
 
 ---
 
@@ -172,6 +198,38 @@ value. Owner decision needed on 403-vs-404 and pricing seed counts.
 | 2026-05-31 | @coordinator | Multiple | ✅ Pricing final, landing, fixes |
 | 2026-05-30 | @coordinator | Multiple | ✅ Security, voiceover, skills |
 | 2026-05-28 | @web + @daemon | Multiple | ✅ Rebranding, registry refactor |
+
+---
+
+## 📋 Community Missing Features — Plan Ready
+
+### Status: Planning Complete (2026-06-13)
+- **Agent**: @planner
+- **Plan**: `docs/plans/community/missing-features.md`
+- **Summary**: 6 missing community features identified and planned (Follow/Unfollow, Comments, Notifications, Report Content, Social Share, Search by Creator)
+- **Total Estimate**: 34 hours (~4-5 days)
+- **Dependencies**: None — can start immediately
+
+### Features by Priority
+
+| # | Feature | Priority | Est. | Status |
+|---|---------|----------|------|--------|
+| 1 | Follow/Unfollow Creator | CRITICAL | 7h | 📋 Planned |
+| 2 | Comments | CRITICAL | 9h | 📋 Planned |
+| 3 | Notifications | MEDIUM | 6h | 📋 Planned |
+| 4 | Report Content | MEDIUM | 6h | 📋 Planned |
+| 5 | Social Share | LOW | 2h | 📋 Planned |
+| 6 | Search by Creator | LOW | 4h | 📋 Planned |
+
+### Implementation Order
+1. **Week 1**: Follow/Unfollow + Comments (16h)
+2. **Week 2**: Notifications + Report Content (12h)
+3. **Week 3**: Social Share + Search by Creator (6h)
+
+### New Database Tables Required
+- `follows` — User follow relationships
+- `comments` — Comments on published assets
+- `reports` — Content reports for moderation
 
 ---
 
