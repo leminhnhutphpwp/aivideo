@@ -1,95 +1,65 @@
-# AI Video Platform — Plans & Docs Index
+# Documentation Index
 
-## Plans Index
+## Quick Links
 
-> **Note:** Many previously referenced directories (`backend/`, `appclient/`, `deployment/env-reference.md`, `pipeline-overview.md`, `roadmap.md`, `update-plan.md`, `integration/01-*.md`) no longer exist. See below for the current structure.
+- [Architecture](architecture.md) — System design, data flow, key patterns
+- [Conventions](conventions.md) — Coding standards, naming, documentation templates
+- [Roadmap](plans/roadmap.md) — Development phases and status
 
-### 📋 Next Tasks & Status
-| File | Description |
-|------|-------------|
-| `plans/next-tasks.md` | Current next tasks, recently completed, P0-P2 priorities |
+## By Role
 
-### 💰 Billing & Pricing
+### New Developers
+1. [Architecture](architecture.md)
+2. [Conventions](conventions.md)
+3. [Roadmap](plans/roadmap.md)
+
+### Backend Developers
+- [Backend Agent Guide](../backend/AGENTS.md)
+- [API Contracts](.opencode/skills/api-contract-daemon/SKILL.md)
+
+### Frontend Developers
+- [Web Agent Guide](../apps/web/AGENTS.md)
+- [Conventions](conventions.md#ui-conventions)
+
+### Daemon Developers
+- [Daemon Agent Guide](../apps/daemon/AGENTS.md)
+
+## Plans
+
+- [Active Plans](plans/active/) — Currently in progress
+- [Completed Plans](plans/completed/) — Archive of finished work
+- [Future Ideas](plans/ideas/) — Backlog and proposals
+
+## Reference
+
+- [Roadmap](plans/roadmap.md) — Development phases
+- [Deployment](deployment/) — Deployment guide
+- [Vendor API Docs](docs.qwencloud.com/) — DashScope/Alibaba API docs
+
+## Legacy Plans Index
+
+> Many previously referenced directories no longer exist. See below for current structure.
+
+### Billing & Pricing
 | File | Description |
 |------|-------------|
 | `plans/billing/credit-pack-ui.md` | Credit pack purchase UI plan |
 | `plans/billing/final-pricing-plan.md` | Final pricing plan specification |
-| `plans/billing/pricing-analysis.md` | Pricing analysis and recommendations |
-| `plans/billing/pricing-margin-analysis.md` | Margin analysis per model/tier |
-| `plans/billing/pricing-review.md` | Full pricing system review |
 
-### 🔌 Integration & API
-| File | Description |
-|------|-------------|
-| `plans/integration/alibaba-model-studio-analysis.md` | Alibaba Cloud Model Studio API analysis |
-| `plans/integration/dashscope-best-practices.md` | DashScope API best practices |
-| `plans/integration/fix-email-notification.md` | Email notification fix plan |
-
-### 🎬 Storyboard
+### Storyboard
 | File | Description |
 |------|-------------|
 | `plans/storyboard/phase0-refactor-detail.md` | Phase 0 refactor detailed plan |
-| `plans/storyboard/professional-storyboard-analysis.md` | Professional storyboard analysis |
-| `plans/storyboard/professional-storyboard-improvements.md` | Proposed improvements |
 | `plans/storyboard/single-flow-narrative.md` | One-Shot single-flow narrative design |
-| `storyboard-flow-plan.md` | Original storyboard flow plan |
 
-### 🎨 UI & Landing Page
+### Community
 | File | Description |
 |------|-------------|
-| `plans/ui/landing-page-settings.md` | Landing page dynamic settings |
-| `plans/ui/manage-general-settings-refactor.md` | General settings refactor |
-| `plans/ui/remove-scene-repeater.md` | Scene repeater removal plan |
-| `plans/ui/server-render-landing-seo.md` | Server-render landing for SEO |
+| `plans/community/README.md` | Community feature architecture |
+| `plans/community/missing-features.md` | Missing community features plan |
 
-### 🚀 Deployment
+### Deployment
 | File | Description |
 |------|-------------|
 | `deployment/README.md` | Deployment overview |
 | `deployment/env-vars.md` | Environment variables reference |
-| `deployment/ssl-routing.md` | SSL and routing configuration |
-
-### 📖 Reference Docs (Vendor APIs)
-| File | Description |
-|------|-------------|
-| `docs.ckey.vn/text-to-image.md` | CKey text-to-image API docs |
-| `docs.qwencloud.com/` | QwenCloud/DashScope API docs (various) |
-
-### 🏷️ Branding
-| File | Description |
-|------|-------------|
-| `brading/README.md` | Brand guide index |
-| `brading/wavise-brand.md` | Wavise Studio brand guidelines |
-
-## Kiến trúc tổng thể
-
-```
-┌─────────────────────────────────────────────────────┐
-│              Frontend (Next.js 16)                    │
-│  Dashboard · Studio · Library · Credits              │
-└──────────────────────┬──────────────────────────────┘
-                       │ HTTPS / WSS
-┌──────────────────────▼──────────────────────────────┐
-│              Control Plane (Laravel)                  │
-│  Auth · Subscription · Credits · Queue · Admin       │
-└──────────────────────┬──────────────────────────────┘
-                       │ Internal API
-┌──────────────────────▼──────────────────────────────┐
-│              Media Engine (Daemon)                    │
-│  Media Gen · Webhook · FFmpeg · Storage              │
-└──────────────────────┬──────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────┐
-│              Compute Plane (GPU / API)                │
-│  Seedance · HunyuanVideo · Runway · FFmpeg           │
-└─────────────────────────────────────────────────────┘
-```
-
-## Nguyên tắc thiết kế
-
-1. **Next.js là Presentation Layer** — UI thuần, không business logic
-2. **Laravel là Business OS** — mọi business logic tập trung ở Laravel
-3. **Daemon là Media Engine** — chỉ làm media generation, không auth/billing
-4. **Pluggable Compute** — GPU tự render hay thuê API đều được
-5. **Event-driven** — mọi state change đều qua event/realtime
-6. **Fail-safe** — không mất job, không double charge, có retry/dead-letter
