@@ -79,7 +79,23 @@ $query = RenderJob::published()
 1. ~~Storyboard viewer page~~ — storyboard is not the publish unit
 2. ~~Community feed page~~ — this is for viewing, not publishing
 
+## Security Features
+
+### Comment Protection
+- **Rate limiting**: 50 comments per user per day
+- **Content filter**: `ContentFilterService` blocks Vietnamese profanity and spam
+- **Max length**: 1000 characters per comment
+- **Delete permission**: Only comment owner can delete their comments
+
+### Spam Prevention
+- Sensitive keyword filter (Vietnamese + English)
+- URL detection (blocks http/https links in comments)
+- Daily comment limit per user
+
 ## Related Docs
 - `docs/plans/community/missing-features.md` — Feature implementation plan
 - `backend/app/Http/Controllers/API/CommunityController.php` — Backend API
+- `backend/app/Http/Controllers/API/CommentController.php` — Comment API
+- `backend/app/Services/ContentFilterService.php` — Content filter
 - `apps/web/src/components/community/` — Frontend components
+- `apps/web/src/hooks/use-scroll-lock.ts` — Scroll lock hook

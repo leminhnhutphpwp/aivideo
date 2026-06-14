@@ -83,3 +83,9 @@ Use Docker: `docker exec backend-app-1 php artisan test`
 | 2026-06-14 | @general | `worklogs/2026-06-14-docs-optimization.md` | ✅ Documentation optimization complete |
 | 2026-06-13 | @general + @tester | `worklogs/2026-06-13-testing-coverage-improvement.md` | ✅ Testing coverage: 37→259 tests |
 | 2026-06-11 | @tester | `backend/worklogs/2026-06-11-test-drift-triage-fix.md` | ✅ Test drift triage: 455 pass (↑19) |
+
+## Documentation & Worklog Updates
+
+- **Documentation Optimization**: Completed and verified (2026-06-14).
+- **Worklogs Summary**: Added consolidated summary `worklogs/2026-06-14-summary.md`.
+- **Next Steps**: Review TypeScript error, archive legacy storyboard file.

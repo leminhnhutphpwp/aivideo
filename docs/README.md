@@ -1,65 +1,36 @@
-# Documentation Index
+# Documentation
 
-## Quick Links
+## Core
 
-- [Architecture](architecture.md) — System design, data flow, key patterns
-- [Conventions](conventions.md) — Coding standards, naming, documentation templates
-- [Roadmap](plans/roadmap.md) — Development phases and status
+| Document | Description |
+|----------|-------------|
+| [Architecture](architecture.md) | System design, 3-layer architecture, data flow |
+| [Conventions](conventions.md) | Coding standards, naming, worklog templates |
+| [Roadmap](plans/roadmap.md) | Development phases and status |
 
-## By Role
+## Agent Guides
 
-### New Developers
-1. [Architecture](architecture.md)
-2. [Conventions](conventions.md)
-3. [Roadmap](plans/roadmap.md)
+| Agent | Scope | Guide |
+|-------|-------|-------|
+| Backend | `backend/` (Laravel) | [backend/AGENTS.md](../backend/AGENTS.md) |
+| Web | `apps/web/` (Next.js) | [apps/web/AGENTS.md](../apps/web/AGENTS.md) |
+| Daemon | `apps/daemon/` (Express) | [apps/daemon/AGENTS.md](../apps/daemon/AGENTS.md) |
 
-### Backend Developers
-- [Backend Agent Guide](../backend/AGENTS.md)
-- [API Contracts](.opencode/skills/api-contract-daemon/SKILL.md)
+## Active Plans
 
-### Frontend Developers
-- [Web Agent Guide](../apps/web/AGENTS.md)
-- [Conventions](conventions.md#ui-conventions)
+| Plan | Status |
+|------|--------|
+| [Community Architecture](plans/community/README.md) | Active |
+| [Missing Features](plans/community/missing-features.md) | Completed |
+| [Fix Asset Type Detection](plans/community/fix-asset-type-detection.md) | Completed |
 
-### Daemon Developers
-- [Daemon Agent Guide](../apps/daemon/AGENTS.md)
+## Deployment
 
-## Plans
-
-- [Active Plans](plans/active/) — Currently in progress
-- [Completed Plans](plans/completed/) — Archive of finished work
-- [Future Ideas](plans/ideas/) — Backlog and proposals
+- [Deployment Guide](deployment/README.md)
+- [Environment Variables](deployment/env-vars.md)
+- [SSL Routing](deployment/ssl-routing.md)
 
 ## Reference
 
-- [Roadmap](plans/roadmap.md) — Development phases
-- [Deployment](deployment/) — Deployment guide
-- [Vendor API Docs](docs.qwencloud.com/) — DashScope/Alibaba API docs
-
-## Legacy Plans Index
-
-> Many previously referenced directories no longer exist. See below for current structure.
-
-### Billing & Pricing
-| File | Description |
-|------|-------------|
-| `plans/billing/credit-pack-ui.md` | Credit pack purchase UI plan |
-| `plans/billing/final-pricing-plan.md` | Final pricing plan specification |
-
-### Storyboard
-| File | Description |
-|------|-------------|
-| `plans/storyboard/phase0-refactor-detail.md` | Phase 0 refactor detailed plan |
-| `plans/storyboard/single-flow-narrative.md` | One-Shot single-flow narrative design |
-
-### Community
-| File | Description |
-|------|-------------|
-| `plans/community/README.md` | Community feature architecture |
-| `plans/community/missing-features.md` | Missing community features plan |
-
-### Deployment
-| File | Description |
-|------|-------------|
-| `deployment/README.md` | Deployment overview |
-| `deployment/env-vars.md` | Environment variables reference |
+- [API Contracts](../.opencode/skills/api-contract-daemon/SKILL.md)
+- [Vendor Docs](docs.qwencloud.com/) — DashScope/Alibaba API
