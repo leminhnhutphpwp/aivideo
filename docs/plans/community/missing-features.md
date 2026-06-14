@@ -3,9 +3,19 @@
 ## Date
 2026-06-13
 
+## ⚠️ CRITICAL ARCHITECTURE RULE
+
+> **Community features operate on RenderJobs (individual assets), NOT Storyboards.**
+> See `docs/plans/community/README.md` for full architecture details.
+> - Publish: `PATCH /render-jobs/{uuid}/publish` ✅
+> - Community Feed: queries `RenderJob::published()` ✅
+> - DO NOT create storyboard publish endpoints — community doesn't query storyboards.
+
 ## Overview
 
-This plan addresses 6 missing community features identified in the audit. The features range from critical (Follow/Unfollow, Comments) to low priority (Social Share, Search by Creator). All features follow existing patterns in the codebase.
+This plan addresses missing community features identified in the audit. The features range from critical (Follow/Unfollow, Comments) to low priority (Social Share, Search by Creator). All features follow existing patterns in the codebase.
+
+**Note:** Publish/Unpublish is ALREADY IMPLEMENTED for RenderJobs. The missing features are: Follow, Comments, Notifications, Report, Social Share, Search by Creator.
 
 ## Priority Order (Dependency Graph)
 

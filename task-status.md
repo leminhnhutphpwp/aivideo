@@ -233,6 +233,63 @@ value. Owner decision needed on 403-vs-404 and pricing seed counts.
 
 ---
 
+## 🔄 Revert Storyboard Publish & Fix RenderJob Locations — Plan Ready
+
+### Status: Planning Complete (2026-06-13)
+- **Agent**: @planner
+- **Plan**: `docs/plans/community/revert-storyboard-publish-and-fix-locations.md`
+- **Summary**: Revert incorrect Storyboard publish functionality and add publish buttons to correct RenderJob detail pages
+- **Total Estimate**: ~3 hours
+- **Priority**: HIGH — Architecture correction needed
+
+### Problem
+Previous implementation incorrectly added publish to Storyboards. Correct architecture: community features operate on RenderJobs (individual assets), NOT Storyboards.
+
+### What's WRONG (Needs Revert)
+1. Storyboard migration with `visibility`, `published_at`, `tags` columns
+2. Storyboard model `publish()`, `unpublish()`, `isPublished()` methods
+3. StoryboardController publish/unpublish endpoints
+4. Storyboard viewer page publish button
+
+### What's MISSING (Needs Addition)
+1. Publish button on Jobs page (for completed render jobs)
+2. Publish button in JobHistory component (Project detail page)
+3. PublishModal integration in correct locations
+
+### Tasks
+
+| # | Layer | Task | Agent | Est. | Status |
+|---|-------|------|-------|------|--------|
+| 1 | Backend | Delete migration `2026_06_13_000001_add_community_fields_to_storyboards_table.php` | @backend | 5 min | 📋 Planned |
+| 2 | Backend | Remove community methods from Storyboard model | @backend | 15 min | 📋 Planned |
+| 3 | Backend | Remove publish/unpublish from StoryboardController | @backend | 10 min | 📋 Planned |
+| 4 | Backend | Remove storyboard publish routes from api.php | @backend | 5 min | 📋 Planned |
+| 5 | Web | Remove storyboard publish methods from client.ts | @web | 10 min | 📋 Planned |
+| 6 | Web | Remove publish UI from storyboard viewer page | @web | 20 min | 📋 Planned |
+| 7 | Web | Add publish button to Jobs page (JobItemCard) | @web | 30 min | 📋 Planned |
+| 8 | Web | Add publish props to JobHistory component | @web | 25 min | 📋 Planned |
+| 9 | Web | Integrate PublishModal in Project detail page | @web | 20 min | 📋 Planned |
+| 10 | Test | Verify publish flow on correct pages | @tester | 30 min | 📋 Planned |
+
+### Files to Modify
+
+**DELETE**:
+- `backend/database/migrations/2026_06_13_000001_add_community_fields_to_storyboards_table.php`
+
+**Backend**:
+- `backend/app/Models/Storyboard.php`
+- `backend/app/Http/Controllers/API/StoryboardController.php`
+- `backend/routes/api.php`
+
+**Frontend**:
+- `apps/web/src/lib/api/client.ts`
+- `apps/web/src/app/(builder)/studio/storyboard/flow/[uuid]/page.tsx`
+- `apps/web/src/app/(dashboard)/jobs/page.tsx`
+- `apps/web/src/components/projects/job-history.tsx`
+- `apps/web/src/app/(dashboard)/projects/[id]/page.tsx`
+
+---
+
 ## 📜 Future Considerations
 
 Not tasks — ideas for next phase:

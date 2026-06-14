@@ -39,15 +39,33 @@ Next.js (apps/web) ──HTTP──► Laravel (backend)
 - Task queue with SQLite persistence
 - Webhook callback on completion/failure
 
+## Community Architecture
+
+```
+Storyboard (project container)
+  ├── Scene 1 → RenderJob 1 (individual video asset)
+  ├── Scene 2 → RenderJob 2
+  └── Scene 3 → RenderJob 3
+                           ↓
+                    Published to Community
+```
+
+- **Community operates on RenderJobs**, NOT Storyboards
+- Publish: `PATCH /render-jobs/{uuid}/publish`
+- Feed: `RenderJob::published()`
+- See `docs/plans/community/README.md` for details
+
 ## When to use this skill
 
 Reference this when:
 - Understanding system architecture
 - Planning cross-service changes
 - Debugging service communication
+- Working on community features (remember: RenderJob, not Storyboard)
 
 ## Related docs
 
 - `docs/plans/README.md` — Full architecture
+- `docs/plans/community/README.md` — Community architecture
 - `docs/plans/appclient/` — Daemon API details
 - `backend/.agents/skills/api-contract-daemon.md` — Laravel↔Daemon contract

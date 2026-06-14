@@ -123,6 +123,14 @@ When adding/modifying features for a specific model (Wan2.7, Wan2.6, etc.):
 - **Filter thumbnail duplicates**: `AssetController::index()` filters `where('type', '!=', 'thumbnail')` to avoid duplicates in pickers.
 - **Image display**: Always fetch via authenticated API. Never construct raw URLs from daemon paths.
 
+### ⚠️ Community Architecture (RenderJob vs Storyboard)
+- **Community features operate on RenderJobs (individual assets), NOT Storyboards.**
+- Publish: `PATCH /render-jobs/{uuid}/publish` — sets visibility, published_at, tags on RenderJob
+- Community Feed: `RenderJob::published()` — queries published RenderJobs only
+- Storyboards are project containers; each scene has its own RenderJob
+- **NEVER create storyboard publish endpoints** — community doesn't query storyboards
+- See `docs/plans/community/README.md` for full architecture
+
 ### Pricing Best Practices
 - **Single source**: `PricingCalculator::calculate()` for ALL credit estimation — backend and frontend must agree.
 - **Duration from DB**: `DurationTier::active()` via `GET /api/v1/pricing/durations`. Never hardcode duration arrays.
