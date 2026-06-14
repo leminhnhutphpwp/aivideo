@@ -22,6 +22,18 @@
 - **Status**: Completed (2026-06-14)
 - **Worklog**: `worklogs/2026-06-14-docs-optimization.md`
 
+### Fix Asset Type Detection — Community Cards
+- **Status**: In Progress
+- **Plan**: `docs/plans/community/fix-asset-type-detection.md`
+- **Root cause**: Frontend uses `duration_seconds > 0` to detect video vs image; images can have non-zero duration
+- **Backend**: Add `asset_type` field to `formatAssetCard()` in CommunityController
+- **Frontend**: Update `AssetCard` interface + `community-card.tsx` + `remix-modal.tsx` to use `asset_type`
+- **Files**:
+  - `backend/app/Http/Controllers/API/CommunityController.php` (line 532-566)
+  - `apps/web/src/lib/api/community-types.ts` (line 1-26)
+  - `apps/web/src/components/community/community-card.tsx` (line 36)
+  - `apps/web/src/components/community/remix-modal.tsx` (line 95)
+
 ---
 
 ## Test Health

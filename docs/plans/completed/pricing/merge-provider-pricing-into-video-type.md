@@ -1,3 +1,10 @@
+> [!WARNING]
+> **TÀI LIỆU CŨ / LEGACY DOCUMENT**
+> Tài liệu này mô tả kiến trúc định giá dựa trên `QualityTier` và `ProviderPricing` cũ. 
+> Hiện tại, hệ thống đã được tái cấu trúc để **hợp nhất toàn bộ cấu hình Model & Provider trực tiếp vào từng Gói dịch vụ (Plan)**.
+> Vui lòng tham khảo thiết kế mới tại: [rearchitect_plan_unify_model_and_provider_config.md](file:///home/minhnhut/.gemini/antigravity-cli/brain/834e59c0-9adc-4b27-aaa6-2701513eb03d/rearchitect_plan_unify_model_and_provider_config.md).
+
+
 # Merge ProviderPricing into VideoTypeResource — Design Plan
 
 ## Date

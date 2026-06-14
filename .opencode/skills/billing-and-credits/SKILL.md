@@ -34,6 +34,9 @@ Plan {
   queue_priority: enum (low, normal, high)
   monthly_credits: integer
   watermark: boolean
+  quality_multiplier: decimal
+  model_mapping: json
+  provider_config: json
 }
 ```
 
