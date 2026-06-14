@@ -66,6 +66,12 @@ Special "Character Node" hoặc "Style Node" trên canvas. Khi nối vào các s
 | **Frontend** | New node design: Character node (hình chân dung), Style node (palette màu) |
 | | Visual indicator trên scene node có character/style lock |
 
+### Edge Cases
+- Multiple character nodes → scene nào nối với character nào thì nhận reference của character đó
+- Character node + style node cùng nối 1 scene → merge cả 2
+- Character/style node deleted → child scenes mất reference
+- Backward compat: scenes hiện tại vẫn giữ reference_image riêng
+
 ---
 
 ## 3. Performance & Responsive
