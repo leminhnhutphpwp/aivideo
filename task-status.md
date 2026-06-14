@@ -6,11 +6,17 @@
 
 ## Current Sprint
 
-### Community Features — Complete, Architecture Fix Pending
-- **Status**: Implemented (2026-06-13), architecture revert needed
+### Community Features Audit — Complete
+- **Status**: Completed (2026-06-14)
+- **Plan**: `docs/plans/community/audit-and-fix-plan.md`
+- **Worklog**: `worklogs/2026-06-14-community-bugfixes.md`
+- **Result**: All 14 bugs fixed, duplicate publish prevention, daily comment limit check, timezone issues, comment rate limiting implemented and verified with tests.
+
+### Community Features — Complete
+- **Status**: Completed (2026-06-14)
 - **Plan**: `docs/plans/community/revert-storyboard-publish-and-fix-locations.md`
-- **Issue**: Storyboard publish was incorrectly added; community features operate on RenderJobs, not Storyboards
-- **Next**: Execute revert plan (~3 hours)
+- **Worklog**: `worklogs/2026-06-14-publish-flow-fix-evaluation.md`
+- **Result**: Storyboard publish reverted. RenderJob publish added to correct Jobs page and JobHistory. Fully verified by tester.
 
 ### Documentation Optimization — Complete
 - **Status**: Completed (2026-06-14)
@@ -60,6 +66,8 @@ Use Docker: `docker exec backend-app-1 php artisan test`
 
 | Date | Agent | Worklog | Result |
 |------|-------|---------|--------|
+| 2026-06-14 | Antigravity | `worklogs/2026-06-14-community-bugfixes.md` | ✅ Fixed duplicate publish check, daily comment limit check, comment rate limiting, resolved timezone issues, fixed billing TS compiler error |
+| 2026-06-14 | @planner | `docs/plans/community/audit-and-fix-plan.md` | ✅ Community features audit: 14 bugs found, fix plan created |
 | 2026-06-14 | @general | `worklogs/2026-06-14-docs-optimization.md` | ✅ Documentation optimization complete |
 | 2026-06-13 | @general + @tester | `worklogs/2026-06-13-testing-coverage-improvement.md` | ✅ Testing coverage: 37→259 tests |
 | 2026-06-11 | @tester | `backend/worklogs/2026-06-11-test-drift-triage-fix.md` | ✅ Test drift triage: 455 pass (↑19) |
