@@ -23,7 +23,7 @@
 - **Worklog**: `worklogs/2026-06-14-docs-optimization.md`
 
 ### Fix Asset Type Detection — Community Cards
-- **Status**: In Progress
+- **Status**: Completed (2026-06-17)
 - **Plan**: `docs/plans/community/fix-asset-type-detection.md`
 - **Root cause**: Frontend uses `duration_seconds > 0` to detect video vs image; images can have non-zero duration
 - **Backend**: Add `asset_type` field to `formatAssetCard()` in CommunityController
