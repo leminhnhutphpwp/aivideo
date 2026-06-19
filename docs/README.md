@@ -26,9 +26,8 @@
 
 ## Deployment
 
-- [Deployment Guide](deployment/README.md)
-- [Environment Variables](deployment/env-vars.md)
-- [SSL Routing](deployment/ssl-routing.md)
+- [Deployment Runbook](deployment/README.md) — topology, domain setup, secrets
+  checklist, deploy steps, storage (MinIO/R2), and readiness gaps.
 
 ## Reference
 

@@ -108,12 +108,17 @@ bash scripts/migrate.sh backend/docker-compose.dev.yml
 
 ### Required for Deploy
 
-- `JWT_SECRET`
 - `DOMAIN`
-- `OD_INTERNAL_API_KEY`
-- `OD_WEBHOOK_SECRET`
-- `SEPAY_WEBHOOK_TOKEN`
-- `DB_NAME`, `DB_USER`, `DB_PASS`, `DB_HOST` (for backups)
+- `JWT_SECRET`
+- `DB_PASSWORD`, `REDIS_PASSWORD`, `MYSQL_ROOT_PASSWORD`
+- `REVERB_APP_KEY`, `REVERB_APP_SECRET`
+- `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `AWS_BUCKET`
+- `INTERNAL_API_KEY`, `DAEMON_WEBHOOK_SECRET` (Laravel ↔ daemon)
+- `CKEY_API_KEY` (LLM prompt compiler — required in prod; no simulation)
+- `SEPAY_WEBHOOK_TOKEN` (payments)
+- AI media provider API keys (per enabled provider)
+
+> Full deploy checklist + domain setup: `docs/deployment/README.md`.
 
 ## Architecture
 

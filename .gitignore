@@ -1,6 +1,8 @@
 # /docs/*
 !/docs/deployment/
 /docs/deployment/*
+# …but keep the runbook tracked (it has no secrets; env files stay ignored)
+!/docs/deployment/README.md
 
 .env
 .env.*
