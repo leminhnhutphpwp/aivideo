@@ -86,10 +86,12 @@ node apps/daemon/scripts/verify-media-models.mjs   # model sync
 ```
 
 > ✅ **Test suite status (2026-06-19):** full `php artisan test` is **green —
-> 445 passed / 1 skipped / 0 failed**. The prior drift (70 failed) was cleared on
+> 447 passed / 1 skipped / 0 failed**. The prior drift (70 failed) was cleared on
 > 2026-06-19; root cause was `AiPromptCompiler` fataling on a null `CKEY_API_KEY`
-> (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`). If you see
-> a red full-suite again, check this baseline before assuming it's your regression.
+> (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`). +2 from a
+> full-system test that found & fixed a render blocker (`qualityTierCode` named-param
+> in `StoryboardRenderer` → see `backend/worklogs/2026-06-19-full-system-test-issues/`).
+> If you see a red full-suite again, check this baseline before assuming it's your regression.
 
 ## Conventions
 

@@ -82,6 +82,8 @@
 - [x] Realtime progress working
 - [x] Community features implemented
 - [x] Testing coverage: 37→259 tests
-- [x] Full backend suite green (2026-06-19: 445 passed / 1 skipped / 0 failed)
+- [x] Full backend suite green (2026-06-19: 447 passed / 1 skipped / 0 failed)
+- [x] E2E Playwright tier 1 green (auth + storyboard creation, 7 specs)
+- [ ] E2E Playwright tier 2 (render → publish, needs full async stack)
 - [ ] Model sync verified
 - [ ] All Phase 2 tasks complete

@@ -6,6 +6,25 @@
 
 ## Current Sprint
 
+### Full-System Test (Simulation) — Pipeline Green
+- **Status**: Completed (2026-06-19)
+- **Worklog**: `backend/worklogs/2026-06-19-full-system-test-issues/SUMMARY.md` (+ per-issue files)
+- **Result**: Ran the main flow end-to-end against the live stack in simulation. Was **not
+  runnable** (daemon couldn't even start); fixed **3 blockers** → pipeline now green:
+  1. `daemon` compose service had no `command` (regression f0c1265) → daemon + app down. Fixed in `backend/docker-compose.dev.yml` (restored command, added `node_modules` anon volume + ffmpeg/build toolchain).
+  2. `StoryboardRenderer::resolveModel()` passed stale named arg `qualityTierCode:` to `ModelSelector::resolve()` → PHP fatal, every scene failed to queue (swallowed into a 200). Fixed (positional arg).
+  3. Daemon container missing `ffmpeg` (`spawn ffmpeg ENOENT`). Fixed (apk add at boot).
+- **Verified**: Storyboard render → webhook → `completed` + final video (cross-service async
+  loop proven). RenderJob render → publish → appears in `GET /v1/community/assets`.
+- **Follow-ups**: regression test for #2; daemon `Dockerfile.dev` to bake ffmpeg; wire real
+  tier-2 `render-publish.spec.ts` from the now-verified API flow. Not committed (awaiting owner).
+
+### E2E Playwright — Tier 1 Complete
+- **Status**: Completed (2026-06-19)
+- **Worklog**: `apps/web/worklogs/2026-06-19-e2e-playwright-tier1.md`
+- **Result**: Playwright stood up from scratch (`apps/web/playwright.config.ts` + `e2e/`). **7/7 tier-1 specs green** — auth (form, valid, invalid) + storyboard creation (projects list, builder nav, create-via-API appears). Run with `npm run test:e2e` (needs web :3000 + backend :8000 + seeded DB). Side-fix: migration `2026_06_06_000007` made idempotent (was failing fresh migrate on duplicate `users_username_unique`).
+- **Tier 2 (render → publish) — DONE & GREEN (opt-in)**: `e2e/render-publish.spec.ts` now exercises the real full-stack pipeline (web→laravel→queue→daemon→webhook→laravel). Two specs pass against the live stack in simulation: (a) render-job → publish → appears in `/v1/community/assets`; (b) storyboard renders end-to-end to a `completed` final video. Run with `E2E_TIER2=1 npx playwright test render-publish` — requires the full stack up **with daemon simulation ON** (`SIMULATION_MODE=1` at compose up). Skipped by default: with simulation off a render calls real providers (real credits/latency). See `backend/worklogs/2026-06-19-full-system-test-issues/SUMMARY.md`.
+
 ### Backend Test Drift Fix — Complete
 - **Status**: Completed (2026-06-19)
 - **Worklog**: `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`
@@ -60,9 +79,11 @@ Status:      ✅ All pass
 ### Backend Tests (backend/)
 ```
 Last Run:    2026-06-19 (Docker: backend-app-1)
-Result:      445 passed · 1 skipped · 0 failed (1525 assertions)
+Result:      447 passed · 1 skipped · 0 failed (1530 assertions)
 Status:      ✅ All pass
 ```
+(+2 since 445: `StoryboardRenderModelResolutionTest` — regression guard for the
+render `qualityTierCode` named-param blocker found in the full-system test.)
 
 **Note**: Prior drift (70 failed) cleared 2026-06-19 — see
 `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`.

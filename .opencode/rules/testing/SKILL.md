@@ -71,7 +71,7 @@ it('creates a render job', function() {
 - User accounts, credits, projects are real test data — clearing wastes time.
 - Only run `db:seed --class=SpecificSeeder` when adding NEW seed data.
 - Target tests: `--filter="RenderJobPipelineTest|RenderJobTest|ModelSelectorTest"` (28 tests)
-- ✅ Full suite (2026-06-19): **445 passed / 1 skipped / 0 failed** — green. Prior drift cleared 2026-06-19 (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`).
+- ✅ Full suite (2026-06-19): **447 passed / 1 skipped / 0 failed** — green. Prior drift cleared 2026-06-19 (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`).
 
 ## Running Tests
 
