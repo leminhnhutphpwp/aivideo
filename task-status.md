@@ -6,6 +6,11 @@
 
 ## Current Sprint
 
+### Backend Test Drift Fix — Complete
+- **Status**: Completed (2026-06-19)
+- **Worklog**: `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`
+- **Result**: Full backend suite green — **445 passed, 1 skipped, 0 failed** (was 70 failed). Two root causes: (1) `AiPromptCompiler` fatal'd assigning null to typed `string $apiKey` when `CKEY_API_KEY` unset (real production bug, 69 failures) — fixed with `?? ` coalescing; (2) `capability` exposure assertion in `CommunityFeatureTest` relaxed (owner-confirmed non-sensitive).
+
 ### Community Features Audit — Complete
 - **Status**: Completed (2026-06-14)
 - **Plan**: `docs/plans/community/audit-and-fix-plan.md`
@@ -54,13 +59,15 @@ Status:      ✅ All pass
 
 ### Backend Tests (backend/)
 ```
-Status:      ⏳ Needs pdo_sqlite extension
-Last Run:    2026-06-11
-Result:      45 failed · 409 passed · 1 skipped
+Last Run:    2026-06-19 (Docker: backend-app-1)
+Result:      445 passed · 1 skipped · 0 failed (1525 assertions)
+Status:      ✅ All pass
 ```
 
-**Note**: Failures are test/seed/contract **drift**, NOT production regressions.
-Use Docker: `docker exec backend-app-1 php artisan test`
+**Note**: Prior drift (70 failed) cleared 2026-06-19 — see
+`backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`.
+Run inside Docker: `docker exec backend-app-1 php artisan test`
+(host PHP lacks `pdo_sqlite`). The 1 skip is intentional (null-user FK case).
 
 ---
 

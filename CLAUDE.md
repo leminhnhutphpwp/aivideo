@@ -85,10 +85,11 @@ docker exec backend-app-1 php artisan test --filter="RenderJobPipelineTest|Rende
 node apps/daemon/scripts/verify-media-models.mjs   # model sync
 ```
 
-> ⚠️ **Test suite status (2026-06-11):** targeted suite is green (19 pass), but the **full**
-> `php artisan test` is currently **~46 failed / 408 passed** — broader than the legacy docs
-> claimed ("4 pre-existing"). Most failures look like test/factory/seed drift, not production
-> bugs. Don't treat a red full-suite as a regression you caused without checking the baseline.
+> ✅ **Test suite status (2026-06-19):** full `php artisan test` is **green —
+> 445 passed / 1 skipped / 0 failed**. The prior drift (70 failed) was cleared on
+> 2026-06-19; root cause was `AiPromptCompiler` fataling on a null `CKEY_API_KEY`
+> (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`). If you see
+> a red full-suite again, check this baseline before assuming it's your regression.
 
 ## Conventions
 
