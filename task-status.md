@@ -1,42 +1,6 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-16
-
----
-
-## 🔄 WP Elementor AI Connector Improvement — Planning
-
-### Status: Plan Ready
-### Plan: `docs/plans/elementor-ai-connector/improvement-plan.md`
-- **Created**: 2026-06-16
-- **Summary**: Kế hoạch cải tiến AI Generator panel trong Elementor editor. 10 vấn đề kỹ thuật được xác định, 3 phases triển khai. Tổng nỗ lực ước tính: 42-59 giờ.
-- **Issues Identified**: 10 (4 P0, 3 P1, 3 P2)
-- **Phases**: 3 (Critical Fix → UX Improvement → Optimization)
-
-### Phase 1 Tasks (Critical — P0)
-
-| # | Task | Nỗ LựC | Status |
-|---|------|---------|--------|
-| 1.1 | Kích hoạt streaming code (elementor-ai-drawer.js → streaming endpoint) | 8-12h | 📋 Planned |
-| 1.2 | Thêm client-side timeout (fetch/ajax) | 4-6h | 📋 Planned |
-| 1.3 | Sửa silent error swallowing (catch(e) {}) | 3-4h | 📋 Planned |
-| 1.4 | Thay thế alert() bằng toast notifications | 3-4h | 📋 Planned |
-
-### Phase 2 Tasks (High — P1)
-
-| # | Task | Nỗ LựC | Status |
-|---|------|---------|--------|
-| 2.1 | Thêm parallel requests cho full page mode | 6-8h | 📋 Planned |
-| 2.2 | Cải thiện progress feedback (tokens, ETA, stages) | 8-10h | 📋 Planned |
-| 2.3 | Sửa race condition rate limiting | 4-6h | 📋 Planned |
-
-### Phase 3 Tasks (Medium — P2)
-
-| # | Task | Nỗ LựC | Status |
-|---|------|---------|--------|
-| 3.1 | Tăng max_tokens cap (8192 → 16384) | 1-2h | 📋 Planned |
-| 3.2 | Tối ưu preview handler (transient thay vì posts) | 3-4h | 📋 Planned |
-| 3.3 | Dọn dẹp duplicate AJAX endpoints | 2-3h | 📋 Planned |
+> Last updated: 2026-06-19
 
 ---
 
