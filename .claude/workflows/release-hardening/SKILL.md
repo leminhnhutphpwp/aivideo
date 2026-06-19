@@ -18,7 +18,7 @@ metadata:
 - [ ] No console.log in production code
 
 ### Documentation
-- [ ] Update `STATUS.md` with latest changes
+- [ ] Update `task-status.md` with latest changes
 - [ ] Update `CHANGELOG.md` with version notes
 - [ ] Update API docs if endpoints changed
 - [ ] Review `.claude/` skills for accuracy

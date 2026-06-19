@@ -14,7 +14,7 @@ metadata:
 1. **Get reproduction steps** from user/report
 2. **Reproduce locally** — Confirm the bug exists
 3. **Check logs** — Look for error messages
-4. **Check status** — Review `STATUS.md` for known issues
+4. **Check status** — Review `task-status.md` for known issues
 
 ## 2. Investigate
 

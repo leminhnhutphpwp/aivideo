@@ -13,7 +13,9 @@
 | **Daemon** | `apps/daemon/` (Express only) | `apps/daemon/AGENTS.md` | `apps/daemon/worklogs/` |
 
 Each sub-agent has a `worklogs/` directory with `.md` files documenting their changes.
-Read those to get the full picture before planning new work.
+Before planning, read the **3 most recent** worklogs in the relevant scope (or the last
+~7 days) — not all of them. Grep them by keyword when you need a specific past change.
+See `.opencode/rules/context-efficiency` for the full targeted-reading order.
 
 ## First time here?
 
@@ -26,6 +28,24 @@ Read those to get the full picture before planning new work.
    - Web frontend → `@web` or `apps/web/AGENTS.md`
    - Daemon → `@daemon` or `apps/daemon/AGENTS.md`
    - Coordination → `@coordinator`
+
+## Feature → where to look
+
+Start a task here, then read **only** these — don't bulk-read the repo (see
+`.opencode/rules/context-efficiency`). Browse the plan folder, open the **one** relevant file.
+
+| Task touches… | Start (skill) | Primary code | Plans |
+|---|---|---|---|
+| Storyboard render / scenes / final video | `job-lifecycle`, `simulation-mode` | `backend/app/Services/StoryboardRenderer.php`, `…/API/StoryboardController.php`, `apps/daemon/src/` | `docs/plans/active/storyboard/` |
+| Single render job / model select | `job-lifecycle` | `…/API/RenderJobController.php`, `app/Services/ModelSelector.php` | — |
+| Community: publish / feed / remix | — | `…/API/CommunityController.php`, `apps/web/src/components/community/` | `docs/plans/active/community/` |
+| Billing / credits / pricing | `billing-and-credits` | `backend/app/Services/Pricing/`, `app/Services/CreditService.php` | `docs/plans/completed/billing/` |
+| Queue / jobs / Horizon | `queue-and-jobs` | `backend/app/Jobs/` | — |
+| Realtime / websockets | `realtime-reverb` | Reverb events / channels | — |
+| Laravel ↔ daemon contract / webhooks | `api-contract-daemon` | `backend/app/Services/DaemonClient.php`, daemon `src/` | `docs/plans/active/integration/` |
+| Daemon / providers / media gen | `architecture` | `apps/daemon/AGENTS.md`, `apps/daemon/src/` | — |
+| Auth / JWT | — | `backend/` auth controllers/middleware | — |
+| Cross-layer / "how does X flow" | `architecture` | use CodeGraph first | `docs/architecture.md` |
 
 ## Available Agents
 

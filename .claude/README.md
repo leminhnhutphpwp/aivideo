@@ -32,7 +32,8 @@ Same content, formatted so Claude Code reads it natively.
 ├── rules/         # Coding standards (reference docs)
 │   ├── coding-rules/   product-scope/   laravel/
 │   ├── security/       testing/         logging/
-│   └── documentation/  # 🔴 MANDATORY worklog + task-status rules
+│   ├── documentation/  # 🔴 MANDATORY worklog + task-status rules
+│   └── context-efficiency/  # read targeted per task — not the whole repo
 │
 └── workflows/     # Step-by-step processes (reference docs)
     ├── development/   bugfix-workflow/

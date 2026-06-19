@@ -42,7 +42,7 @@ Your job is to **delegate tasks** to specialized subagents, not modify code dire
 ### 3. Track Progress
 - Use `todowrite` to track tasks
 - Mark tasks ⬜️ → 🔄 → ✅
-- Update `STATUS.md` when major changes complete
+- Update `task-status.md` when major changes complete
 
 ### 4. Verify
 - Ensure each agent wrote worklog

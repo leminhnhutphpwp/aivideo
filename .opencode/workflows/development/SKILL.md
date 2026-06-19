@@ -11,32 +11,38 @@ metadata:
 
 ## Before Starting
 
-1. **Read `STATUS.md`** — Current project status
-2. **Read `scripts/README.md`** — Scripts usage
-3. **Read `docs/plans/update-plan.md`** — Roadmap
+1. **Read `task-status.md`** (root) — current status + active work. This is the entry
+   point. Do **not** read `HISTORY.md` (archived) unless you are researching past work.
+2. **Read `docs/plans/roadmap.md`** — phases & priorities.
+3. Need to run services? See `scripts/README.md` (don't read it unless you're starting/
+   debugging the stack).
+
+> Read selectively. Load only your layer's `AGENTS.md` + the matching skill, and open the
+> single relevant plan file — not whole folders. See the **"Feature → where to look"** table
+> in root `CLAUDE.md` and the `.opencode/rules/context-efficiency` rule before reading broadly.
 
 ## By Task Type
 
 ### Daemon Work (apps/daemon/)
 
 1. Read `apps/daemon/AGENTS.md` — API endpoints, providers
-2. Read `docs/plans/appclient/` — Daemon architecture
+2. Load skill `api-contract-daemon` — Laravel ↔ daemon contract (only if touching the contract)
 3. Modify source in `apps/daemon/src/`
 4. Run `cd apps/daemon && npm run typecheck`
 5. Run `cd apps/daemon && npm run dev` — Test locally
 
 ### Web App Work (apps/web/)
 
-1. Read `apps/web/AGENTS.md` — Conventions
-2. Read `docs/plans/appclient/09-ux-flow.md` — UX flows
-3. Read `docs/plans/integration/01-api-contract.md` — API contract
-4. Develop feature, reference `docs/plans/update-plan.md` for phase
+1. Read `apps/web/AGENTS.md` — conventions
+2. Load skill `api-contract-daemon` for the API surface; for a feature's UX, open the one
+   relevant file under `docs/plans/active/ui/` (e.g. `unified-projects-page.md`)
+3. Develop the feature, then `cd apps/web && npx tsc --noEmit`
 
 ### Backend Work (backend/)
 
-1. Read `backend/AGENTS.md` — Overview + docs mapping
+1. Read `backend/AGENTS.md` — overview + docs mapping
 2. Read `.opencode/rules/laravel` — Laravel standards
-3. Read `docs/plans/backend/` — DB schema, API routes, queue
+3. Open the relevant note under `docs/plans/backend/` (browse, don't bulk-read)
 
 ## Starting Services
 

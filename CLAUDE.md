@@ -123,6 +123,25 @@ node apps/daemon/scripts/verify-media-models.mjs   # model sync
 | OpenCode guide (origin) | `AGENTS.md` |
 | Scripts | `scripts/README.md` |
 
+## Feature → where to look
+
+Start a task here, then read **only** these. Don't bulk-read the repo — see the
+`.claude/rules/context-efficiency` rule and `.claude/workflows/development` for the full
+reading order. Browse the plan **folder**, open the **one** relevant file.
+
+| Task touches… | Start (skill/rule) | Primary code | Plans |
+|---|---|---|---|
+| Storyboard render / scenes / final video | `job-lifecycle`, `simulation-mode` | `backend/app/Services/StoryboardRenderer.php`, `…/Controllers/API/StoryboardController.php`, `apps/daemon/src/` | `docs/plans/active/storyboard/` |
+| Single render job / model select | `job-lifecycle` | `…/Controllers/API/RenderJobController.php`, `app/Services/ModelSelector.php` | — |
+| Community: publish / feed / remix | — | `…/Controllers/API/CommunityController.php`, `apps/web/src/components/community/` | `docs/plans/active/community/` |
+| Billing / credits / pricing | `billing-and-credits` | `backend/app/Services/Pricing/`, `app/Services/CreditService.php` | `docs/plans/completed/billing/` |
+| Queue / jobs / Horizon | `queue-and-jobs` | `backend/app/Jobs/` | — |
+| Realtime / websockets | `realtime-reverb` | Reverb events / channels | — |
+| Laravel ↔ daemon contract / webhooks | `api-contract-daemon` | `backend/app/Services/DaemonClient.php`, daemon `src/` | `docs/plans/active/integration/` |
+| Daemon / providers / media gen | `architecture` | `apps/daemon/AGENTS.md`, `apps/daemon/src/` | — |
+| Auth / JWT | rule `security` | `backend/` auth controllers/middleware | — |
+| Cross-layer / "how does X flow" | `architecture` | use CodeGraph MCP first | `docs/architecture.md` |
+
 ## CodeGraph MCP
 
 Wired for Claude Code via `.mcp.json` (server `codegraph`, runs `codegraph serve --mcp`).
