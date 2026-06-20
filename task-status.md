@@ -1,10 +1,36 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-19
+> Last updated: 2026-06-20
 
 ---
 
 ## Current Sprint
+
+### AI System (config / authoring / prompt enhance) + platform fixes — Complete
+- **Status**: Completed (2026-06-20)
+- **Worklogs**: `backend/worklogs/2026-06-20-ai-system-and-platform-fixes.md`,
+  `apps/daemon/worklogs/2026-06-20-ai-endpoints.md`,
+  `apps/web/worklogs/2026-06-20-enhance-prompt-and-feature-gating.md`.
+  **Training skill**: `.claude/skills/ai-system/SKILL.md`.
+- **Shipped**:
+  - **Admin AI config** (`AiSettings` + `/admin/manage-ai-settings` + `LlmConfigResolver`) —
+    LLM + web-search providers incl. **Custom API**, passed to the daemon per request; `.env` fallback.
+  - **AI skill authoring** (`POST /api/skills/author` → draft) + schema endpoint.
+  - **Reusable prompt enhancer** (`POST /api/ai/enhance-prompt` + `<EnhancePromptButton>` / `useEnhancePrompt`) —
+    auto-matches input language, mobile bottom-sheet preview.
+  - **Local skills manager** (`/admin/skill-manager`): file CRUD, **draft/publish**, category
+    classification (multi/single/unloaded), AI-author button.
+  - **Tavily web-search** helper (optional trend grounding).
+  - **ErrorSanitizer**: hide provider/model/credential leaks at every frontend boundary.
+  - **Plan feature-gating** (`Plan::capabilities` → studio "Tính năng đang bảo trì").
+  - Fixes: project-status (daemon latest-task), `model_mapping` repeater dehydrate,
+    `image_multi_panel`→`storyboard_video`, **retry cap** (`max_attempts_per_project`=5),
+    reasoning-model JSON parse (`<think>` strip).
+- **Verification**: tsc 0 (web + daemon), `php -l` clean, end-to-end via real ckey/MiniMax-M3
+  + Playwright + curl. Committed + synced to monorepo.
+- **Config note**: set a real provider/key in `/admin/manage-ai-settings` to enable AI live
+  (CKEY default is a placeholder). Reasoning models are slow — use a non-reasoning model
+  (e.g. gpt-4o-mini) for snappy prompt enhancement.
 
 ### Full-System Test (Simulation) — Pipeline Green
 - **Status**: Completed (2026-06-19)

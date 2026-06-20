@@ -57,7 +57,7 @@ Delegate with the **Task tool** (`subagent_type: <name>`). Each has a strict sco
 ## Skills (`.claude/skills/`) — load via the Skill tool when relevant
 
 `architecture` · `api-contract-daemon` · `billing-and-credits` · `job-lifecycle` ·
-`queue-and-jobs` · `realtime-reverb` · `planning` · `simulation-mode`
+`queue-and-jobs` · `realtime-reverb` · `planning` · `simulation-mode` · `ai-system`
 
 ## Commands
 
@@ -140,6 +140,10 @@ reading order. Browse the plan **folder**, open the **one** relevant file.
 | Laravel ↔ daemon contract / webhooks | `api-contract-daemon` | `backend/app/Services/DaemonClient.php`, daemon `src/` | `docs/plans/active/integration/` |
 | Daemon / providers / media gen | `architecture` | `apps/daemon/AGENTS.md`, `apps/daemon/src/` | — |
 | Auth / JWT | rule `security` | `backend/` auth controllers/middleware | — |
+| AI: LLM config / skill authoring / prompt enhance | `ai-system` | `backend/app/Support/{LlmConfigResolver,ErrorSanitizer}.php`, `app/Settings/AiSettings.php`, `app/Services/{SkillAuthoringService,PromptEnhancementService,SkillService}.php`, `apps/daemon/src/routes/media.ts` (`extractJsonFromLlm`, `/enhance-prompt`, `/skills/author`) | — |
+| Local skills (CRUD / draft-publish / categories) | `ai-system` | `backend/app/Services/SkillService.php`, `app/Filament/Pages/SkillManager.php`, `apps/skills/`, daemon `src/skills/loader.ts` | — |
+| Plan feature-gating (capabilities) | `ai-system` | `backend/app/Models/Plan.php` (`toSnapshot.capabilities`), `apps/web/src/lib/feature-capabilities.ts`, `components/feature-gate.tsx` | — |
+| AI prompt enhancer (reusable UI) | `ai-system` | `apps/web/src/hooks/use-enhance-prompt.ts`, `components/studio/enhance-prompt-button.tsx` | — |
 | Cross-layer / "how does X flow" | `architecture` | use CodeGraph MCP first | `docs/architecture.md` |
 
 ## CodeGraph MCP
