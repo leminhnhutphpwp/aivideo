@@ -6,6 +6,23 @@
 
 ## Current Sprint
 
+### Voiceover TTS availability gating — Complete
+- **Status**: Completed (2026-06-22)
+- **Worklog**: `apps/web/worklogs/2026-06-22-voiceover-availability-gating.md`.
+- **Shipped**: `GET /media/voices` now returns `available` (true iff a voice provider has
+  credentials). `VoiceSelector` shows an early warning banner + reports usability; `VoiceoverModal`
+  disables submit when no TTS is configured — instead of the old "looks fine, fails at generate"
+  gap. Voiceover stays a separate post-render flow (button only when `status==='completed'`);
+  video generation untouched.
+- **Verified**: daemon+web `tsc` 0; daemon 142 passed / web 51 passed; live `/voices`
+  `available:true` (ckey key present) + ElevenLabs empty→unusable branch.
+
+### Daemon TTS default-voice regression fix — Complete
+- **Status**: Completed (2026-06-22)
+- **Worklog**: `apps/daemon/worklogs/2026-06-22-tts-default-voice-fix.md`.
+- **Shipped**: Restored default-voice fallback in CKey + ElevenLabs TTS (regression from
+  `d5c591d` that made them throw on empty `voice`). Daemon suite back to green (142 passed).
+
 ### Studio polish: vocab single-source, searchable pickers, storyboard fixes, admin skill-manager — Complete
 - **Status**: Completed (2026-06-22)
 - **Worklogs**: `apps/daemon/worklogs/2026-06-21-studio-vocab-single-source.md`,
