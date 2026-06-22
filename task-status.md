@@ -1,10 +1,37 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-20
+> Last updated: 2026-06-22
 
 ---
 
 ## Current Sprint
+
+### Studio polish: vocab single-source, searchable pickers, storyboard fixes, admin skill-manager — Complete
+- **Status**: Completed (2026-06-22)
+- **Worklogs**: `apps/daemon/worklogs/2026-06-21-studio-vocab-single-source.md`,
+  `apps/web/worklogs/2026-06-22-storyboard-{panel-half-render-fix,ai-panel-autosave,toolbar-overflow-menu}.md`,
+  `backend/worklogs/2026-06-21-skill-manager-search-pagination.md`,
+  `backend/worklogs/2026-06-21-storyboard-retry-cap.md`,
+  `backend/worklogs/2026-06-22-standardize-user-error-messages.md`.
+- **Shipped**:
+  - **Single-source studio vocabulary** (`apps/daemon/src/media/studio-vocab.json` + `vocab.ts`)
+    consumed by `/skills/author` + new `GET /media/vocab`; web `options.ts` guarded by a
+    vocab-sync test. Fixes empty studio dropdowns from non-canonical skill presets.
+  - **12 trend skills** (image/video-direction) authored as **draft** (await admin publish).
+  - **Searchable pickers** — RichSelect inline search (>7 options), video presets search +
+    show-more, admin skill-manager search + accordion + per-group numbered pagination.
+  - **Storyboard fixes** — half-render on open (`initial={false}`), AI multi-panel **auto-saves**
+    the storyboard before generating (kills the "Vui lòng lưu storyboard trước" deadlock),
+    top toolbar decluttered into a "⋯" overflow menu, render-attempt **cap (5)** + sanitized
+    failure banner, removed the placeholder "Phân tích" action.
+  - **User-safe error messages** — `StoryboardController` routes 5xx through a `systemError()`
+    helper (generic VN message + real error logged); English 4xx messages translated to VN.
+  - **AI authoring always `draft`** (`SkillAuthoringService` force-prepend), `AiPromptCompiler`
+    now uses admin AI config via `LlmConfigResolver` (fixes "Failed to compile prompt").
+- **Commits**: apps `b3e0d14`, `bc36d13`, `8551cdb`; backend `70b0abb`, `cbeb5a1`.
+  Synced to monorepo branch (NOT promoted to `main`).
+- **Config gate**: image/video generation needs a real `DASHSCOPE_API_KEY` (intl) in
+  `apps/daemon/.env` — the committed value is a placeholder (401 until set).
 
 ### AI System (config / authoring / prompt enhance) + platform fixes — Complete
 - **Status**: Completed (2026-06-20)
@@ -88,33 +115,52 @@
 
 ## Test Health
 
+> Re-run 2026-06-22 against current code. **All three suites green.** Daemon had 5 TTS
+> failures (a regression from `d5c591d`); fixed by restoring default-voice fallback — see
+> `apps/daemon/worklogs/2026-06-22-tts-default-voice-fix.md`.
+
 ### Daemon Tests (apps/daemon/)
 ```
+Last Run:    2026-06-22 (npm test)
 Test Files:  8 passed (8)
 Tests:       142 passed, 4 skipped (146)
 Status:      ✅ All pass
 ```
+**Fixed 2026-06-22**: `d5c591d` accidentally changed CKey + ElevenLabs TTS to **throw** on an
+empty `voice` (while the sibling `openai-generic` provider it added kept a `|| 'alloy'`
+default, and the pipeline passes `voice || ''`). Restored the default-voice fallback
+(`CKEY_DEFAULT_VOICE_ID` / `ELEVENLABS_DEFAULT_VOICE_ID`) for a consistent TTS contract.
 
 ### Web Tests (apps/web/)
 ```
-Test Files:  8 passed (8)
-Tests:       117 passed (117)
+Last Run:    2026-06-22 (npm test)
+Test Files:  4 passed (4)
+Tests:       51 passed (51)
 Status:      ✅ All pass
 ```
+**Note**: vitest `include` is `src/**/*.test.{ts,tsx}` → 4 files / 51 tests today. The earlier
+"8 files / 117" baseline was inaccurate (counted files no longer present / a different config).
 
 ### Backend Tests (backend/)
 ```
-Last Run:    2026-06-19 (Docker: backend-app-1)
-Result:      447 passed · 1 skipped · 0 failed (1530 assertions)
+Last Run:    2026-06-22 (Docker: backend-app-1)
+Result:      448 passed · 1 skipped · 0 failed (1532 assertions)
 Status:      ✅ All pass
 ```
-(+2 since 445: `StoryboardRenderModelResolutionTest` — regression guard for the
-render `qualityTierCode` named-param blocker found in the full-system test.)
+(+1 since 447 — storyboard error-message coverage from the 2026-06-22 sprint.)
+
+### Snapshot (2026-06-22)
+| Suite | Result |
+|-------|--------|
+| Daemon | ✅ 142 passed · 4 skipped |
+| Web | ✅ 51 passed |
+| Backend | ✅ 448 passed · 1 skipped |
 
 **Note**: Prior drift (70 failed) cleared 2026-06-19 — see
 `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`.
 Run inside Docker: `docker exec backend-app-1 php artisan test`
 (host PHP lacks `pdo_sqlite`). The 1 skip is intentional (null-user FK case).
+The app container needs `composer install` (vendor is an anon volume) before tests run.
 
 ---
 
