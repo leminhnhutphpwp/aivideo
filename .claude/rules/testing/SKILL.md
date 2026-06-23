@@ -71,7 +71,7 @@ it('creates a render job', function() {
 - User accounts, credits, projects are real test data — clearing wastes time.
 - Only run `db:seed --class=SpecificSeeder` when adding NEW seed data.
 - Target tests: `--filter="RenderJobPipelineTest|RenderJobTest"` (19 tests) — green
-- ✅ Full suite (2026-06-22): **448 passed / 1 skipped / 0 failed** — green (re-run 2026-06-22; +1 since the 447 baseline). Daemon suite also green (142 passed / 4 skipped) after the 2026-06-22 TTS default-voice fix; web 51 passed. Prior drift (70 failed) cleared 2026-06-19. See root `task-status.md` → Test Health and `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md` before assuming a red suite is your regression.
+- ✅ Full suite (2026-06-23): **450 passed / 1 skipped / 0 failed** — green (re-run 2026-06-23; +2 since the 448 baseline = multi_scene store/render block tests). Daemon suite also green (142 passed / 4 skipped) after the 2026-06-22 TTS default-voice fix; web 51 passed. Prior drift (70 failed) cleared 2026-06-19. See root `task-status.md` → Test Health and `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md` before assuming a red suite is your regression.
 
 ## Running Tests
 

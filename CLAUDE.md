@@ -85,9 +85,9 @@ docker exec backend-app-1 php artisan test --filter="RenderJobPipelineTest|Rende
 node apps/daemon/scripts/verify-media-models.mjs   # model sync
 ```
 
-> ✅ **Test suite status (2026-06-22):** full `php artisan test` is **green —
-> 448 passed / 1 skipped / 0 failed** (re-run 2026-06-22; +1 since 447 = storyboard
-> error-message coverage). The prior drift (70 failed) was cleared on
+> ✅ **Test suite status (2026-06-23):** full `php artisan test` is **green —
+> 450 passed / 1 skipped / 0 failed** (re-run 2026-06-23; +2 since 448 = multi_scene
+> store/render block tests). The prior drift (70 failed) was cleared on
 > 2026-06-19; root cause was `AiPromptCompiler` fataling on a null `CKEY_API_KEY`
 > (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`). +2 from a
 > full-system test that found & fixed a render blocker (`qualityTierCode` named-param
@@ -106,6 +106,7 @@ node apps/daemon/scripts/verify-media-models.mjs   # model sync
 ## Domain rules (high-value, see `.claude/skills/` for detail)
 
 - **Render modes**: `multi_scene` (per-scene skills, FFmpeg concat) · `single_flow` (one compiled prompt, no concat) · `storyboard_image` (multi-panel image → R2V).
+  - ⚠️ **`multi_scene` ("Ghép cảnh") is DISABLED for launch** (focus = One-Shot + Multi-Panel). Backend hard-blocks store/update/render of multi_scene (422) via `config('storyboard.multi_scene_enabled')` (env `STORYBOARD_MULTI_SCENE_ENABLED`, default false) — see `StoryboardController::guardRenderMode()`. The builder toggle shows it as "Sắp ra mắt" via `MULTI_SCENE_ENABLED` in `apps/web/.../storyboard/flow/shared/constants.ts`. **To re-enable**: set the backend env true AND flip the web constant true (both). The multi_scene render path / service / job code is left intact.
 - **Reference media** (`driving_audio`, `first/last_frame`): storyboard-level in One-Shot, per-scene in multi-scene. `buildPayload()` routes by mode.
 - **Model params**: ALWAYS check official DashScope / Model Studio docs before adding/changing model parameters — never assume. https://help.aliyun.com/zh/model-studio/
 - **Pricing**: `PricingCalculator::calculate()` is the single source (backend + frontend must agree). Durations from `DurationTier::active()` — never hardcode. `credits = ceil(VND × exchange_rate)`.

@@ -6,6 +6,18 @@
 
 ## Current Sprint
 
+### Disable "Ghép cảnh" (multi_scene) for launch — Complete
+- **Status**: Completed (2026-06-23)
+- **Agent**: @backend + @web
+- **Worklog**: `backend/worklogs/2026-06-23-disable-multi-scene.md` (canonical, cross-layer).
+- **Shipped**: multi_scene render mode gated off for initial launch (focus One-Shot + Multi-Panel).
+  Builder toggle shows **"Sắp ra mắt"** (disabled); `?mode=multi` falls back to One-Shot. Backend
+  **hard-blocks** store/update/render of multi_scene (422) via `config('storyboard.multi_scene_enabled')`
+  / env `STORYBOARD_MULTI_SCENE_ENABLED` + `StoryboardController::guardRenderMode()`. Web mirror:
+  `MULTI_SCENE_ENABLED` in `flow/shared/constants.ts`. Render path/service/job left intact.
+- **Re-enable**: backend env true **AND** web constant true (see worklog + `config/storyboard.php` comment).
+- **Verified**: backend full suite **450 passed / 1 skipped** (+2 block tests); web `tsc` 0, `vitest` 51.
+
 ### Storyboard default render mode = One-Shot + toggle reorder — Complete
 - **Status**: Completed (2026-06-23)
 - **Agent**: @web
