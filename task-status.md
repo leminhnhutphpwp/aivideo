@@ -1,10 +1,22 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-22
+> Last updated: 2026-06-23
 
 ---
 
 ## Current Sprint
+
+### Maintenance mode toggle (dashboard / landing) — Complete
+- **Status**: Completed (2026-06-23)
+- **Agent**: @web
+- **Worklog**: `apps/web/worklogs/2026-06-23-maintenance-mode-toggle.md`.
+- **Shipped**: Two independent runtime env switches — `MAINTENANCE_DASHBOARD` /
+  `MAINTENANCE_LANDING` (server-side, `.env`, restart-to-apply, no rebuild). New
+  `src/middleware.ts` rewrites gated routes to a polished `/maintenance` page (HTTP 503,
+  area-specific VN copy, brand decor). Dashboard = app route prefixes; landing = `/`. Auth +
+  `/api` + `/maintenance` stay reachable.
+- **Verified**: web `tsc` 0; live (both ON) `/`, `/dashboard`, `/studio/*` → 503, `/login` +
+  `/maintenance` → 200; independence (landing-only ON → `/dashboard` passes); both screenshots reviewed.
 
 ### Voiceover TTS availability gating — Complete
 - **Status**: Completed (2026-06-22)
