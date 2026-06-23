@@ -6,6 +6,15 @@
 
 ## Current Sprint
 
+### Storyboard default render mode = One-Shot + toggle reorder — Complete
+- **Status**: Completed (2026-06-23)
+- **Agent**: @web
+- **Worklog**: `apps/web/worklogs/2026-06-23-storyboard-default-render-mode.md`.
+- **Shipped**: New storyboard projects now default to **One-Shot** (`single_flow`) instead of
+  Ghép cảnh (`multi_scene`); mode toggle reordered to **One-Shot → Multi-Panel → Ghép cảnh**.
+  Existing storyboards still restore their saved `render_mode` (`use-load-storyboard.ts:96`).
+- **Verified**: web `tsc` 0; `vitest` 51 passed (render-mode-provider 18/18, default-assertions updated).
+
 ### Maintenance mode toggle (dashboard / landing) — Complete
 - **Status**: Completed (2026-06-23)
 - **Agent**: @web
