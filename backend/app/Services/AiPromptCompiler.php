@@ -105,88 +105,88 @@ class AiPromptCompiler
 
     protected function buildSystemPrompt(Storyboard $storyboard, $scenes): string
     {
-        return "Bạn là một nhà biên kịch điện ảnh chuyên nghiệp. Nhiệm vụ của bạn là viết MỘT đoạn mô tả liền mạch (ONE continuous narrative) cho một video được tạo bởi AI.
+        return "You are a professional cinematic screenwriter. Your task is to write ONE continuous narrative for an AI-generated video.
 
-QUAN TRỌNG:
-- Viết thành MỘT đoạn văn duy nhất, liền mạch, không ngắt quãng.
-- TUYỆT ĐỐI KHÔNG dùng các cụm như \"Cảnh 1\", \"Cảnh 2\", \"Scene 1\", \"Scene 2\".
-- Tất cả các yếu tố (góc máy, ánh sáng, phong cách, tâm trạng, lời dẫn) phải được ĐAN XEN tự nhiên vào dòng chảy của câu chuyện.
-- Mô tả chuyển động camera như một phần của hành động (vd: \"máy quay từ từ zoom cận vào khuôn mặt cô ấy khi cô ấy nhận ra sự thật\").
-- Kết hợp ánh sáng và tâm trạng vào mô tả cảnh (vd: \"dưới ánh đèn neon tím lạnh lẽo, không khí căng thẳng bao trùm\").
-- Viết bằng tiếng Việt.
-- Độ dài: phù hợp với tổng thời lượng video khoảng {$scenes->sum('duration_seconds')} giây.
-- Trả về CHỈ nội dung prompt đã biên dịch, không thêm bất kỳ lời dẫn nào khác.";
+IMPORTANT:
+- Write it as ONE single, continuous paragraph with no breaks.
+- ABSOLUTELY DO NOT use phrases like \"Scene 1\", \"Scene 2\", \"Cảnh 1\", \"Cảnh 2\".
+- Weave all elements (camera angle, lighting, style, mood, narration) naturally into the flow of the story.
+- Describe camera movement as part of the action (e.g. \"the camera slowly zooms in on her face as she realizes the truth\").
+- Blend lighting and mood into the scene description (e.g. \"under cold purple neon light, a tense atmosphere fills the room\").
+- Write in ENGLISH (video generation models follow English best).
+- Length: appropriate for a total video duration of about {$scenes->sum('duration_seconds')} seconds.
+- Return ONLY the compiled prompt content, with no extra preamble.";
     }
 
     protected function buildUserContent(Storyboard $storyboard, $scenes): string
     {
         $parts = [];
-        $parts[] = "TIÊU ĐỀ: {$storyboard->title}";
+        $parts[] = "TITLE: {$storyboard->title}";
         if ($storyboard->description) {
-            $parts[] = "MÔ TẢ: {$storyboard->description}";
+            $parts[] = "DESCRIPTION: {$storyboard->description}";
         }
 
         if ($storyboard->render_mode === 'single_flow') {
-            $parts[] = "\n--- HƯỚNG DẪN CHUNG (ÁP DỤNG TOÀN BỘ VIDEO) ---";
+            $parts[] = "\n--- GLOBAL STYLE GUIDE (APPLIES TO THE WHOLE VIDEO) ---";
             if ($storyboard->camera_movement) {
                 $parts[] = "Camera: {$storyboard->camera_movement}";
             }
             if ($storyboard->style) {
-                $parts[] = "Phong cách: {$storyboard->style}";
+                $parts[] = "Style: {$storyboard->style}";
             }
             if ($storyboard->mood) {
-                $parts[] = "Tâm trạng: {$storyboard->mood}";
+                $parts[] = "Mood: {$storyboard->mood}";
             }
             if ($storyboard->lighting) {
-                $parts[] = "Ánh sáng: {$storyboard->lighting}";
+                $parts[] = "Lighting: {$storyboard->lighting}";
             }
             if ($storyboard->narration) {
-                $parts[] = "Lời dẫn: {$storyboard->narration}";
+                $parts[] = "Narration: {$storyboard->narration}";
             }
         }
 
         if ($storyboard->shot_type === 'multi' && $storyboard->multi_panel_image) {
-            $parts[] = "\nMột ảnh truyện tranh nhiều khung (multi-panel storyboard) đã được tải lên làm tài liệu tham khảo. Prompt nên mô tả hành động và chuyển động camera của từng khung theo trình tự.";
+            $parts[] = "\nA multi-panel storyboard image has been provided as a reference. The prompt should describe the action and camera movement of each panel in order.";
         }
 
-        $parts[] = "\nDANH SÁCH CÁC PHÂN CẢNH (theo thứ tự):\n";
+        $parts[] = "\nSCENE LIST (in order):\n";
 
         foreach ($scenes as $i => $scene) {
             $n = $i + 1;
-            $parts[] = "--- Phân cảnh {$n} ---";
+            $parts[] = "--- Scene {$n} ---";
             $parts[] = "Prompt: {$scene->prompt}";
             if ($scene->camera_movement) {
-                $parts[] = "Chuyển động camera: {$scene->camera_movement}";
+                $parts[] = "Camera movement: {$scene->camera_movement}";
             }
             if ($scene->style) {
-                $parts[] = "Phong cách: {$scene->style}";
+                $parts[] = "Style: {$scene->style}";
             }
             if ($scene->mood) {
-                $parts[] = "Tâm trạng: {$scene->mood}";
+                $parts[] = "Mood: {$scene->mood}";
             }
             if ($scene->lighting) {
-                $parts[] = "Ánh sáng: {$scene->lighting}";
+                $parts[] = "Lighting: {$scene->lighting}";
             }
             if ($scene->edge_label) {
-                $parts[] = "Chuyển tiếp: {$scene->edge_label}";
+                $parts[] = "Transition: {$scene->edge_label}";
             }
             if ($scene->narration) {
-                $parts[] = "Lời dẫn: {$scene->narration}";
+                $parts[] = "Narration: {$scene->narration}";
             }
             if ($scene->duration_seconds) {
-                $parts[] = "Thời lượng: {$scene->duration_seconds}s";
+                $parts[] = "Duration: {$scene->duration_seconds}s";
             }
         }
 
         $voiceNote = '';
         if ($storyboard->voice) {
-            $voiceNote = "\nVideo có giọng đọc: {$storyboard->voice}.";
+            $voiceNote = "\nThe video has a voiceover: {$storyboard->voice}.";
         }
         if ($storyboard->voice_mood) {
-            $voiceNote .= " Tông giọng: {$storyboard->voice_mood}.";
+            $voiceNote .= " Voice tone: {$storyboard->voice_mood}.";
         }
 
-        $parts[] = "\nHãy viết MỘT đoạn mô tả video liền mạch duy nhất, kết hợp tất cả các phân cảnh trên thành một câu chuyện điện ảnh liên tục, không đánh số cảnh." . $voiceNote;
+        $parts[] = "\nWrite ONE single continuous video description that combines all the scenes above into one continuous cinematic story, without numbering the scenes." . $voiceNote;
 
         return implode("\n", $parts);
     }
@@ -204,53 +204,55 @@ QUAN TRỌNG:
         }
 
         $sceneCount = $scenes->count();
-        $styleLine = $storyboard->style ?: 'điện ảnh chân thực (photorealistic cinematic) — mặc định khi project chưa chọn style';
+        $styleLine = $storyboard->style ?: 'photorealistic cinematic (default when the project has no chosen style)';
 
+        // Steering prompt is ENGLISH (models follow it better); only the user's own input
+        // (title, description, scene prompts) is embedded verbatim.
         $parts = [];
-        $parts[] = "Bạn là một đạo diễn hình ảnh. Nhiệm vụ: tạo MỘT prompt (tiếng Việt) mô tả MỘT bức ảnh bố cục nhiều khung (multi-panel grid), MỖI khung là một KHUNG HÌNH (keyframe) của một phân cảnh — dùng làm REFERENCE cho AI sinh VIDEO. Phong cách / bối cảnh / nhân vật của các khung PHẢI theo ĐÚNG style của project (xem HƯỚNG DẪN PHONG CÁCH bên dưới): project ảnh thật → khung ảnh thật; project anime/hoạt hình → khung anime/hoạt hình; oil painting / cyberpunk / v.v. → đúng style đó. Đây KHÔNG phải 'storyboard sketch có ghi chú' — mà là các khung hình thành phẩm đẹp, đúng phong cách project.";
+        $parts[] = "You are a film image director. Task: write ONE image-generation prompt (in ENGLISH) describing a SINGLE multi-panel grid image, where EACH panel is a keyframe of one scene — used as a REFERENCE for AI video generation. The visual style / setting / characters of the panels MUST follow the project's style (see STYLE GUIDE below): a realistic project -> realistic panels; an anime/cartoon project -> anime/cartoon panels; oil painting / cyberpunk / etc. -> that exact style. This is NOT a 'storyboard sketch with notes' — it is a set of finished, polished frames in the project's style.";
         $parts[] = "";
-        $parts[] = "TIÊU ĐỀ: {$storyboard->title}";
+        $parts[] = "TITLE: {$storyboard->title}";
         if ($storyboard->description) {
-            $parts[] = "MÔ TẢ: {$storyboard->description}";
+            $parts[] = "DESCRIPTION: {$storyboard->description}";
         }
         $parts[] = "";
-        $parts[] = "YÊU CẦU BỐ CỤC:";
-        $parts[] = "- Bức ảnh duy nhất, chia thành ĐÚNG {$sceneCount} khung (bằng số phân cảnh), theo trình tự thời gian từ trái sang phải, trên xuống dưới, cách nhau bởi gutter mảnh.";
-        $parts[] = "- Mỗi khung là một keyframe chất lượng cao của một phân cảnh.";
-        $parts[] = "- Phong cách / bối cảnh / nhân vật / bảng màu NHẤT QUÁN xuyên suốt tất cả các khung, theo ĐÚNG style project (mục HƯỚNG DẪN PHONG CÁCH). KHÔNG tự đổi sang style khác giữa các khung.";
-        $parts[] = "- TUYỆT ĐỐI KHÔNG: chữ, số, nhãn, caption, ghi chú kỹ thuật, logo, tiêu đề, số thứ tự khung, khung viền có chữ. Chỉ có HÌNH.";
-        $parts[] = "- Lý do bỏ chữ + giữ đúng style: ảnh là reference cho AI sinh video → chữ sẽ bị 'vẽ' vào video, và style của ảnh quyết định style video (ảnh thật→video thật, anime→video anime).";
+        $parts[] = "LAYOUT REQUIREMENTS:";
+        $parts[] = "- A single image divided into EXACTLY {$sceneCount} panels (equal to the number of scenes), in time order left-to-right, top-to-bottom, separated by thin gutters.";
+        $parts[] = "- Each panel is a high-quality keyframe of one scene.";
+        $parts[] = "- Style / setting / characters / color palette CONSISTENT across all panels, following the project style (STYLE GUIDE). Do NOT switch styles between panels.";
+        $parts[] = "- ABSOLUTELY NO: text, numbers, labels, captions, technical notes, logos, titles, panel numbers, framed borders with text. Image only.";
+        $parts[] = "- Reason (no text + keep style): this image is a reference for AI video generation -> any text gets baked into the video, and the image's style dictates the video's style (realistic image -> realistic video, anime -> anime video).";
         $parts[] = "";
 
         if ($storyboard->render_mode === 'single_flow' || $storyboard->render_mode === 'storyboard_image') {
-            $parts[] = "HƯỚNG DẪN PHONG CÁCH (BẮT BUỘC áp cho MỌI khung, giữ nhất quán):";
-            $parts[] = "- Phong cách hình ảnh: {$styleLine}";
-            if ($storyboard->camera_movement) $parts[] = "- Góc máy: {$storyboard->camera_movement}";
-            if ($storyboard->mood) $parts[] = "- Tâm trạng: {$storyboard->mood}";
-            if ($storyboard->lighting) $parts[] = "- Ánh sáng: {$storyboard->lighting}";
+            $parts[] = "STYLE GUIDE (MANDATORY for every panel, keep consistent):";
+            $parts[] = "- Visual style: {$styleLine}";
+            if ($storyboard->camera_movement) $parts[] = "- Camera: {$storyboard->camera_movement}";
+            if ($storyboard->mood) $parts[] = "- Mood: {$storyboard->mood}";
+            if ($storyboard->lighting) $parts[] = "- Lighting: {$storyboard->lighting}";
             $parts[] = "";
         }
 
-        $parts[] = "NỘI DUNG TỪNG KHUNG (theo thứ tự):";
+        $parts[] = "SCENE CONTENT (in order):";
 
         foreach ($scenes as $i => $scene) {
             $n = $i + 1;
             $parts[] = "";
-            $parts[] = "Khung {$n}:";
-            $parts[] = "- Mô tả: {$scene->prompt}";
+            $parts[] = "Panel {$n}:";
+            $parts[] = "- Description: {$scene->prompt}";
             if ($scene->duration_seconds) {
-                $parts[] = "- Thời lượng: {$scene->duration_seconds}s";
+                $parts[] = "- Duration: {$scene->duration_seconds}s";
             }
             if ($scene->camera_movement) {
-                $parts[] = "- Góc máy: {$scene->camera_movement}";
+                $parts[] = "- Camera: {$scene->camera_movement}";
             }
         }
 
         $parts[] = "";
-        $parts[] = "Hãy viết MỘT prompt duy nhất (bằng tiếng Việt) mô tả bức ảnh multi-panel này cho AI image generation. Bao gồm: bố cục lưới ĐÚNG {$sceneCount} khung, mô tả từng khung như một keyframe, và phong cách / bối cảnh NHẤT QUÁN theo ĐÚNG style project ở mục HƯỚNG DẪN PHONG CÁCH (KHÔNG tự đổi thành style khác). Kết thúc prompt bằng cụm nhấn mạnh: 'KHÔNG chữ KHÔNG số KHÔNG nhãn, giữ nguyên phong cách {$styleLine} xuyên suốt tất cả các khung'. KHÔNG dùng từ 'khung 1', 'khung 2' trong prompt cuối — mô tả liền mạch.";
+        $parts[] = "Write ONE single image-generation prompt (in ENGLISH) describing this multi-panel image. Include: the grid layout of EXACTLY {$sceneCount} panels, a description of each panel as a keyframe, and a CONSISTENT style / setting following the project style in the STYLE GUIDE (do NOT change to another style). End the prompt with the emphasis: 'no text, no numbers, no labels; keep the {$styleLine} style consistent across all panels'. Do NOT use words like 'panel 1', 'panel 2' in the final prompt — describe it as one flowing prompt.";
 
         if ($storyboard->multi_panel_image) {
-            $parts[] = "\nLƯU Ý: Có thể dùng ảnh multi-panel hiện tại ({$storyboard->multi_panel_image}) làm style reference nếu muốn.";
+            $parts[] = "\nNOTE: You may use the current multi-panel image ({$storyboard->multi_panel_image}) as a style reference if helpful.";
         }
 
         return implode("\n", $parts);
