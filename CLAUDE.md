@@ -85,13 +85,12 @@ docker exec backend-app-1 php artisan test --filter="RenderJobPipelineTest|Rende
 node apps/daemon/scripts/verify-media-models.mjs   # model sync
 ```
 
-> ✅ **Test suite status (2026-06-23):** full `php artisan test` is **green —
-> 450 passed / 1 skipped / 0 failed** (re-run 2026-06-23; +2 since 448 = multi_scene
-> store/render block tests). The prior drift (70 failed) was cleared on
-> 2026-06-19; root cause was `AiPromptCompiler` fataling on a null `CKEY_API_KEY`
-> (see `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`). +2 from a
-> full-system test that found & fixed a render blocker (`qualityTierCode` named-param
-> in `StoryboardRenderer` → see `backend/worklogs/2026-06-19-full-system-test-issues/`).
+> ✅ **Test suite status (2026-07-18):** full `php artisan test` is **green —
+> 504 passed / 1 skipped / 0 failed** (daemon 155 passed / 4 skipped; web 51 passed).
+> Grew from the 450 baseline (2026-06-23) via the 2026-07-17/18 launch-readiness work:
+> real image-provider integration (`wan2.7-image`), moderation + render-quota guards,
+> SecretGuard, admin ReportResource, image WebP derivative, and the multi-dimension
+> security/logic/perf audit fixes (see `backend/worklogs/2026-07-18-*`).
 > If you see a red full-suite again, check this baseline before assuming it's your regression.
 
 ## Conventions

@@ -151,7 +151,12 @@ alerts). Bring it up independently with its own compose file once the app is hea
 - [ ] All secrets set (no `change-me`/empty) — see §4. **Blocker.**
 - [ ] Real AI provider keys configured and one live render verified.
 - [ ] Decide MinIO vs R2 (§6) and align all services.
-- [ ] Database backups (mysql volume) + a tested restore.
+- [ ] Database backups + a tested restore. **Use `scripts/backup.sh`** (dumps MySQL from the
+      compose `mysql` service, gzips to `./backups`, rotates by `RETENTION_DAYS`, optional offsite
+      via `RCLONE_REMOTE`). Schedule via host crontab, e.g. daily at 03:00 with 14-day retention +
+      offsite to R2:
+      `0 3 * * * cd /path/to/AI-Video-Platform && RETENTION_DAYS=14 RCLONE_REMOTE=r2:apaiplatform-backups bash scripts/backup.sh db >> scripts/logs/backup.log 2>&1`
+      Then **verify** once: `bash scripts/backup.sh restore backups/db-<tag>.sql.gz` into a staging DB.
 - [ ] Log rotation / disk monitoring for `caddy_data`, `mysql_data`, `od_data`, MinIO.
 - [ ] Load/sizing check against the `mem_limit`/`cpus` in compose.
 - [ ] CI/CD (currently manual `up --build`).

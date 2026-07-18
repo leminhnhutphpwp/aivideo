@@ -21,6 +21,7 @@ coverage/
 .nyc_output/
 .od
 .codegraph/
+backups/
 apps/
 backend/
 colab-demo.ipynb

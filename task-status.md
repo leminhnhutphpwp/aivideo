@@ -1,10 +1,116 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-06-23
+> Last updated: 2026-07-18
 
 ---
 
 ## Current Sprint
+
+### Landing (/) SEO / GEO / content polish — Complete
+- **Status**: Completed (2026-07-18)
+- **Agent**: @web
+- **Worklog**: `apps/web/worklogs/2026-07-18-landing-seo-geo-content.md`
+- **Shipped**: Fixed duplicate `<h1>` (wired dead `hideText` on hero/reel/intro + demoted
+  preloader h1) → exactly 1 h1. JSON-LD nâng lên `@graph` (Organization + WebSite +
+  SoftwareApplication, `@id`-linked, truthful featureList, no fabricated sameAs/rating).
+  New server-rendered FAQ section (`#faq`, `<details>`) + FAQPage schema (GEO). New
+  generated OG image `app/opengraph-image.tsx` (PNG 1200×630, replaces 404 `/og-image.svg`)
+  + `twitter-image.tsx`. Meta description ≤160 + VN keywords, OG/Twitter fallback to
+  generated PNG (backend `og_image` still wins). `public/llms.txt` for AI crawlers.
+  robots/sitemap cleaned (auth routes disallowed + dropped from sitemap; legal pages added).
+  Backend seo/landing settings NOT overridden.
+- **Verified**: tsc 0; web tests **56/56** (≥ baseline 51). Live :3100 — 1 h1 / 11 h2 / 17 h3;
+  2 JSON-LD blocks parse (@graph + FAQPage); og/twitter image HTTP 200 image/png 1200×630
+  (VN diacritics correct); robots/sitemap/llms.txt 200.
+- **Needs owner**: real social links (`sameAs`), legalName, real Twitter handle; verify stats
+  numbers (not in schema).
+
+### Landing (/) scroll-snap jerk fix + hero mobile hardening — Complete
+- **Status**: Completed (2026-07-18)
+- **Agent**: @web
+- **Worklog**: `apps/web/worklogs/2026-07-18-landing-scroll-snap-jerk-fix.md`
+- **Shipped**: Fixed "cuộn bị giật lên/xuống rồi mới chuyển section" on the full-page snap.
+  Root cause: `ScrollSnapController.handleWheel` let sub-threshold wheel ticks leak to native
+  scroll (no `preventDefault`) → page drifted then the GSAP tween yanked it back (worst on
+  trackpads). Now commits-then-blocks: `preventDefault` on all wheel events once a snap is
+  committed, native scroll kept only for tall-section pass-through + top/bottom boundaries
+  (footer reachable). Added `prefers-reduced-motion` gate. Hero 2nd title line wraps on
+  mobile (`text-balance lg:whitespace-nowrap` + breakable typewriter spans).
+- **Verified**: tsc 0; web tests 51/51 (baseline held). Live Playwright 1440/768/375 — 5
+  desktop transitions monotonic 1-section each (`maxReversalPx:0`); trackpad-burst sim (18×
+  deltaY 9) = 1 section, no drift; `overflowX:0` all breakpoints; mobile native scroll intact.
+
+### Skill-author AUTO-VERIFY: sample render + vision style-match — Complete
+- **Status**: Completed (2026-07-18)
+- **Agent**: @daemon
+- **Worklog**: `apps/daemon/worklogs/2026-07-18-skill-author-auto-verify.md`.
+- **Shipped**:
+  - `POST /api/media/skills/author` now closes the "does this skill produce the intended
+    style?" loop automatically: after the LLM authors a skill it renders ONE sample image
+    with the skill's own `prompt_template` and asks the moderation vision model for a
+    style-match verdict, returned as a NEW optional `sample: { imageUrl, model, styleMatch:{
+    match, score, notes } }` field (or `{ degraded, error }`). **Fail-open** — never blocks
+    the draft. `skill` contract unchanged.
+  - Structural example the AI copies is now `exampleId` (backend override) → `featured:true`
+    → `samples[0]`, so drafts inherit a QUALITY skill's shape.
+  - Config: `SKILL_AUTHOR_AUTOVERIFY_ENABLED` (default on when an image key exists),
+    `SKILL_AUTHOR_VERIFY_MODEL` (override the sample image model).
+- **Verified**: daemon suite **291 passed / 4 skipped / 0 failed** (279 baseline + 12 new);
+  tsc 0. Real E2E on the live container (real keys): authored `neon-cyberpunk-rain`, sample
+  via `qwen-image-max`, real vision verdict `match:true score:0.95`.
+- **Backend handoff**: read/persist the optional `sample` (image + verdict) for admin review;
+  treat as optional/degraded-tolerant. May pass `exampleId`. To use real sample gen on this
+  deployment, set `SKILL_AUTHOR_VERIFY_MODEL` to a qwencloud model (registry default
+  `gpt-image-2`/ckey key is invalid here) — a config decision, not code.
+
+### Skill authoring hardening: required-key validation + video-marketing-psychology category — Complete
+- **Status**: Completed (2026-07-18)
+- **Agent**: @backend
+- **Worklog**: `backend/worklogs/2026-07-18-skill-authoring-hardening.md`.
+- **Shipped**:
+  - `SkillService::save()` now enforces per-category **REQUIRED_KEYS** after YAML parse —
+    AI drafts AND manual admin edits missing core keys (`prompt_template`, `style_keywords`,
+    `default_negative`, …) are rejected with a clear VN message listing the missing keys, no
+    broken file written. Keyed by `collectionFor()` so `video-storyboard/types/*` uses its
+    own ruleset.
+  - `video-marketing-psychology` registered in `DAEMON_CATEGORIES` as `single` → classifies
+    correctly instead of `unloaded`.
+- **Verified**: backend full suite **517 passed / 1 skipped / 0 failed** (511 baseline + 6 new).
+- **Daemon handoff**: vocab constraint for storyboard-type `*_hints` (Task 3) is a daemon-only
+  change in `media.ts` (~L304); backend already passes the correct `category`. Daemon also owns
+  the `video-marketing-psychology` `single` loader.
+
+### Image path launch-hardening: feed preview derivative + edit-guard — Complete
+- **Status**: Completed (2026-07-17)
+- **Agent**: @backend
+- **Worklog**: `backend/worklogs/2026-07-17-image-preview-derivative-and-edit-guard.md`.
+- **Shipped**:
+  - **IMG#1** — image jobs now get a web-optimized WebP preview (ffmpeg, ≤1280px, q80) on
+    completion; `render_job.thumbnail_path` points at it so the community feed serves the
+    small file instead of the raw 6-9MB PNG (original kept for download). Config:
+    `assets.image_preview.*`. Frontend card already reads `thumbnail_path` (no web change).
+  - **IMG#2** — `DaemonProxyController` now blocks image edit/i2i/inpaint routed into a
+    t2i-only model (e.g. Wan2.7_Image) with `422 image_edit_unavailable` (VN message) BEFORE
+    job create / credit reserve, instead of a downstream provider 404.
+- **Verified**: backend full suite **465 passed / 1 skipped / 0 failed** (461 baseline + 4 new).
+
+### Launch guards: content moderation + daily render cap + secret validation — Complete
+- **Status**: Completed (2026-07-17)
+- **Agent**: @backend
+- **Worklog**: `backend/worklogs/2026-07-17-launch-guards-moderation-quota-secrets.md`.
+- **Shipped**:
+  - **WS3.2 moderation** — `ContentFilterService::containsProhibitedContent()` (curated
+    NSFW/deepfake/gore/illegal list) now gates video prompts (RenderJob store, Storyboard
+    store/update) → 422 `unsafe_content`, and community `publish()` (title/prompt/tags) →
+    422. Negative prompts intentionally not moderated. Comment filter unchanged.
+  - **WS1.3 daily render cap** — new `RenderQuotaService` + `Plan.max_renders_per_day`
+    (migration + seeder: free 15, pro 100, studio unlimited). Enforced in RenderJob store &
+    Storyboard render (first render only) → 429 `daily_render_limit`. Retries excluded.
+  - **WS2.3 secret guard** — `App\Support\SecretGuard` aborts **production** boot on empty/
+    placeholder JWT_SECRET or DAEMON_WEBHOOK_SECRET (fail-closed; local/testing unaffected).
+- **Verified**: backend full suite **459 passed / 1 skipped / 0 failed** (450 baseline + 9 new).
+- **Open gaps (owner)**: no admin/Filament UI to review reports or force-unpublish reported
+  assets (ReportController only records); prohibited-word list is a starter set. See worklog.
 
 ### Disable "Ghép cảnh" (multi_scene) for launch — Complete
 - **Status**: Completed (2026-06-23)

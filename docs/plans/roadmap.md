@@ -46,8 +46,8 @@
 | # | Task | Effort | Scope | Notes |
 |---|------|--------|-------|-------|
 | 2.0 | Revert storyboard publish fix | 3h | backend+web | Architecture correction |
-| 2.1 | Forgot password flow | 4h | web+backend | Backend endpoints done, UI needed |
-| 2.2 | Email verification flow | 4h | web+backend | Backend endpoints done, UI needed |
+| 2.1 | Forgot password flow | ✅ Done | web+backend | UI wired: `apps/web/src/app/forgot-password/page.tsx` → `laravel.forgotPassword` |
+| 2.2 | Email verification flow | ✅ Done | web+backend | UI wired: `apps/web/src/app/verify-email/page.tsx` → `laravel.verifyEmail` |
 | 2.3 | Character animation feature | 6h | daemon+backend+web | Phase 2 (Phase 1 done) |
 | 2.4 | Video editing API gaps | 8h | backend+web | Gap analysis from worklog |
 | 2.5 | Landing page settings | 6h | backend+web | 44 fields, admin tabs, server-render SEO |
