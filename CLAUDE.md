@@ -155,9 +155,9 @@ After a Claude Code **restart** + approving the server, `mcp__codegraph__*` tool
 callers, callees, impact — they're far cheaper on context than reading whole files. Grep/Glob/Read
 remain valid fallbacks. Index lives at `.codegraph/codegraph.db` (~838 files, rebuilt 2026-06-11).
 
-> ⚠️ **Do NOT run `codegraph sync` / `codegraph index` from the project root.** The root
-> `.gitignore` ignores `apps/` and `backend/` (they're tracked separately), and CodeGraph honors
-> gitignore — a plain sync/index will **wipe** the index down to ~8 root files. The MCP server runs
-> with `--no-watch` for exactly this reason (the auto-sync watcher would corrupt the index on the
-> first file change). To rebuild manually: temporarily remove the `apps/` + `backend/` lines from
-> `.gitignore`, run `codegraph index -f`, then restore `.gitignore` (verify md5 unchanged).
+> **Monorepo (since 2026-07-19):** `apps/` and `backend/` are now tracked by the **single root
+> git repo** — no longer separate nested repos. (Old nested `.git` histories were backed up to
+> `../AI-Video-Platform-gitrepos-bak-20260719/`.) The root `.gitignore` no longer ignores
+> `apps/` / `backend/`, so `codegraph index -f` from the root now indexes the whole tree
+> correctly — the previous "wipe to ~8 files" caveat no longer applies. The MCP server still runs
+> with `--no-watch` (the auto-sync watcher can corrupt the index on the first file change).
