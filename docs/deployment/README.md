@@ -111,6 +111,12 @@ Generate secrets with `openssl rand -base64 32`. Never commit `.env`.
 
 ```bash
 cd backend
+# Project name — scopes ALL containers/networks/volumes so multiple deployments can
+# coexist on ONE host without colliding. Set STACK_NAME per deployment (unique per
+# project/tenant); it defaults to "aivideo" if unset. Put it in backend/.env so every
+# subsequent `docker compose` command targets the same stack.
+echo "STACK_NAME=aivideo-prod" >> .env   # or aivideo-clientA, etc.
+
 # build images and start everything
 DOMAIN=$DOMAIN docker compose -f docker-compose.yml up -d --build
 
@@ -118,6 +124,12 @@ DOMAIN=$DOMAIN docker compose -f docker-compose.yml up -d --build
 # Watch it come up healthy:
 docker compose -f docker-compose.yml ps
 ```
+
+> **Multi-deployment on one server**: give each deployment a distinct `STACK_NAME`
+> (e.g. `aivideo-clientA`, `aivideo-clientB`). Containers become `aivideo-clientA-app-1`,
+> volumes `aivideo-clientA_mysql_data`, etc. — fully isolated. No service is shared; each
+> stack runs its own mysql/redis/minio/caddy. Renaming an existing stack's `STACK_NAME`
+> orphans its named volumes (data), so pick it once at first deploy.
 
 ### Post-deploy verification
 - `https://$DOMAIN/api/health` → `200`.

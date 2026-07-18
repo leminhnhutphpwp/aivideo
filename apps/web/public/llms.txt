@@ -1,0 +1,39 @@
+# Wavise Studio
+
+> Wavise Studio là nền tảng tạo video ngắn bằng AI (prompt-first). Người dùng nhập ý tưởng, kịch bản hoặc ảnh, hệ thống tự dựng thành video hoàn chỉnh kèm lồng tiếng AI để đăng lên TikTok, Reels và YouTube Shorts. Giao diện chính bằng tiếng Việt.
+
+## Tổng quan sản phẩm
+
+- Loại: nền tảng SaaS tạo video AI (AI video generation).
+- Đối tượng: nhà sáng tạo nội dung, marketer, đội ngũ sản xuất video ngắn.
+- Ngôn ngữ giao diện: tiếng Việt (chính).
+- Định dạng xuất: dọc 9:16 (TikTok, Reels, YouTube Shorts) và ngang 16:9 (YouTube, website).
+
+## Tính năng chính
+
+- Tạo video từ văn bản (text-to-video).
+- Tạo video từ ảnh (image-to-video).
+- Storyboard nhiều cảnh với hai chế độ: One-Shot (một dòng chảy) và Multi-Panel (nhiều khung ảnh).
+- Lồng tiếng AI (voiceover) với nhiều giọng đọc tự nhiên — thực hiện sau khi dựng hình.
+- Nhiều phong cách hình ảnh: Cinematic, Anime, Cyberpunk, Fantasy, Minimalist, Realistic.
+- Kiểm soát phong cách, góc máy và bố cục từng cảnh.
+
+## Công nghệ
+
+- Engine tạo video: Qwen/Wan.
+- Kèm các mô hình AI chuyên biệt cho tạo ảnh và tổng hợp giọng nói.
+- Lưu ý: Wavise Studio KHÔNG chạy các provider như Kling, Veo hay Runway; thông tin chính xác là engine Qwen/Wan cùng mô hình ảnh và giọng nói.
+
+## Chi phí
+
+- Có bản dùng thử miễn phí.
+- Tính phí theo lượng credit sử dụng, tùy độ dài và chất lượng video.
+
+## Liên kết chính
+
+- Trang chủ: https://studio.wavise.com/
+- Đăng ký: https://studio.wavise.com/register
+- Đăng nhập: https://studio.wavise.com/login
+- Điều khoản dịch vụ: https://studio.wavise.com/dieu-khoan-dich-vu
+- Chính sách bảo mật: https://studio.wavise.com/chinh-sach-bao-mat
+- Chính sách hoàn tiền & credit: https://studio.wavise.com/chinh-sach-hoan-tien

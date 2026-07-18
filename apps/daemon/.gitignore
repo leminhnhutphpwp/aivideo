@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+
+.env
+.env.local
+.env.*.local
+.od
+
+*.tsbuildinfo
+*.log
+.DS_Store
+*.pem
+
+coverage/
+.nyc_output/
+package-lock.json

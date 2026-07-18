@@ -1,0 +1,50 @@
+# CI cho frontend (web) + media engine (daemon).
+# Repo này (checkout tại apps/) nằm trên nhánh `appvideo` của remote chung
+# leminhnhutphpwp/AI-Video-Platform. Workflow trigger theo đúng nhánh này.
+# Cổng chặn regression: tsc --noEmit + test cho cả web và daemon.
+name: CI (web + daemon)
+
+on:
+  push:
+    branches: [appvideo]
+  pull_request:
+    branches: [appvideo]
+
+jobs:
+  web:
+    name: web — tsc + vitest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npm test
+
+  daemon:
+    name: daemon — tsc + vitest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daemon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: daemon/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test

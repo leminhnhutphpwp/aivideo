@@ -1,0 +1,50 @@
+# CI cho Laravel backend (control plane).
+# Repo này (checkout tại backend/) nằm trên nhánh `Backend` của remote chung
+# leminhnhutphpwp/AI-Video-Platform. Test chạy trên SQLite in-memory
+# (phpunit.xml đã set DB_CONNECTION=sqlite / :memory:) nên không cần MySQL.
+name: CI (backend)
+
+on:
+  push:
+    branches: [Backend]
+  pull_request:
+    branches: [Backend]
+
+jobs:
+  test:
+    name: php artisan test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, sqlite3, mbstring, bcmath, intl, gd, zip, redis
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      # --no-scripts: bỏ qua post-autoload hooks (filament:upgrade cần asset build)
+      # để install chạy sạch trong CI; ta discover package thủ công sau khi có APP_KEY.
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+
+      - name: Prepare env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan jwt:secret --force || true
+          php artisan package:discover --ansi || true
+
+      - name: Run tests
+        run: php artisan test
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'

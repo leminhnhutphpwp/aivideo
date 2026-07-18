@@ -1,0 +1,53 @@
+{
+    "name": "nuxtifyts/dash-stack-theme",
+    "description": "DashStack theme for filament php",
+    "keywords": [
+        "php",
+        "filament",
+        "filamentphp",
+        "filamentphp-theme",
+        "dashStack",
+        "dashboard-theme"
+    ],
+    "authors": [
+        {
+            "name": "Farouk Braik",
+            "email": "faroukbraik17@gmail.com"
+        }
+    ],
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^5.0",
+        "illuminate/contracts": "^11.0|^12.0",
+        "spatie/laravel-package-tools": "^1.19"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.20",
+        "phpunit/phpunit": "^11.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Nuxtifyts\\DashStackTheme\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nuxtifyts\\DashStackTheme\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse --configuration phpstan.neon --memory-limit=1G",
+        "pint": "vendor/bin/pint src/",
+        "test": "XDEBUG_MODE=coverage vendor/bin/phpunit --configuration=phpunit.xml --testsuite=Unit"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nuxtifyts\\DashStackTheme\\DashStackThemeServiceProvider"
+            ]
+        }
+    }
+}

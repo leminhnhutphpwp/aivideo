@@ -1,0 +1,8 @@
+{
+  "name": "Horizon Cinematic VI",
+  "description": "Bảng điều khiển sản xuất phim 3D chuyên nghiệp và điện ảnh hỗ trợ bởi trí tuệ nhân tạo (AI).",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

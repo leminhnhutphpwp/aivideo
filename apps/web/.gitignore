@@ -1,0 +1,30 @@
+node_modules/
+.next/
+out/
+dist/
+build/
+
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+*.tsbuildinfo
+*.log
+.DS_Store
+*.pem
+
+coverage/
+.nyc_output/
+
+# vercel
+.vercel
+__tests__
+package-lock.json
+
+# playwright e2e
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/e2e/.auth/

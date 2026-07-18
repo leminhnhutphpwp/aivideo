@@ -1,0 +1,33 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../../../vendor/nuxtifyts/dash-stack-theme/resources/css/theme.css';
+@import '../../../../vendor/awcodes/filament-curator/resources/css/plugin.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../vendor/filament/filament/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/actions/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/forms/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/infolists/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/notifications/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/support/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/tables/resources/views/**/*.blade.php';
+@source '../../../../vendor/filament/widgets/resources/views/**/*.blade.php';
+@source '../../../../vendor/awcodes/filament-curator/resources/**/*.blade.php';
+
+/* Force Curator Overrides due to CSS building order precedence */
+.fi-modal-window:has(.curator-panel) {
+    padding: 0 !important;
+}
+
+.fi-modal-window:has(.curator-panel) .fi-modal-header {
+    display: none !important;
+}
+
+.fi-modal-window:has(.curator-panel) .fi-modal-content {
+    padding: 0 !important;
+}
+
+/* Ensure parents are relative for inset-0 to bound correctly */
+.fi-modal-window {
+    position: relative !important;
+}

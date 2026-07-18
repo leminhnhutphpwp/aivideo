@@ -1,0 +1,7 @@
+{
+  "_comment": "Single source of truth for the studio's controlled vocabularies. The daemon uses this to constrain AI skill authoring; apps/web/src/components/studio/options.ts must expose the same values (enforced by vocab-sync.test.ts). Keep label/icon presentation in options.ts; keep the VALUE strings here.",
+  "camera": ["Fixed", "Pan Left", "Pan Right", "Zoom In", "Zoom Out", "Dolly", "Tracking", "Crane Up", "Crane Down", "Handheld"],
+  "lighting": ["Natural", "Golden Hour", "Studio Soft", "Dramatic", "Neon", "Moody", "Backlit", "Silhouette", "Rim Light"],
+  "mood": ["Dramatic", "Happy", "Mysterious", "Dark", "Romantic", "Peaceful", "Energetic", "Melancholic"],
+  "style": ["Cinematic", "3D Animation", "Anime", "Realistic", "Fantasy", "Cyberpunk", "Vintage", "Minimalist", "Oil Painting", "Watercolor"]
+}

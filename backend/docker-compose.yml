@@ -1,0 +1,417 @@
+# Project name — scopes ALL containers/networks/volumes per deployment so multiple
+# projects can coexist on one server. Each deployment sets STACK_NAME in its .env
+# (e.g. STACK_NAME=aivideo-clientA); defaults to "aivideo".
+name: ${STACK_NAME:-aivideo}
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+  od_data:
+  caddy_data:
+  caddy_config:
+
+services:
+  # ====================
+  # LARAVEL (Control Plane)
+  # ====================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Shared project-scoped image — queue/scheduler/reverb/app-init reuse this exact tag.
+    image: ${STACK_NAME:-aivideo}-app
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1.0
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: https://${DOMAIN:-app.com}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-production_video}
+      DB_USERNAME: ${DB_USERNAME:-app}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      DB_PERSISTENT: "true"
+      DB_TIMEOUT: 5
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis-change-me}
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      BROADCAST_CONNECTION: reverb
+      REVERB_HOST: 0.0.0.0
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      REVERB_APP_ID: ${REVERB_APP_ID:-515932}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-app-key-change-me}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-app-secret-change-me}
+      FILESYSTEM_DISK: s3
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_BUCKET: ${AWS_BUCKET:-production-video}
+      AWS_ENDPOINT: http://minio:9000
+      AWS_USE_PATH_STYLE_ENDPOINT: "true"
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_ALGO: HS256
+      SEPAY_WEBHOOK_TOKEN: ${SEPAY_WEBHOOK_TOKEN:-}
+      DAEMON_URL: http://daemon:7456
+      DAEMON_CALLBACK_URL: http://app:8000/api/daemon/webhook
+      SEPAY_MATCH_PATTERN: SE
+      MINIO_CONSOLE_URL: http://localhost:9001
+      PMA_URL: http://localhost:8081
+      REVERB_URL: http://localhost:8080
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
+    volumes:
+      - ./storage:/var/www/storage
+      - ../apps/skills:/skills
+    healthcheck:
+      test: ["CMD", "php", "artisan", "tinker", "--execute=echo 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ====================
+  # QUEUE WORKER
+  # ====================
+  queue:
+    image: ${STACK_NAME:-aivideo}-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 2.0
+    command: php /var/www/artisan horizon
+    environment:
+      APP_ENV: production
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: ${DB_DATABASE:-production_video}
+      DB_USERNAME: ${DB_USERNAME:-app}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis-change-me}
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+    volumes:
+      - ./storage:/var/www/storage
+    healthcheck:
+      test: ["CMD", "php", "artisan", "tinker", "--execute=echo 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ====================
+  # SCHEDULER
+  # ====================
+  scheduler:
+    image: ${STACK_NAME:-aivideo}-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    command: php /var/www/artisan schedule:work
+    environment:
+      APP_ENV: production
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: ${DB_DATABASE:-production_video}
+      DB_USERNAME: ${DB_USERNAME:-app}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis-change-me}
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./storage:/var/www/storage
+    depends_on:
+      - queue
+    networks:
+      - app-network
+
+  # ====================
+  # REALTIME (Reverb)
+  # ====================
+  reverb:
+    image: ${STACK_NAME:-aivideo}-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    command: php /var/www/artisan reverb:start
+    environment:
+      APP_ENV: production
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: ${DB_DATABASE:-production_video}
+      DB_USERNAME: ${DB_USERNAME:-app}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis-change-me}
+      QUEUE_CONNECTION: redis
+      BROADCAST_CONNECTION: reverb
+      REVERB_HOST: 0.0.0.0
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      REVERB_APP_ID: ${REVERB_APP_ID:-515932}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-}
+    healthcheck:
+      test: ["CMD", "php", "artisan", "tinker", "--execute=echo 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ====================
+  # DATABASE
+  # ====================
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 2.0
+    command: >
+      --max-connections=500
+      --innodb-buffer-pool-size=512M
+      --innodb-log-file-size=256M
+      --innodb-flush-log-at-trx-commit=2
+      --query-cache-type=0
+      --performance-schema=OFF
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
+      MYSQL_DATABASE: ${DB_DATABASE:-production_video}
+      MYSQL_USER: ${DB_USERNAME:-app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+  # ====================
+  # REDIS
+  # ====================
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis-change-me}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis-change-me}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # ====================
+  # STORAGE (MinIO / S3-compatible)
+  # ====================
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # Create bucket on MinIO startup
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      mc mb myminio/${AWS_BUCKET:-production-video} --ignore-existing;
+      mc policy set download myminio/${AWS_BUCKET:-production-video};
+      echo 'Bucket created';
+      "
+    networks:
+      - app-network
+
+  # Run migrations + seed on startup
+  app-init:
+    image: ${STACK_NAME:-aivideo}-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "
+      php /var/www/artisan migrate --force &&
+      php /var/www/artisan db:seed --class=PricingSystemSeeder --force &&
+      echo 'Migration + seed done'
+      "
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-production_video}
+      DB_USERNAME: ${DB_USERNAME:-app}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis-change-me}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ====================
+  # DAEMON (Media Engine)
+  # ====================
+  daemon:
+    build:
+      context: ../apps/daemon
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 2g
+    cpus: 2.0
+    stop_grace_period: 5m
+    environment:
+      PORT: 7456
+      BIND_HOST: 0.0.0.0
+      LARAVEL_API_URL: http://app/api
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+      WEBHOOK_SECRET: ${DAEMON_WEBHOOK_SECRET:-}
+      DISABLE_AGENTS: "true"
+      MEDIA_ALLOW_STUBS: "0"
+    volumes:
+      - od_data:/app/.od
+      - ../apps/skills:/skills
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:7456/api/health',(r)=>{process.exit(r.statusCode===200?0:1);})"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ====================
+  # REVERSE PROXY (Auto HTTPS)
+  # ====================
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN:-app.com}
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ====================
+  # WEB APP (Next.js)
+  # ====================
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: https://${DOMAIN:-app.com}/api
+      NEXT_PUBLIC_REVERB_HOST: ${DOMAIN:-app.com}
+      NEXT_PUBLIC_REVERB_PORT: 443
+      NEXT_PUBLIC_REVERB_SCHEME: https
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  # ====================
+  # DATABASE MANAGER
+  # ====================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.3
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USERNAME:-app}
+      PMA_PASSWORD: ${DB_PASSWORD:-}
+      UPLOAD_LIMIT: 512M
+    depends_on:
+      - mysql
+    networks:
+      - app-network

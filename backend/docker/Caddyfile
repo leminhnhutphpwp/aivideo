@@ -1,0 +1,43 @@
+{$DOMAIN:localhost} {
+    # ── Next.js Web App (frontend) ──
+    handle {
+        reverse_proxy web:3000 {
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Host {$DOMAIN}
+        }
+    }
+
+    # ── Laravel API ──
+    handle_path /api/* {
+        reverse_proxy app:80 {
+            header_up X-Forwarded-Proto https
+            lb_policy round_robin
+            health_uri /api/health
+            health_interval 10s
+            health_timeout 3s
+        }
+    }
+
+    # ── WebSocket (Reverb) ──
+    handle_path /ws/* {
+        reverse_proxy reverb:8080
+    }
+
+    # NOTE: `/studio/*` are Next.js app pages (storyboard builder/editor/list) and are
+    # served by the web app via the catch-all `handle` above. The media daemon is reached
+    # ONLY through the Laravel API proxy (`/api/*`) — never exposed publicly — so it has no
+    # route here.
+
+    # ── Security headers ──
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # ── Gzip ──
+    encode gzip zstd
+
+    log { output file /data/access.log }
+}
