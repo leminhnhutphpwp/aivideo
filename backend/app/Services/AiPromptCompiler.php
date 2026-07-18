@@ -204,7 +204,7 @@ QUAN TRỌNG:
         }
 
         $parts = [];
-        $parts[] = "Bạn là một họa sĩ storyboard chuyên nghiệp. Nhiệm vụ của bạn là tạo một prompt mô tả một bức ảnh bố cục dạng truyện tranh (comic strip / multi-panel storyboard) thể hiện tất cả các phân cảnh của một video.";
+        $parts[] = "Bạn là một đạo diễn hình ảnh. Nhiệm vụ: tạo MỘT prompt (tiếng Việt) mô tả MỘT bức ảnh bố cục nhiều khung (multi-panel grid), trong đó MỖI khung là một KHUNG HÌNH ĐIỆN ẢNH THỰC TẾ (photorealistic keyframe, như frame video / ảnh chụp thật) của một phân cảnh. Ảnh này dùng làm REFERENCE cho AI sinh VIDEO — style của ảnh quyết định style video, nên PHẢI là ảnh thật, KHÔNG phải tranh vẽ / truyện tranh / hoạt hình / storyboard sketch.";
         $parts[] = "";
         $parts[] = "TIÊU ĐỀ: {$storyboard->title}";
         if ($storyboard->description) {
@@ -212,11 +212,12 @@ QUAN TRỌNG:
         }
         $parts[] = "";
         $parts[] = "YÊU CẦU BỐ CỤC:";
-        $parts[] = "- Bức ảnh duy nhất, chia thành nhiều khung (panels) theo trình tự thời gian từ trái sang phải, trên xuống dưới.";
-        $parts[] = "- Mỗi khung thể hiện nội dung chính của một phân cảnh.";
-        $parts[] = "- Giữa các khung có khoảng cách (gutter) để phân cách.";
-        $parts[] = "- Phong cách minh họa nhất quán xuyên suốt tất cả các khung.";
-        $parts[] = "- Phù hợp để dùng làm storyboard tham khảo cho video generation AI.";
+        $parts[] = "- Bức ảnh duy nhất, chia thành nhiều khung (panels) theo trình tự thời gian từ trái sang phải, trên xuống dưới, cách nhau bởi gutter mảnh.";
+        $parts[] = "- Mỗi khung là một khung hình ĐIỆN ẢNH THỰC TẾ (photorealistic, như frame video / ảnh chụp thật), thể hiện nội dung chính của một phân cảnh.";
+        $parts[] = "- Phong cách ẢNH THẬT nhất quán xuyên suốt (mặc định: photorealistic, cinematic — trừ khi có chỉ định style khác bên dưới).";
+        $parts[] = "- TUYỆT ĐỐI KHÔNG: chữ, số, nhãn, caption, ghi chú kỹ thuật, logo, tiêu đề, khung viền có chữ. Chỉ có HÌNH.";
+        $parts[] = "- TUYỆT ĐỐI KHÔNG phong cách: hoạt hình, tranh vẽ, truyện tranh, comic, illustration, sketch, cartoon.";
+        $parts[] = "- Lý do: ảnh này là reference cho AI sinh video — nếu ảnh là tranh/chữ thì video sẽ ra hoạt hình / có chữ bị lỗi.";
         $parts[] = "";
 
         if ($storyboard->render_mode === 'single_flow' || $storyboard->render_mode === 'storyboard_image') {
@@ -246,7 +247,7 @@ QUAN TRỌNG:
         }
 
         $parts[] = "";
-        $parts[] = "Hãy viết MỘT prompt duy nhất (bằng tiếng Việt) mô tả bức ảnh multi-panel storyboard này, phù hợp với AI image generation. Prompt nên bao gồm: bố cục tổng thể, mô tả từng khung, phong cách nhất quán. KHÔNG dùng từ ngữ như 'khung 1', 'khung 2' trong prompt cuối — hãy mô tả liền mạch.";
+        $parts[] = "Hãy viết MỘT prompt duy nhất (bằng tiếng Việt) mô tả bức ảnh multi-panel này cho AI image generation. Bao gồm: bố cục lưới nhiều khung, mô tả từng khung như một khung hình ĐIỆN ẢNH THỰC TẾ (photorealistic), phong cách ảnh thật nhất quán. Kết thúc prompt bằng cụm nhấn mạnh: 'ảnh thật điện ảnh photorealistic, KHÔNG chữ KHÔNG số, KHÔNG hoạt hình KHÔNG tranh vẽ'. KHÔNG dùng từ 'khung 1', 'khung 2' trong prompt cuối — mô tả liền mạch.";
 
         if ($storyboard->multi_panel_image) {
             $parts[] = "\nLƯU Ý: Có thể dùng ảnh multi-panel hiện tại ({$storyboard->multi_panel_image}) làm style reference nếu muốn.";
