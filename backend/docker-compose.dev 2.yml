@@ -1,0 +1,277 @@
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    env_file: .env.docker
+    environment:
+      REVERB_HOST: reverb
+      DAEMON_URL: http://daemon:7456
+      DAEMON_CALLBACK_URL: http://app:8000/api/daemon/webhook
+      DB_HOST: mysql
+      REDIS_HOST: redis
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+      - ../apps/skills:/skills
+      - ./docker-php-ext-upload.ini:/usr/local/etc/php/conf.d/docker-php-ext-upload.ini
+    command: >
+      sh -c "
+        [ ! -f vendor/autoload.php ] && composer install;
+        php artisan storage:link --force 2>/dev/null;
+        php artisan migrate --force 2>/dev/null;
+        exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+      "
+    healthcheck:
+      test: ["CMD", "php", "artisan", "tinker", "--execute=echo 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      daemon:
+        condition: service_healthy
+      # Storage phải sẵn sàng cùng app — nếu không, app "healthy" nhưng ghi ảnh/asset
+      # fail (đúng lỗi từng gặp: app up mà minio down). minio-setup tạo bucket rồi thoát.
+      minio:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+
+  # ====================
+  # DAEMON (Media Engine)
+  # ====================
+  daemon:
+    image: node:24-alpine
+    working_dir: /app
+    stop_grace_period: 5m
+    env_file:
+      - .env.docker
+      - ../apps/daemon/.env
+    environment:
+      - SIMULATION_MODE=${SIMULATION_MODE:-0}
+      - SIMULATION_LATENCY_IMAGE=${SIMULATION_LATENCY_IMAGE:-3000}
+      - SIMULATION_LATENCY_VIDEO=${SIMULATION_LATENCY_VIDEO:-20000}
+      - SIMULATION_LATENCY_AUDIO=${SIMULATION_LATENCY_AUDIO:-2000}
+      - SIMULATION_LATENCY_JITTER=${SIMULATION_LATENCY_JITTER:-0.3}
+    # node_modules is an anon volume (below) so the host's macOS-built native
+    # deps (better-sqlite3) never leak into Alpine; we (re)install inside the
+    # container, pulling the build toolchain only when a fresh install is needed.
+    command: >
+      sh -c "
+        apk add --no-cache ffmpeg >/dev/null 2>&1;
+        if [ ! -d node_modules/better-sqlite3/build ]; then
+          apk add --no-cache python3 make g++ &&
+          npm install;
+        fi;
+        exec node --import tsx ./src/index.ts
+      "
+    volumes:
+      - ../apps/daemon:/app
+      - /app/node_modules
+      - ../apps/skills:/skills
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:7456/api/health',(r)=>{process.exit(r.statusCode===200?0:1);})"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - app-network
+
+  # ====================
+  # REVERB (WebSocket Server)
+  # ====================
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    env_file: .env.docker
+    environment:
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      REVERB_HOST: 0.0.0.0
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+    command: >
+      sh -c "
+        [ ! -f vendor/autoload.php ] && composer install;
+        exec php artisan reverb:start --debug
+      "
+    healthcheck:
+      test: ["CMD", "php", "artisan", "tinker", "--execute=echo 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file: .env.docker
+    environment:
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      REVERB_HOST: reverb
+      DAEMON_URL: http://daemon:7456
+    command: >
+      sh -c "
+        [ ! -f vendor/autoload.php ] && composer install;
+        exec php /var/www/artisan queue:work --tries=3 --timeout=3600
+      "
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+      - ./docker-php-ext-upload.ini:/usr/local/etc/php/conf.d/docker-php-ext-upload.ini
+    healthcheck:
+      test: ["CMD", "php", "artisan", "tinker", "--execute=echo 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      # HandleJobCompletion + GenerateThumbnail ghi asset lên storage → cần minio sẵn sàng.
+      minio:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+      - /var/www/node_modules
+    command: >
+      sh -c "
+        [ ! -f vendor/autoload.php ] && composer install;
+        [ ! -f node_modules/.package-lock.json ] && npm install;
+        exec npm run dev -- --host=0.0.0.0
+      "
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    env_file: .env.docker
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-me-dev}
+      MYSQL_DATABASE: ${DB_DATABASE:-aivideo_dev}
+      MYSQL_USER: ${DB_USERNAME:-app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change-me-dev}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-change-me-dev}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file: .env.docker
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    env_file: .env.docker
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      mc alias set myminio http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
+      mc mb myminio/aivideo-dev --ignore-existing;
+      mc policy set public myminio/aivideo-dev;
+      echo 'MinIO bucket aivideo-dev ready';
+      "
+    networks:
+      - app-network
+
+  # phpMyAdmin with HTTP Basic Auth (UNCOMMENT ONLY IF NEEDED)
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest
+  #   ports:
+  #     - "8081:80"
+  #   environment:
+  #     PMA_HOST: mysql
+  #     PMA_PORT: 3306
+  #     PMA_USER: root
+  #     PMA_PASSWORD: root-secret
+  #     UPLOAD_LIMIT: 512M
+  #     PMA_ABSOLUTE_URI: http://localhost:8081
+  #   volumes:
+  #     - ./.htpasswd:/etc/apache2/.htpasswd
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - app-network
