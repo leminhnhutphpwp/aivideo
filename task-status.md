@@ -6,6 +6,24 @@
 
 ## Current Sprint
 
+### Image moderation fix — was a silent no-op (NSFW never blocked) — Complete
+- **Status**: Completed (2026-07-18)
+- **Agent**: @daemon
+- **Worklog**: `apps/daemon/worklogs/2026-07-18-image-moderation-fix.md`
+- **Shipped**: `POST /api/media/moderate-image` was effectively disabled — default vision model
+  `claude-haiku-4.5` on xah.io is proxied to a coding assistant ("Kiro") that refuses image
+  analysis with prose → `extractJsonFromLlm` fails → fail-open `safe:true` on every image.
+  Switched default to live-verified vision model `openai/gpt-5.6-luna`; added
+  `response_format:json_object`, a hardened anti-refusal/anti-prose prompt, and a primary→fallback
+  model chain (`IMAGE_MODERATION_FALLBACK_MODELS`) that only fails open AFTER all models fail, now
+  logging at ERROR with `modelsTried` so degraded verdicts are visible.
+- **Verified**: tsc 0; daemon tests **295 passed / 4 skipped** (baseline 291, +4). Live probe:
+  haiku refuses (prose "Kiro"); gpt-5.6-luna genuinely sees images + returns JSON (safe & safe:false
+  paths). E2E through real handler → real verdict `{safe:true,…,model:"openai/gpt-5.6-luna"}`.
+- **Handoff @backend**: on `degraded:true` route asset to "chờ duyệt" (manual review) instead of
+  trusting safe. Response shape unchanged. Prod env: `IMAGE_MODERATION_MODEL=openai/gpt-5.6-luna`;
+  never `claude-haiku-4.5` (no vision on this endpoint).
+
 ### Landing (/) SEO / GEO / content polish — Complete
 - **Status**: Completed (2026-07-18)
 - **Agent**: @web
