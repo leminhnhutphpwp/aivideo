@@ -203,8 +203,11 @@ QUAN TRỌNG:
             throw new \RuntimeException('Storyboard has no scenes to compile');
         }
 
+        $sceneCount = $scenes->count();
+        $styleLine = $storyboard->style ?: 'điện ảnh chân thực (photorealistic cinematic) — mặc định khi project chưa chọn style';
+
         $parts = [];
-        $parts[] = "Bạn là một đạo diễn hình ảnh. Nhiệm vụ: tạo MỘT prompt (tiếng Việt) mô tả MỘT bức ảnh bố cục nhiều khung (multi-panel grid), trong đó MỖI khung là một KHUNG HÌNH ĐIỆN ẢNH THỰC TẾ (photorealistic keyframe, như frame video / ảnh chụp thật) của một phân cảnh. Ảnh này dùng làm REFERENCE cho AI sinh VIDEO — style của ảnh quyết định style video, nên PHẢI là ảnh thật, KHÔNG phải tranh vẽ / truyện tranh / hoạt hình / storyboard sketch.";
+        $parts[] = "Bạn là một đạo diễn hình ảnh. Nhiệm vụ: tạo MỘT prompt (tiếng Việt) mô tả MỘT bức ảnh bố cục nhiều khung (multi-panel grid), MỖI khung là một KHUNG HÌNH (keyframe) của một phân cảnh — dùng làm REFERENCE cho AI sinh VIDEO. Phong cách / bối cảnh / nhân vật của các khung PHẢI theo ĐÚNG style của project (xem HƯỚNG DẪN PHONG CÁCH bên dưới): project ảnh thật → khung ảnh thật; project anime/hoạt hình → khung anime/hoạt hình; oil painting / cyberpunk / v.v. → đúng style đó. Đây KHÔNG phải 'storyboard sketch có ghi chú' — mà là các khung hình thành phẩm đẹp, đúng phong cách project.";
         $parts[] = "";
         $parts[] = "TIÊU ĐỀ: {$storyboard->title}";
         if ($storyboard->description) {
@@ -212,23 +215,20 @@ QUAN TRỌNG:
         }
         $parts[] = "";
         $parts[] = "YÊU CẦU BỐ CỤC:";
-        $parts[] = "- Bức ảnh duy nhất, chia thành nhiều khung (panels) theo trình tự thời gian từ trái sang phải, trên xuống dưới, cách nhau bởi gutter mảnh.";
-        $parts[] = "- Mỗi khung là một khung hình ĐIỆN ẢNH THỰC TẾ (photorealistic, như frame video / ảnh chụp thật), thể hiện nội dung chính của một phân cảnh.";
-        $parts[] = "- Phong cách ẢNH THẬT nhất quán xuyên suốt (mặc định: photorealistic, cinematic — trừ khi có chỉ định style khác bên dưới).";
-        $parts[] = "- TUYỆT ĐỐI KHÔNG: chữ, số, nhãn, caption, ghi chú kỹ thuật, logo, tiêu đề, khung viền có chữ. Chỉ có HÌNH.";
-        $parts[] = "- TUYỆT ĐỐI KHÔNG phong cách: hoạt hình, tranh vẽ, truyện tranh, comic, illustration, sketch, cartoon.";
-        $parts[] = "- Lý do: ảnh này là reference cho AI sinh video — nếu ảnh là tranh/chữ thì video sẽ ra hoạt hình / có chữ bị lỗi.";
+        $parts[] = "- Bức ảnh duy nhất, chia thành ĐÚNG {$sceneCount} khung (bằng số phân cảnh), theo trình tự thời gian từ trái sang phải, trên xuống dưới, cách nhau bởi gutter mảnh.";
+        $parts[] = "- Mỗi khung là một keyframe chất lượng cao của một phân cảnh.";
+        $parts[] = "- Phong cách / bối cảnh / nhân vật / bảng màu NHẤT QUÁN xuyên suốt tất cả các khung, theo ĐÚNG style project (mục HƯỚNG DẪN PHONG CÁCH). KHÔNG tự đổi sang style khác giữa các khung.";
+        $parts[] = "- TUYỆT ĐỐI KHÔNG: chữ, số, nhãn, caption, ghi chú kỹ thuật, logo, tiêu đề, số thứ tự khung, khung viền có chữ. Chỉ có HÌNH.";
+        $parts[] = "- Lý do bỏ chữ + giữ đúng style: ảnh là reference cho AI sinh video → chữ sẽ bị 'vẽ' vào video, và style của ảnh quyết định style video (ảnh thật→video thật, anime→video anime).";
         $parts[] = "";
 
         if ($storyboard->render_mode === 'single_flow' || $storyboard->render_mode === 'storyboard_image') {
-            if ($storyboard->camera_movement || $storyboard->style || $storyboard->mood || $storyboard->lighting) {
-                $parts[] = "HƯỚNG DẪN PHONG CÁCH CHUNG:";
-                if ($storyboard->camera_movement) $parts[] = "- Góc máy: {$storyboard->camera_movement}";
-                if ($storyboard->style) $parts[] = "- Phong cách: {$storyboard->style}";
-                if ($storyboard->mood) $parts[] = "- Tâm trạng: {$storyboard->mood}";
-                if ($storyboard->lighting) $parts[] = "- Ánh sáng: {$storyboard->lighting}";
-                $parts[] = "";
-            }
+            $parts[] = "HƯỚNG DẪN PHONG CÁCH (BẮT BUỘC áp cho MỌI khung, giữ nhất quán):";
+            $parts[] = "- Phong cách hình ảnh: {$styleLine}";
+            if ($storyboard->camera_movement) $parts[] = "- Góc máy: {$storyboard->camera_movement}";
+            if ($storyboard->mood) $parts[] = "- Tâm trạng: {$storyboard->mood}";
+            if ($storyboard->lighting) $parts[] = "- Ánh sáng: {$storyboard->lighting}";
+            $parts[] = "";
         }
 
         $parts[] = "NỘI DUNG TỪNG KHUNG (theo thứ tự):";
@@ -247,7 +247,7 @@ QUAN TRỌNG:
         }
 
         $parts[] = "";
-        $parts[] = "Hãy viết MỘT prompt duy nhất (bằng tiếng Việt) mô tả bức ảnh multi-panel này cho AI image generation. Bao gồm: bố cục lưới nhiều khung, mô tả từng khung như một khung hình ĐIỆN ẢNH THỰC TẾ (photorealistic), phong cách ảnh thật nhất quán. Kết thúc prompt bằng cụm nhấn mạnh: 'ảnh thật điện ảnh photorealistic, KHÔNG chữ KHÔNG số, KHÔNG hoạt hình KHÔNG tranh vẽ'. KHÔNG dùng từ 'khung 1', 'khung 2' trong prompt cuối — mô tả liền mạch.";
+        $parts[] = "Hãy viết MỘT prompt duy nhất (bằng tiếng Việt) mô tả bức ảnh multi-panel này cho AI image generation. Bao gồm: bố cục lưới ĐÚNG {$sceneCount} khung, mô tả từng khung như một keyframe, và phong cách / bối cảnh NHẤT QUÁN theo ĐÚNG style project ở mục HƯỚNG DẪN PHONG CÁCH (KHÔNG tự đổi thành style khác). Kết thúc prompt bằng cụm nhấn mạnh: 'KHÔNG chữ KHÔNG số KHÔNG nhãn, giữ nguyên phong cách {$styleLine} xuyên suốt tất cả các khung'. KHÔNG dùng từ 'khung 1', 'khung 2' trong prompt cuối — mô tả liền mạch.";
 
         if ($storyboard->multi_panel_image) {
             $parts[] = "\nLƯU Ý: Có thể dùng ảnh multi-panel hiện tại ({$storyboard->multi_panel_image}) làm style reference nếu muốn.";
