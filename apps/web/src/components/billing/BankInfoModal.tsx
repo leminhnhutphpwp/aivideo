@@ -39,7 +39,7 @@ export function BankInfoModal({ data, type, onClose }: BankInfoModalProps) {
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-zinc-950/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
+        className="fixed inset-0 bg-[#16141a]/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
         onClick={onClose}
       >
         <motion.div
@@ -47,7 +47,7 @@ export function BankInfoModal({ data, type, onClose }: BankInfoModalProps) {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-          className="w-full max-w-sm bg-zinc-950 border border-white/5 rounded-2xl shadow-md shadow-black/80 relative overflow-hidden"
+          className="w-full max-w-sm bg-[#16141a] border border-white/12 rounded-2xl shadow-md shadow-black/80 relative overflow-hidden"
           onClick={e => e.stopPropagation()}
         >
           <div className="billing-zigzag-top h-3 w-full" />
@@ -85,18 +85,18 @@ export function BankInfoModal({ data, type, onClose }: BankInfoModalProps) {
                   { label: t('billing.accountNumber'), value: data.bank.account, mono: true },
                   { label: t('billing.accountHolder'), value: data.bank.holder },
                 ].map((item) => (
-                  <div key={item.label} className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-center">
-                    <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mb-1">{item.label}</p>
+                  <div key={item.label} className="p-2.5 rounded-xl bg-white/[0.03] border border-white/12 text-center">
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">{item.label}</p>
                     <p className={`text-[11px] font-bold text-white leading-tight ${item.mono ? 'font-mono' : ''}`}>{item.value}</p>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest mb-2">{t('billing.transferContent')}</p>
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/12">
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-2">{t('billing.transferContent')}</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs font-bold text-white font-mono bg-zinc-950/30 rounded-lg px-3 py-2 truncate">
+                <code className="flex-1 text-xs font-bold text-white font-mono bg-[#16141a]/30 rounded-lg px-3 py-2 truncate">
                   {data.content}
                 </code>
                 <button

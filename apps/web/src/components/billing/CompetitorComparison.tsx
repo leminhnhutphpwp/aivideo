@@ -96,17 +96,17 @@ export function CompetitorComparison() {
     <div className="mt-10 space-y-4">
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
           So sánh với đối thủ
         </span>
         <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/[0.06] bg-zinc-950">
+      <div className="overflow-x-auto rounded-2xl border border-white/12 bg-[#16141a]">
         <table className="w-full text-[11px]">
           <thead>
-            <tr className="border-b border-white/[0.06]">
-              <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+            <tr className="border-b border-white/12">
+              <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Tính năng
               </th>
               {competitors.map((c) => (
@@ -117,7 +117,7 @@ export function CompetitorComparison() {
                   }`}
                 >
                   <span className={c.isOurs ? 'text-white' : ''}>{c.name}</span>
-                  <div className="text-[9px] font-normal text-slate-600 mt-0.5">
+                  <div className="text-[9px] font-normal text-slate-400 mt-0.5">
                     {c.price}
                   </div>
                 </th>
@@ -150,9 +150,9 @@ export function CompetitorComparison() {
                         {val === true ? (
                           <Check className="h-3.5 w-3.5 text-emerald-400 mx-auto" />
                         ) : val === false ? (
-                          <X className="h-3.5 w-3.5 text-slate-600 mx-auto" />
+                          <X className="h-3.5 w-3.5 text-slate-400 mx-auto" />
                         ) : (
-                          <Minus className="h-3.5 w-3.5 text-slate-600 mx-auto" />
+                          <Minus className="h-3.5 w-3.5 text-slate-400 mx-auto" />
                         )}
                       </td>
                     );
@@ -164,7 +164,7 @@ export function CompetitorComparison() {
         </table>
       </div>
 
-      <p className="text-[10px] text-slate-600 text-center italic">
+      <p className="text-[10px] text-slate-400 text-center italic">
         * Thông tin dựa trên so sánh thị trường tháng 06/2026. Giá có thể thay đổi theo từng thời điểm.
       </p>
     </div>

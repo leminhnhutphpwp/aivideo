@@ -21,14 +21,14 @@ export function PreviewBox({ aspect }: { aspect: string }) {
 
   return (
     <div className="space-y-2 pt-1 w-full sm:w-[120px]">
-      <div className="flex items-center justify-center bg-white/[0.02] border border-white/5 rounded-xl p-3">
+      <div className="flex items-center justify-center bg-white/[0.02] border border-white/12 rounded-xl p-3">
         <div className="bg-gradient-to-br from-[#FF5A1F]/20 to-[#FF5A1F]/5 border border-[#FF5A1F]/20 rounded-sm flex items-center justify-center transition-all duration-200"
           style={{ width: w, height: h }}
         >
           <span className="text-[10px] font-mono font-bold text-[#FF5A1F]/70">{aspect}</span>
         </div>
       </div>
-      <p className="text-[10px] text-slate-600 text-center leading-relaxed">{label}</p>
+      <p className="text-[10px] text-slate-400 text-center leading-relaxed">{label}</p>
     </div>
   );
 }

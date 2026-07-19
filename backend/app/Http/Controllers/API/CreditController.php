@@ -1,12 +1,14 @@
 <?php
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CouponException;
 use App\Jobs\SendTelegramNotification;
 use App\Models\CreditSetting;
 use App\Models\CreditTransaction;
 use App\Models\PendingCreditPurchase;
 use App\Models\Plan;
 use App\Models\PlanUpgrade;
+use App\Services\CouponService;
 use App\Services\CreditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +18,8 @@ use Illuminate\Support\Str;
 class CreditController extends Controller
 {
     public function __construct(
-        protected CreditService $creditService
+        protected CreditService $creditService,
+        protected CouponService $couponService
     ) {
         $this->middleware('auth:api');
     }
@@ -53,6 +56,7 @@ class CreditController extends Controller
     {
         $request->validate([
             'amount' => 'required|integer|min:' . CreditSetting::get('min_purchase_amount', 50000) . '|max:' . CreditSetting::get('max_purchase_amount', 10000000),
+            'coupon_code' => 'nullable|string|max:64',
         ]);
 
         $user = $request->user();
@@ -68,25 +72,47 @@ class CreditController extends Controller
             ], 429);
         }
 
-        // Match amount with a DB package or use exchange_rate fallback
-        $creditPack = \App\Models\CreditPack::where('price', $request->amount)->where('is_active', true)->first();
-        
+        // Match amount with a DB package or use exchange_rate fallback. Credits luôn theo giá GỐC —
+        // coupon chỉ giảm số tiền phải trả, không đổi số credits nhận được.
+        $originalAmount = (int) $request->amount;
+        $creditPack = \App\Models\CreditPack::where('price', $originalAmount)->where('is_active', true)->first();
+
         if ($creditPack) {
             $credits = $creditPack->credits;
         } else {
             $exchangeRate = \App\Models\CreditSetting::exchangeRate();
-            $credits = (int) ceil($request->amount * $exchangeRate);
+            $credits = (int) ceil($originalAmount * $exchangeRate);
+        }
+
+        // Mã giảm giá (nếu có): tính server-side số tiền phải trả sau giảm.
+        $payableAmount = $originalAmount;
+        $discount = 0;
+        $appliedCoupon = null;
+        if ($request->filled('coupon_code')) {
+            try {
+                $preview = $this->couponService->previewDiscount($request->input('coupon_code'), $user, $originalAmount);
+            } catch (CouponException $e) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+            $appliedCoupon = $preview['coupon'];
+            $discount = $preview['discount_amount'];
+            $payableAmount = $preview['final_amount'];
         }
 
         // Tạo mã giao dịch ngắn: DH + 8 ký tự ngẫu nhiên
         $transferCode = $this->generateTransferCode('DH');
 
-        PendingCreditPurchase::create([
+        $pending = PendingCreditPurchase::create([
             'user_id' => $user->id,
             'transfer_code' => $transferCode,
-            'amount' => $request->amount,
+            'amount' => $payableAmount, // số tiền webhook SePay đối chiếu (đã giảm)
             'credits' => $credits,
         ]);
+
+        // Giữ chỗ lượt coupon (nhả lại nếu đơn hết hạn/huỷ).
+        if ($appliedCoupon) {
+            $this->couponService->reserveForPurchase($appliedCoupon, $user, $pending, $discount);
+        }
 
         $bankInfo = config('sepay.bank_info', [
             'bank' => 'MB Bank',
@@ -106,20 +132,24 @@ class CreditController extends Controller
             . "📧 <b>Email:</b> {$user->email}\n"
             . "📅 <b>Thời gian:</b> {$time}\n\n"
             . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            . "💰 <b>Số tiền:</b> " . number_format($request->amount) . "₫\n"
+            . "💰 <b>Số tiền:</b> " . number_format($payableAmount) . "₫"
+            . ($discount > 0 ? " <i>(đã giảm " . number_format($discount) . "₫ từ " . number_format($originalAmount) . "₫)</i>" : "") . "\n"
             . "🎯 <b>Credits nhận:</b> {$credits}\n"
             . "🔗 <b>Mã chuyển khoản:</b> <code>{$transferCode}</code>\n\n"
             . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             . "🟡 <b>Trạng thái:</b> Chờ xác nhận\n"
             . "⏳ <b>Hạn xử lý:</b> Trong vòng 24h\n\n"
             . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            . "🔗 <a href=\"" . url('/admin') . "\">Phê duyệt tại Admin →</a>"
+            . "🔗 <a href=\"" . url('/admin') . "\">Phê duyệt tại Admin →</a>",
+            'credit_purchase'
         );
 
         return response()->json([
             'message' => 'Vui lòng chuyển khoản theo thông tin bên dưới',
             'bank' => $bankInfo,
-            'amount' => $request->amount,
+            'amount' => $payableAmount,
+            'original_amount' => $originalAmount,
+            'discount_amount' => $discount,
             'content' => $transferCode,
             'credits_to_receive' => $credits,
             'note' => 'Sao chép nội dung chuyển khoản chính xác để được cộng credits tự động',
@@ -222,7 +252,8 @@ class CreditController extends Controller
             . "🟡 <b>Trạng thái:</b> Chờ xác nhận\n"
             . "⏳ <b>Hạn xử lý:</b> Trong vòng 24h\n\n"
             . "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            . "🔗 <a href=\"" . url('/admin') . "\">Phê duyệt tại Admin →</a>"
+            . "🔗 <a href=\"" . url('/admin') . "\">Phê duyệt tại Admin →</a>",
+            'plan_upgrade'
         );
 
         return response()->json([

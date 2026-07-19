@@ -147,5 +147,8 @@ class SePayWebhookListener
                 $data->referenceCode
             );
         });
+
+        // Chốt lượt coupon giảm giá (nếu đơn có áp mã).
+        app(\App\Services\CouponService::class)->completeForPurchase($pending);
     }
 }

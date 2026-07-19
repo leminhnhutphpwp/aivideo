@@ -50,5 +50,8 @@ class PendingCreditPurchase extends Model
     public function markAsExpired(): void
     {
         $this->update(['status' => self::STATUS_EXPIRED]);
+
+        // Đơn bị từ chối/hết hạn → nhả lại lượt coupon đã giữ chỗ (nếu có).
+        app(\App\Services\CouponService::class)->voidForPurchase($this);
     }
 }

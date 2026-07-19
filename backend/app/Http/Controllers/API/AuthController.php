@@ -589,30 +589,15 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // Gán credits trước khi đánh dấu verified (atomic check)
-        $freePlan = \App\Models\Plan::where('slug', 'free')->first();
-        if ($freePlan) {
-            $affected = \App\Models\User::where('id', $user->id)
-                ->whereNull('email_verified_at')
-                ->update(['credits' => $freePlan->effective_credits ?? 1000]);
-
-            if ($affected) {
-                \App\Models\CreditTransaction::create([
-                    'user_id' => $user->id,
-                    'type' => 'manual',
-                    'amount' => $freePlan->effective_credits ?? 1000,
-                    'balance_before' => 0,
-                    'balance_after' => $freePlan->effective_credits ?? 1000,
-                    'description' => 'Thưởng xác thực email',
-                ]);
-            }
-        }
-
         $user->update([
             'email_verified_at' => now(),
             'email_verification_code' => null,
             'email_verification_code_sent_at' => null,
         ]);
+
+        // Mã chào mừng tự động (nếu admin bật một coupon is_welcome) — thay cho việc tặng
+        // credits cứng khi xác thực trước đây. Gated + kiểm soát qua hệ coupon.
+        app(\App\Services\CouponService::class)->issueWelcome($user);
 
         return response()->json([
             'success' => true,

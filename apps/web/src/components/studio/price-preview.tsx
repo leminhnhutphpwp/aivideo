@@ -61,7 +61,7 @@ export function PricePreview({ priceData, loading, error, quantity = 1, classNam
 
   if (loading && !priceData) {
     return (
-      <div className={cn("bg-zinc-950 border border-white/5 rounded-2xl p-5 space-y-3", className)}>
+      <div className={cn("bg-[#16141a] border border-white/12 rounded-2xl p-5 space-y-3", className)}>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
           <Loader2 className="h-3.5 w-3.5 animate-spin text-[#FF5A1F]" />
           Đang tính giá...
@@ -77,24 +77,24 @@ export function PricePreview({ priceData, loading, error, quantity = 1, classNam
 
   if (error) {
     return (
-      <div className={cn("bg-zinc-950 border border-white/5 rounded-2xl p-5", className)}>
+      <div className={cn("bg-[#16141a] border border-white/12 rounded-2xl p-5", className)}>
         <div className="flex items-center gap-2 text-xs font-semibold text-amber-500">
           <AlertTriangle className="h-3.5 w-3.5" />
           Không thể ước tính giá
         </div>
-        <p className="text-[10px] text-slate-600 mt-1">{error}</p>
+        <p className="text-[10px] text-slate-400 mt-1">{error}</p>
       </div>
     );
   }
 
   if (!priceData) {
     return (
-      <div className={cn("bg-zinc-950 border border-white/5 rounded-2xl p-5", className)}>
+      <div className={cn("bg-[#16141a] border border-white/12 rounded-2xl p-5", className)}>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
           <Receipt className="h-3.5 w-3.5" />
           Ước tính chi phí
         </div>
-        <p className="text-[10px] text-slate-600 mt-1">Điền thông tin để xem chi phí</p>
+        <p className="text-[10px] text-slate-400 mt-1">Điền thông tin để xem chi phí</p>
       </div>
     );
   }
@@ -148,7 +148,7 @@ export function PricePreview({ priceData, loading, error, quantity = 1, classNam
   const grandTotal = totalPerItem * quantity;
 
   return (
-    <div className={cn("bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/5 rounded-2xl overflow-hidden", className)}>
+    <div className={cn("bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/12 rounded-2xl overflow-hidden", className)}>
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
@@ -186,14 +186,14 @@ export function PricePreview({ priceData, loading, error, quantity = 1, classNam
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className={cn("px-5 pb-4 space-y-2 border-t border-white/5 pt-3 transition-opacity", loading && "opacity-50")}>
+            <div className={cn("px-5 pb-4 space-y-2 border-t border-white/12 pt-3 transition-opacity", loading && "opacity-50")}>
               {/* Base items */}
               {items.map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between text-xs">
                   <span className="text-slate-500">
                     {item.label}
                     {item.multiplier && item.multiplier !== 1 ? (
-                      <span className="text-slate-600 ml-1">×{item.multiplier}</span>
+                      <span className="text-slate-400 ml-1">×{item.multiplier}</span>
                     ) : null}
                   </span>
                   <span className={idx === 0 ? 'text-white font-semibold' : 'text-[#FF5A1F] font-medium'}>
@@ -203,7 +203,7 @@ export function PricePreview({ priceData, loading, error, quantity = 1, classNam
               ))}
 
               {/* Subtotal */}
-              <div className="flex items-center justify-between text-xs border-t border-white/5 pt-2">
+              <div className="flex items-center justify-between text-xs border-t border-white/12 pt-2">
                 <span className="text-slate-400 font-medium">Tổng phụ</span>
                 <span className="text-white font-semibold">{formatCredits(pricing.subtotal)}</span>
               </div>
@@ -225,7 +225,7 @@ export function PricePreview({ priceData, loading, error, quantity = 1, classNam
               )}
 
               {/* Total before discount */}
-              <div className="flex items-center justify-between text-xs border-t border-white/5 pt-2">
+              <div className="flex items-center justify-between text-xs border-t border-white/12 pt-2">
                 <span className="text-slate-400 font-medium">Tổng</span>
                 <span className="text-white font-semibold">{formatCredits(pricing.total_credits)}</span>
               </div>

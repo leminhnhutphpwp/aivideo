@@ -258,9 +258,9 @@ export default function ProjectDetailPage() {
           <h2 className="text-sm font-bold text-white uppercase tracking-widest">Tasks</h2>
         </div>
         {tasks.length === 0 ? (
-          <div className="text-center py-16 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
+          <div className="text-center py-16 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
             <p className="text-slate-500 font-medium">Chưa có tác vụ nào</p>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-400">
               {surface === 'image' ? 'Tạo ảnh mới tại Studio → Image' : surface === 'audio' ? 'Tạo âm thanh mới tại Studio → Audio' : 'Tạo video mới tại Studio'}
             </p>
             <Button onClick={handleRetry} disabled={retrying}
@@ -294,8 +294,12 @@ export default function ProjectDetailPage() {
             currentTags={publishTarget.tags}
             onConfirm={async (visibility, tags) => {
               try {
-                await laravel.communityPublish(publishTarget.uuid, visibility, tags);
-                addToast('Đăng lên cộng đồng thành công!', 'success');
+                const res = await laravel.communityPublish(publishTarget.uuid, visibility, tags);
+                if (res?.pending_review) {
+                  addToast('Tác phẩm đang chờ kiểm duyệt trước khi hiển thị công khai', 'info');
+                } else {
+                  addToast('Đăng lên cộng đồng thành công!', 'success');
+                }
                 setPublishTarget(null);
                 fetchData();
               } catch (e: any) {
@@ -316,11 +320,11 @@ export default function ProjectDetailPage() {
       <AnimatePresence>
         {showDeleteConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#16141a]/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
             onClick={() => setShowDeleteConfirm(false)}>
             <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-              className="w-full max-w-sm bg-zinc-950 border border-white/10 rounded-2xl p-6 shadow-md"
+              className="w-full max-w-sm bg-[#16141a] border border-white/10 rounded-2xl p-6 shadow-md"
               onClick={e => e.stopPropagation()}>
               <h3 className="text-lg font-bold text-white mb-2">Xoá project?</h3>
               <p className="text-sm text-slate-400 mb-6">Xoá vĩnh viễn project và tất cả tài nguyên.</p>
@@ -343,11 +347,11 @@ export default function ProjectDetailPage() {
 
         {unpublishTarget && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#16141a]/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
             onClick={() => setUnpublishTarget(null)}>
             <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-              className="w-full max-w-sm bg-zinc-950 border border-white/10 rounded-2xl p-6 shadow-md"
+              className="w-full max-w-sm bg-[#16141a] border border-white/10 rounded-2xl p-6 shadow-md"
               onClick={e => e.stopPropagation()}>
               <h3 className="text-lg font-bold text-white mb-2">Gỡ đăng tác phẩm?</h3>
               <p className="text-sm text-slate-400 mb-6">Tác phẩm sẽ không còn hiển thị trên cộng đồng.</p>

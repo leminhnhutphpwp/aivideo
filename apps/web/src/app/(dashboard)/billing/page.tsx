@@ -8,6 +8,7 @@ import { BillingModals } from '@/components/billing/BillingModals';
 import { BankInfoModal } from '@/components/billing/BankInfoModal';
 import { PricingPlans } from '@/components/billing/PricingPlans';
 import { CreditPackSection } from '@/components/billing/CreditPackSection';
+import { CouponRedeemCard } from '@/components/billing/CouponRedeemCard';
 import { UpgradeHistoryTable } from '@/components/billing/UpgradeHistoryTable';
 import { PendingPurchases } from '@/components/billing/PendingPurchases';
 import { TransactionHistory } from '@/components/billing/TransactionHistory';
@@ -53,10 +54,10 @@ export default function BillingPage() {
     }
   };
 
-  const handlePackConfirm = async (pack: CreditPack) => {
+  const handlePackConfirm = async (pack: CreditPack, couponCode?: string) => {
     setPurchaseLoading(true);
     try {
-      const data = await laravel.creditsPurchase(Math.floor(Number(pack.price)));
+      const data = await laravel.creditsPurchase(Math.floor(Number(pack.price)), couponCode);
       setPurchaseReceipt({
         success: true,
         message: data.message || '',
@@ -99,6 +100,8 @@ export default function BillingPage() {
       <BillingHero
         credits={credits}
       />
+
+      <CouponRedeemCard onRedeemed={() => { loadData(); }} />
 
       <PricingPlans
         plans={plans}

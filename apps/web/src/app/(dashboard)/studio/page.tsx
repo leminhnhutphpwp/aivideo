@@ -117,7 +117,7 @@ function FeatureCard({ feature }: { feature: StudioFeature }) {
       <motion.div
         whileHover={{ y: -4, scale: 1.01 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className={`relative h-full bg-zinc-950 border border-white/5 rounded-2xl p-4 md:p-6 flex flex-col gap-4 md:gap-5 hover:border-white/10 transition-all overflow-hidden ${sizeClasses[feature.size]} ${locked ? 'opacity-50' : ''}`}
+        className={`relative h-full bg-[#16141a] border border-white/12 rounded-2xl p-4 md:p-6 flex flex-col gap-4 md:gap-5 hover:border-white/10 transition-all overflow-hidden ${sizeClasses[feature.size]} ${locked ? 'opacity-50' : ''}`}
       >
         {/* Background gradient */}
         <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
@@ -149,7 +149,7 @@ function FeatureCard({ feature }: { feature: StudioFeature }) {
             <p className="text-sm text-slate-500 leading-relaxed">{feature.desc}</p>
           </div>
 
-          <div className="mt-4 flex items-center gap-2 text-sm text-slate-600 group-hover:text-[#FF5A1F] transition-colors">
+          <div className="mt-4 flex items-center gap-2 text-sm text-slate-400 group-hover:text-[#FF5A1F] transition-colors">
             <span className="font-medium">{locked ? 'Nâng cấp để mở khóa' : 'Bắt đầu tạo'}</span>
             <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -200,7 +200,7 @@ export default function StudioHub() {
       </div>
 
       {/* Quick Tip */}
-      <div className="flex items-start md:items-center gap-3 px-4 md:px-5 py-4 rounded-2xl bg-zinc-950 border border-white/5">
+      <div className="flex items-start md:items-center gap-3 px-4 md:px-5 py-4 rounded-2xl bg-[#16141a] border border-white/12">
         <Zap className="h-4 w-4 text-[#FF5A1F] shrink-0" />
         <p className="text-sm text-slate-500">
           <span className="text-white font-medium">Mẹo:</span> Dùng Text-to-Video để bắt đầu nhanh nhất, hoặc Image-to-Video để kiểm soát phong cách hình ảnh tốt hơn.

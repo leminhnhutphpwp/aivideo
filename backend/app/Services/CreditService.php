@@ -153,15 +153,15 @@ class CreditService
         }
     }
 
-    public function addCredits(User $user, int $amount, string $description, ?string $referenceCode = null): void
+    public function addCredits(User $user, int $amount, string $description, ?string $referenceCode = null, string $type = 'purchase'): CreditTransaction
     {
-        DB::transaction(function () use ($user, $amount, $description, $referenceCode) {
+        $transaction = DB::transaction(function () use ($user, $amount, $description, $referenceCode, $type) {
             $balanceBefore = $user->credits;
             $user->increment('credits', $amount);
             $user->refresh();
-            CreditTransaction::create([
+            return CreditTransaction::create([
                 'user_id' => $user->id,
-                'type' => 'purchase',
+                'type' => $type,
                 'amount' => $amount,
                 'balance_before' => $balanceBefore,
                 'balance_after' => $user->credits,
@@ -177,6 +177,8 @@ class CreditService
                 'description' => $description,
             ]);
         }
+
+        return $transaction;
     }
 
     private function buildDescription(string $prefix, ?RenderJob $job = null, ?Storyboard $storyboard = null): string

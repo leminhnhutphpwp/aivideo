@@ -75,7 +75,7 @@ export function NotificationBell() {
     <div className="relative">
       <button
         onClick={handleOpen}
-        className="relative h-10 w-10 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all cursor-pointer"
+        className="relative h-10 w-10 rounded-xl bg-white/[0.03] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all cursor-pointer"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -86,8 +86,8 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 w-80 bg-zinc-950 border border-white/[0.08] rounded-2xl shadow-2xl z-50">
-          <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
+        <div className="absolute right-0 top-12 w-80 bg-[#16141a] border border-white/12 rounded-2xl shadow-2xl z-50">
+          <div className="p-4 border-b border-white/12 flex items-center justify-between">
             <h3 className="text-sm font-bold text-white">Thông báo</h3>
             {unreadCount > 0 && (
               <button

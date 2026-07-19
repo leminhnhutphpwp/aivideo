@@ -12,7 +12,7 @@ import { useTokenRefresh } from '@/hooks/use-token-refresh';
 import { initTheme } from '@/stores/theme-store';
 import { useAuthStore } from '@/stores/auth-store';
 import Link from 'next/link';
-import { Mail, X, ArrowRight, Zap } from 'lucide-react';
+import { Mail, X, ArrowRight } from 'lucide-react';
 
 function EmailVerifyAlert() {
   const user = useAuthStore(s => s.user);
@@ -33,13 +33,9 @@ function EmailVerifyAlert() {
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-bold text-white tracking-tight">Xác thực email</p>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#FF5A1F]/10 text-[#FF5A1F] text-[9px] font-bold uppercase tracking-wider">
-                <Zap className="h-2.5 w-2.5" />
-                +2,000 Credits
-              </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Email của bạn chưa được xác thực. Hãy xác thực để nhận credits và mở khóa đầy đủ tính năng.
+              Email của bạn chưa được xác thực. Hãy xác thực để bảo mật tài khoản và mở khóa đầy đủ tính năng.
             </p>
             <Link
               href="/verify-email"
@@ -51,7 +47,7 @@ function EmailVerifyAlert() {
 
           <button
             onClick={() => setDismissed(true)}
-            className="shrink-0 h-7 w-7 rounded-lg flex items-center justify-center text-slate-600 hover:text-white hover:bg-white/5 transition-all"
+            className="shrink-0 h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all"
           >
             <X className="h-3.5 w-3.5" />
           </button>

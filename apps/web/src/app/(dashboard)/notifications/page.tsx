@@ -122,7 +122,7 @@ export default function NotificationsPage() {
         <button
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
-            filter === 'all' ? 'bg-[#FF5A1F] text-white shadow-sm' : 'bg-white/5 text-slate-500 hover:text-slate-300 border border-white/5'
+            filter === 'all' ? 'bg-[#FF5A1F] text-white shadow-sm' : 'bg-white/5 text-slate-500 hover:text-slate-300 border border-white/12'
           }`}
         >
           Tất cả
@@ -130,7 +130,7 @@ export default function NotificationsPage() {
         <button
           onClick={() => setFilter('unread')}
           className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all cursor-pointer ${
-            filter === 'unread' ? 'bg-[#FF5A1F] text-white shadow-sm' : 'bg-white/5 text-slate-500 hover:text-slate-300 border border-white/5'
+            filter === 'unread' ? 'bg-[#FF5A1F] text-white shadow-sm' : 'bg-white/5 text-slate-500 hover:text-slate-300 border border-white/12'
           }`}
         >
           Chưa đọc
@@ -144,8 +144,8 @@ export default function NotificationsPage() {
             <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-32 text-center bg-zinc-950 rounded-2xl border border-white/5 space-y-4">
-            <Bell className="h-12 w-12 text-slate-700 mx-auto" />
+          <div className="py-32 text-center bg-[#16141a] rounded-2xl border border-white/12 space-y-4">
+            <Bell className="h-12 w-12 text-slate-500 mx-auto" />
             <p className="text-sm text-slate-500 font-medium">Chưa có thông báo nào</p>
           </div>
         ) : (
@@ -160,7 +160,7 @@ export default function NotificationsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
                 onClick={() => router.push(`/notifications/${notif.id}`)}
-                className={`p-4 md:p-5 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border ${!notif.read ? 'border-[#FF5A1F]/20' : 'border-white/5'} hover:border-white/10 transition-all cursor-pointer`}
+                className={`p-4 md:p-5 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border ${!notif.read ? 'border-[#FF5A1F]/20' : 'border-white/12'} hover:border-white/10 transition-all cursor-pointer`}
               >
                 <div className="flex items-start gap-4">
                   <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
@@ -184,7 +184,7 @@ export default function NotificationsPage() {
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${color}`}>
                           {label}
                         </span>
-                        <span className="text-[10px] text-slate-600">
+                        <span className="text-[10px] text-slate-400">
                           {notif.sent_at ? new Date(notif.sent_at).toLocaleString('vi-VN') : ''}
                         </span>
                       </div>
@@ -207,19 +207,19 @@ export default function NotificationsPage() {
           <button
             onClick={() => fetchNotifications(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="h-9 w-9 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="h-9 w-9 rounded-xl bg-[#16141a] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           {getPageNumbers().map((p, i) =>
             p === '...' ? (
-              <span key={`dots-${i}`} className="h-9 w-9 flex items-center justify-center text-slate-600 text-xs font-bold">...</span>
+              <span key={`dots-${i}`} className="h-9 w-9 flex items-center justify-center text-slate-400 text-xs font-bold">...</span>
             ) : (
               <button
                 key={p}
                 onClick={() => fetchNotifications(p)}
                 className={`h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all cursor-pointer ${
-                  p === currentPage ? 'bg-[#FF5A1F] text-white shadow-sm shadow-[#FF5A1F]/20' : 'bg-zinc-950 border border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
+                  p === currentPage ? 'bg-[#FF5A1F] text-white shadow-sm shadow-[#FF5A1F]/20' : 'bg-[#16141a] border border-white/12 text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {p}
@@ -229,7 +229,7 @@ export default function NotificationsPage() {
           <button
             onClick={() => fetchNotifications(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="h-9 w-9 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="h-9 w-9 rounded-xl bg-[#16141a] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

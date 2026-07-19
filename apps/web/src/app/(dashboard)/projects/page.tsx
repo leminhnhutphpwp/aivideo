@@ -89,7 +89,7 @@ const createHref = activeTab === 'storyboard' ? '/studio/storyboard/flow' : '/st
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-        <div className="flex p-1 rounded-xl bg-zinc-950 border border-white/5 w-full md:w-auto overflow-x-auto no-scrollbar">
+        <div className="flex p-1 rounded-xl bg-[#16141a] border border-white/12 w-full md:w-auto overflow-x-auto no-scrollbar">
           {FILTER_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -105,13 +105,13 @@ const createHref = activeTab === 'storyboard' ? '/studio/storyboard/flow' : '/st
           ))}
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-80 rounded-xl border border-white/5 bg-zinc-950 px-4 py-2.5 group focus-within:border-[#FF5A1F]/30 transition-all">
-          <Search className="h-4 w-4 text-slate-600" />
+        <div className="flex items-center gap-3 w-full md:w-80 rounded-xl border border-white/12 bg-[#16141a] px-4 py-2.5 group focus-within:border-[#FF5A1F]/30 transition-all">
+          <Search className="h-4 w-4 text-slate-400" />
           <input
             placeholder={t('projects.searchPlaceholder')}
             value={searchQuery}
             onChange={handleSearchChange}
-            className="bg-transparent text-sm text-white outline-none placeholder:text-slate-700 w-full font-medium"
+            className="bg-transparent text-sm text-white outline-none placeholder:text-slate-500 w-full font-medium"
           />
         </div>
       </div>
@@ -121,7 +121,7 @@ const createHref = activeTab === 'storyboard' ? '/studio/storyboard/flow' : '/st
           <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
         </div>
       ) : error ? (
-        <div className="col-span-full text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
+        <div className="col-span-full text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
           <p className="text-slate-500 font-medium">{error}</p>
           <Button onClick={load} className="bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white rounded-xl">
             Thử lại
@@ -131,8 +131,8 @@ const createHref = activeTab === 'storyboard' ? '/studio/storyboard/flow' : '/st
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
               {filtered.length === 0 ? (
-                <div className="col-span-full text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-                  <Clapperboard className="h-12 w-12 text-slate-700 mx-auto" />
+                <div className="col-span-full text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+                  <Clapperboard className="h-12 w-12 text-slate-500 mx-auto" />
                   <p className="text-slate-500 font-medium">Chưa có dự án nào</p>
                   <Link href={createHref}>
                     <Button className="bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white rounded-xl">{t('projects.createFirst')}</Button>
@@ -148,7 +148,7 @@ const createHref = activeTab === 'storyboard' ? '/studio/storyboard/flow' : '/st
             <div className="flex justify-center pt-8">
               <Button onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
                 variant="ghost"
-                className="px-10 py-6 rounded-2xl border border-white/5 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
+                className="px-10 py-6 rounded-2xl border border-white/12 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
                 Xem thêm ({filtered.length - visibleCount})
               </Button>
             </div>

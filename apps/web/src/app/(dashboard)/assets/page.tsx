@@ -267,7 +267,7 @@ function AssetsPage() {
         </div>
         {canUpload && (
         <Button disabled={uploading} onClick={() => setUploadOpen(true)}
-          className="h-12 px-8 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white font-bold text-sm tracking-tight shadow-sm shadow-[#FF5A1F]/20 transition-all disabled:opacity-50">
+          className="h-12 px-8 rounded-xl bg-brand hover:bg-[#FF6A2B] text-white font-bold text-sm tracking-tight shadow-sm shadow-brand/20 transition-all disabled:opacity-50">
           {uploading ? (
             <Loader2 className="h-5 w-5 mr-2 animate-spin" />
           ) : (
@@ -279,13 +279,13 @@ function AssetsPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-        <div className="flex p-2 rounded-[20px] bg-zinc-950 border border-white/5 overflow-x-auto no-scrollbar">
+        <div className="flex p-2 rounded-[20px] bg-[#16141a] border border-white/12 overflow-x-auto no-scrollbar">
           {TYPE_FILTERS.map((f) => (
             <button
               key={f.slug}
               onClick={() => handleFilterChange(f.slug)}
               className={`px-8 py-3 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer ${
-                filter === f.slug ? 'bg-[#FF5A1F] text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'
+                filter === f.slug ? 'bg-brand text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               {f.label()}
@@ -294,7 +294,7 @@ function AssetsPage() {
         </div>
 
         <div className="flex items-center gap-5 w-full md:w-auto">
-          <div className="flex bg-zinc-950 p-1.5 rounded-xl border border-white/5 h-11">
+          <div className="flex bg-[#16141a] p-1.5 rounded-xl border border-white/12 h-11">
             <Button variant="ghost" size="icon" onClick={() => setView('grid')}
               className={`h-8 w-8 rounded-lg ${view === 'grid' ? 'bg-white/10 text-white' : 'text-slate-500'}`}>
               <Grid3X3 className="h-4 w-4" />
@@ -304,13 +304,13 @@ function AssetsPage() {
               <List className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex md:w-72 items-center gap-3 rounded-xl border border-white/5 bg-zinc-950 px-4 h-11 group focus-within:border-[#FF5A1F]/30 transition-all">
-            <Search className="h-4 w-4 text-slate-600" />
+          <div className="flex md:w-72 items-center gap-3 rounded-xl border border-white/12 bg-[#16141a] px-4 h-11 group focus-within:border-brand/30 transition-all">
+            <Search className="h-4 w-4 text-slate-400" />
             <input
               placeholder={t('assets.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(ITEMS_PER_PAGE); }}
-              className="bg-transparent text-sm text-white outline-none w-full placeholder:text-slate-700 font-medium"
+              className="bg-transparent text-sm text-white outline-none w-full placeholder:text-slate-500 font-medium"
             />
           </div>
         </div>
@@ -318,11 +318,11 @@ function AssetsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-32">
-          <Loader2 className="h-8 w-8 text-slate-600 animate-spin" />
+          <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
         </div>
       ) : filteredAssets.length === 0 ? (
-        <div className="text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-          <Box className="h-12 w-12 text-slate-700 mx-auto" />
+        <div className="text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+          <Box className="h-12 w-12 text-slate-500 mx-auto" />
           <p className="text-slate-500 font-medium">{t('assets.empty')}</p>
         </div>
       ) : view === 'grid' ? (
@@ -338,18 +338,18 @@ function AssetsPage() {
             <div className="flex justify-center pt-4">
               <Button onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
                 variant="ghost"
-                className="px-10 py-6 rounded-2xl border border-white/5 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
+                className="px-10 py-6 rounded-2xl border border-white/12 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
                 Xem thêm ({filteredAssets.length - visibleCount})
               </Button>
             </div>
           )}
         </>
       ) : (
-        <div className="cinematic-card overflow-hidden border-white/5 isolate">
+        <div className="cinematic-card overflow-hidden border-white/12 isolate">
           {/* Desktop table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-[#050505] text-[11px] uppercase tracking-widest font-bold text-slate-500 border-b border-white/5">
+              <thead className="bg-[#16141a] text-[11px] uppercase tracking-widest font-bold text-slate-500 border-b border-white/12">
                 <tr>
                   <th className="px-10 py-6">{t('assets.name')}</th>
                   <th className="px-10 py-6">{t('assets.type')}</th>
@@ -362,10 +362,10 @@ function AssetsPage() {
                   <tr key={asset.id} className="group hover:bg-white/[0.03] transition-all">
                     <td className="px-10 py-7">
                       <div className="flex items-center gap-5">
-                        <AssetIcon type={asset.type} className="h-6 w-6 text-[#FF5A1F]" />
-                        <span className="text-sm font-semibold text-white tracking-tight group-hover:text-[#FF5A1F] transition-all">{asset.name}</span>
+                        <AssetIcon type={asset.type} className="h-6 w-6 text-brand" />
+                        <span className="text-sm font-semibold text-white tracking-tight group-hover:text-brand transition-all">{asset.name}</span>
                         {asset.date && (
-                          <span className="text-[10px] text-slate-600 font-medium ml-2">{asset.date}</span>
+                          <span className="text-[10px] text-slate-400 font-medium ml-2">{asset.date}</span>
                         )}
                       </div>
                     </td>
@@ -374,14 +374,14 @@ function AssetsPage() {
                         {formatType(asset.type)}
                       </Badge>
                     </td>
-                    <td className="px-10 py-7 text-xs font-bold text-slate-600">{asset.size}</td>
+                    <td className="px-10 py-7 text-xs font-bold text-slate-400">{asset.size}</td>
                     <td className="px-10 py-7 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" onClick={() => handleDownload(asset)} className="h-11 w-11 rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-all">
                           <Download className="h-5 w-5" />
                         </Button>
                         <Button variant="ghost" onClick={() => handleDelete(asset)}
-                          className="h-11 w-11 rounded-xl text-slate-600 hover:text-red-400 hover:bg-red-500/5 transition-all">
+                          className="h-11 w-11 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all">
                           <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
@@ -397,7 +397,7 @@ function AssetsPage() {
               <div key={asset.id} className="p-4 space-y-3 hover:bg-white/[0.03] transition-all">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <AssetIcon type={asset.type} className="h-5 w-5 text-[#FF5A1F]" />
+                    <AssetIcon type={asset.type} className="h-5 w-5 text-brand" />
                     <span className="text-sm font-semibold text-white tracking-tight">{asset.name}</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -405,7 +405,7 @@ function AssetsPage() {
                       <Download className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" onClick={() => handleDelete(asset)}
-                      className="h-9 w-9 rounded-xl text-slate-600 hover:text-red-400">
+                      className="h-9 w-9 rounded-xl text-slate-400 hover:text-red-400">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -414,16 +414,16 @@ function AssetsPage() {
                   <Badge variant="ghost" className="text-[10px] font-bold text-slate-500 uppercase border-white/10 px-2.5 py-0.5 bg-white/5">
                     {formatType(asset.type)}
                   </Badge>
-                  <span className="font-bold text-slate-600">{asset.size}</span>
+                  <span className="font-bold text-slate-400">{asset.size}</span>
                 </div>
                 {asset.date && (
-                  <p className="text-[10px] text-slate-700 font-medium">{asset.date}</p>
+                  <p className="text-[10px] text-slate-500 font-medium">{asset.date}</p>
                 )}
               </div>
             ))}
           </div>
           {hasMore && (
-            <div className="flex justify-center py-8 border-t border-white/5">
+            <div className="flex justify-center py-8 border-t border-white/12">
               <Button onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
                 variant="ghost"
                 className="px-10 py-6 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
@@ -460,18 +460,19 @@ function AssetCard({ asset, onDelete, onDownload }: { asset: Asset; onDelete: (a
   
   return (
     <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-      className="cinematic-card group overflow-hidden flex flex-col h-full border-white/5 bg-zinc-950">
-      <div className="h-52 relative bg-[#050505] overflow-hidden">
+      className="cinematic-card group overflow-hidden flex flex-col h-full border-white/12 bg-[#16141a]">
+      <div className="h-52 relative bg-[#16141a] overflow-hidden">
         {blobUrl ? (
           isVideo ? (
             <video src={blobUrl} autoPlay muted loop playsInline
-              className="object-cover w-full h-full opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000"
+              className="object-cover w-full h-full opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-1000"
             />
           ) : (
-            <Image src={blobUrl} alt={asset.name} fill
-              className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000"
+            // Plain <img> (not next/image) — reliably renders auth-fetched blob URLs.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={blobUrl} alt={asset.name}
+              className="object-cover w-full h-full opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-1000"
               referrerPolicy="no-referrer"
-              unoptimized
             />
           )
         ) : (
@@ -479,7 +480,7 @@ function AssetCard({ asset, onDelete, onDownload }: { asset: Asset; onDelete: (a
             <AssetIcon type={asset.type} className="h-16 w-16 text-slate-900" />
           </div>
         )}
-        <div className="absolute inset-0 bg-[#FF5A1F]/20 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-4 backdrop-blur-md">
+        <div className="absolute inset-0 bg-brand/20 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-4 backdrop-blur-md">
           <Button onClick={() => onDownload(asset)} className="h-12 w-12 rounded-2xl bg-white text-black hover:scale-110 transition-transform">
             <Download className="h-6 w-6" />
           </Button>
@@ -492,11 +493,11 @@ function AssetCard({ asset, onDelete, onDownload }: { asset: Asset; onDelete: (a
       <div className="p-6 space-y-2">
         <h3 className="text-sm font-semibold text-white truncate tracking-tight">{asset.name}</h3>
         <div className="flex items-center justify-between pt-1">
-          <span className="text-[10px] font-bold uppercase text-[#FF5A1F] tracking-widest">{formatType(asset.type)}</span>
-          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{asset.size}</span>
+          <span className="text-[10px] font-bold uppercase text-brand tracking-widest">{formatType(asset.type)}</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{asset.size}</span>
         </div>
         {asset.date && (
-          <p className="text-[10px] text-slate-700 font-medium">{asset.date}</p>
+          <p className="text-[10px] text-slate-500 font-medium">{asset.date}</p>
         )}
       </div>
     </motion.div>

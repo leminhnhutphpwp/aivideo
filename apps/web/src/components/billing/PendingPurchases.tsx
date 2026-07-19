@@ -50,7 +50,7 @@ export function PendingPurchases({ onStatusChange }: PendingPurchasesProps) {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">Yêu cầu đang chờ</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Yêu cầu đang chờ</span>
         <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
       </div>
 
@@ -70,7 +70,7 @@ export function PendingPurchases({ onStatusChange }: PendingPurchasesProps) {
               className={`flex items-center justify-between p-4 rounded-2xl ${cfg.bg} border ${cfg.border}`}
             >
               <div className="flex items-center gap-3.5">
-                <div className={`h-9 w-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center`}>
+                <div className={`h-9 w-9 rounded-xl bg-white/5 border border-white/12 flex items-center justify-center`}>
                   {p.status === 'paid' ? <CheckCircle className="h-4 w-4 text-emerald-400" /> : <Clock className="h-4 w-4 text-amber-400" />}
                 </div>
                 <div>
@@ -80,16 +80,16 @@ export function PendingPurchases({ onStatusChange }: PendingPurchasesProps) {
                       <div className={`h-1 w-1 rounded-full ${cfg.dot}`} />
                       {cfg.label}
                     </span>
-                    <span className="text-[10px] text-slate-600 font-medium">{new Date(p.created_at).toLocaleString('vi-VN')}</span>
+                    <span className="text-[10px] text-slate-400 font-medium">{new Date(p.created_at).toLocaleString('vi-VN')}</span>
                     {p.paid_at && (
-                      <span className="text-[10px] text-slate-600">· Duyệt lúc {new Date(p.paid_at).toLocaleString('vi-VN')}</span>
+                      <span className="text-[10px] text-slate-400">· Duyệt lúc {new Date(p.paid_at).toLocaleString('vi-VN')}</span>
                     )}
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold text-white">{p.amount?.toLocaleString('vi-VN') || 0}đ</p>
-                <p className="text-[9px] text-slate-600">Mã: {p.transfer_code}</p>
+                <p className="text-[9px] text-slate-400">Mã: {p.transfer_code}</p>
               </div>
             </motion.div>
           );

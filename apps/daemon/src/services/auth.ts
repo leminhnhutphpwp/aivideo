@@ -19,6 +19,44 @@ function timingSafeEqualHex(a: string, b: string): boolean {
   }
 }
 
+/** Replay window (seconds) for timestamped daemon signatures. Default 300s. */
+function signatureWindowSeconds(): number {
+  const raw = Number(process.env.DAEMON_SIGNATURE_WINDOW_SECONDS);
+  return Number.isFinite(raw) && raw > 0 ? raw : 300;
+}
+
+/**
+ * Verify the Laravel→daemon control-plane signature.
+ *
+ * Preferred scheme: an `x-timestamp` header binds the signature to a time
+ * window — HMAC(`${userId}.${timestamp}`) — so a captured signature cannot be
+ * replayed indefinitely (it expires after signatureWindowSeconds()). When a
+ * timestamp is present we ONLY accept this scheme (no silent downgrade).
+ *
+ * Legacy scheme: constant HMAC(userId) with no replay protection. Retained for
+ * backward compatibility during rollout so an older control plane keeps working;
+ * disable it entirely by setting DAEMON_STRICT_SIGNATURE=1 once the cutover is done.
+ */
+export function verifyDaemonSignature(
+  userId: string,
+  signature: string,
+  timestamp: string | undefined,
+  secret: string,
+): boolean {
+  if (timestamp !== undefined && timestamp !== '') {
+    const ts = Number(timestamp);
+    if (!Number.isFinite(ts)) return false;
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (Math.abs(nowSec - ts) > signatureWindowSeconds()) return false;
+    const expected = createHmac('sha256', secret).update(`${userId}.${timestamp}`).digest('hex');
+    return timingSafeEqualHex(signature, expected);
+  }
+
+  if (process.env.DAEMON_STRICT_SIGNATURE === '1') return false;
+  const expectedLegacy = createHmac('sha256', secret).update(userId).digest('hex');
+  return timingSafeEqualHex(signature, expectedLegacy);
+}
+
 export function hashPassword(password: string): string {
   const salt = randomUUID().slice(0, 16);
   const buf = scryptSync(password, salt, 64);
@@ -56,10 +94,10 @@ export function createAuthMiddleware(db: Database.Database): RequestHandler {
 
     const userId = req.headers['x-user-id'] as string | undefined;
     const signature = req.headers['x-daemon-signature'] as string | undefined;
+    const timestamp = req.headers['x-timestamp'] as string | undefined;
     const webhookSecret = process.env.WEBHOOK_SECRET || '';
     if (userId && signature && webhookSecret) {
-      const expected = createHmac('sha256', webhookSecret).update(userId).digest('hex');
-      if (timingSafeEqualHex(signature, expected)) {
+      if (verifyDaemonSignature(userId, signature, timestamp, webhookSecret)) {
         (req as any).user = { id: userId };
         return next();
       }

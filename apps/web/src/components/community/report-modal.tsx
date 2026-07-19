@@ -57,14 +57,14 @@ export function ReportModal({ assetUuid, isOpen, onClose }: ReportModalProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-zinc-950/80 backdrop-blur-md"
+        className="absolute inset-0 bg-[#16141a]/80 backdrop-blur-md"
       />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative z-10 w-full max-w-md bg-zinc-950 border border-white/[0.08] rounded-2xl p-6"
+        className="relative z-10 w-full max-w-md bg-[#16141a] border border-white/12 rounded-2xl p-6"
       >
         <button
           onClick={onClose}
@@ -91,7 +91,7 @@ export function ReportModal({ assetUuid, isOpen, onClose }: ReportModalProps) {
                     "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
                     reason === r.value
                       ? "border-[#FF5A1F]/30 bg-[#FF5A1F]/[0.02]"
-                      : "border-white/[0.04] hover:border-white/[0.08]"
+                      : "border-white/12 hover:border-white/12"
                   )}
                 >
                   <input
@@ -111,7 +111,7 @@ export function ReportModal({ assetUuid, isOpen, onClose }: ReportModalProps) {
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="Chi tiết (tùy chọn)"
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A1F]/30 mb-4 resize-none"
+              className="w-full bg-white/[0.03] border border-white/12 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A1F]/30 mb-4 resize-none"
               rows={3}
             />
 

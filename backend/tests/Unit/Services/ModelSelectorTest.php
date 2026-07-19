@@ -178,7 +178,9 @@ class ModelSelectorTest extends TestCase
         $expected = [
             'free' => 'z-image-turbo',
             'pro' => 'qwen-image-plus',
-            'studio' => 'qwen-image-2.0-pro',
+            // Studio uses the cheaper qwen-image-2.0 ($0.035) — the -pro ($0.075) left the flat
+            // 200-credit image fee at ~6% margin (unit-economics-2026-07-18 / A1).
+            'studio' => 'qwen-image-2.0',
         ];
 
         foreach ($expected as $slug => $model) {

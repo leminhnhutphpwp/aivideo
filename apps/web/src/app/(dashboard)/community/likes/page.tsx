@@ -65,10 +65,10 @@ export default function SavedLikesPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <Link href="/community" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/5 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+            <Link href="/community" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/12 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
               <Compass className="h-4 w-4" /> Khám phá
             </Link>
-            <Link href="/community/trending" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/5 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+            <Link href="/community/trending" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/12 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
               <Trophy className="h-4 w-4" /> Bảng xếp hạng
             </Link>
             <Link href="/community/likes" className="px-4 py-2.5 rounded-xl bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/20 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
@@ -94,10 +94,10 @@ export default function SavedLikesPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-          <Archive className="h-12 w-12 text-slate-700 mx-auto" />
+        <div className="text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+          <Archive className="h-12 w-12 text-slate-500 mx-auto" />
           <p className="text-slate-500 font-medium">Chưa có tài nguyên nào được lưu</p>
-          <p className="text-xs text-slate-600 max-w-[360px] mx-auto">
+          <p className="text-xs text-slate-400 max-w-[360px] mx-auto">
             Khi bạn thả tim các tác phẩm trên Thư viện cộng đồng, chúng sẽ xuất hiện ở đây để bạn dễ dàng kế thừa sử dụng.
           </p>
           <Link href="/community" className="inline-flex h-10 px-6 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white text-xs font-bold transition-all items-center justify-center gap-2">

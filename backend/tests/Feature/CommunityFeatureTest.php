@@ -331,11 +331,15 @@ class CommunityFeatureTest extends TestCase
     }
 
     /** @test */
-    public function image_publish_allowed_when_moderation_degraded(): void
+    public function image_publish_held_for_review_when_moderation_degraded(): void
     {
+        // A degraded verdict (vision provider errored/unconfigured) must NOT silently pass as
+        // safe. The asset is published but held out of the public feed for manual review, and
+        // the creator payout is deferred until an admin approves it.
+        $this->saveSettings(['creator_payout_percent' => 25]);
         $job = $this->createImageJobWithAsset($this->proUser);
+        $balanceBefore = $this->proUser->credits;
 
-        // Fail-open: vision provider errored → degraded verdict must NOT block publish.
         $this->mock(\App\Services\DaemonClient::class, function ($mock) {
             $mock->shouldReceive('moderateImage')->once()
                 ->andReturn(['safe' => true, 'degraded' => true]);
@@ -343,11 +347,67 @@ class CommunityFeatureTest extends TestCase
 
         $response = $this->actingAs($this->proUser, 'api')
             ->patchJson("/api/render-jobs/{$job->uuid}/publish", [
-                'visibility' => 'sharing',
+                'visibility' => 'public',
             ]);
 
-        $response->assertOk()->assertJsonPath('data.visibility', 'sharing');
-        $this->assertEquals('sharing', $job->fresh()->visibility);
+        $response->assertOk()
+            ->assertJsonPath('pending_review', true)
+            ->assertJsonPath('data.moderation_status', RenderJob::MODERATION_PENDING);
+
+        $fresh = $job->fresh();
+        $this->assertEquals(RenderJob::MODERATION_PENDING, $fresh->moderation_status);
+        $this->assertEquals(0, $fresh->creator_payout, 'payout deferred until approval');
+
+        $this->proUser->refresh();
+        $this->assertEquals($balanceBefore, $this->proUser->credits);
+
+        // Held asset stays out of the public feed.
+        $feed = $this->getJson('/api/v1/community/assets')->assertOk()->json('data.items');
+        $this->assertNotContains($job->uuid, array_column($feed, 'uuid'));
+    }
+
+    /** @test */
+    public function approving_a_held_public_asset_releases_it_and_grants_deferred_payout(): void
+    {
+        $this->saveSettings(['creator_payout_percent' => 25]);
+        $job = $this->createCompletedJob($this->proUser, 2000);
+        $balanceBefore = $this->proUser->credits;
+
+        // Simulate the held-publish path (degraded verdict).
+        $job->publish('public', [], RenderJob::MODERATION_PENDING);
+        $this->proUser->refresh();
+        $this->assertEquals($balanceBefore, $this->proUser->credits, 'no payout while held');
+
+        $job->approveModeration();
+
+        $fresh = $job->fresh();
+        $this->assertEquals(RenderJob::MODERATION_APPROVED, $fresh->moderation_status);
+        $this->assertEquals(500, $fresh->creator_payout); // 2000 * 25%
+        $this->proUser->refresh();
+        $this->assertEquals($balanceBefore + 500, $this->proUser->credits);
+
+        // Now visible in the public feed.
+        $feed = $this->getJson('/api/v1/community/assets')->assertOk()->json('data.items');
+        $this->assertContains($job->uuid, array_column($feed, 'uuid'));
+    }
+
+    /** @test */
+    public function rejecting_a_held_asset_hides_it_and_pays_nothing(): void
+    {
+        $this->saveSettings(['creator_payout_percent' => 25]);
+        $job = $this->createCompletedJob($this->proUser, 2000);
+        $balanceBefore = $this->proUser->credits;
+
+        $job->publish('public', [], RenderJob::MODERATION_PENDING);
+        $job->rejectModeration();
+
+        $fresh = $job->fresh();
+        $this->assertEquals(RenderJob::MODERATION_REJECTED, $fresh->moderation_status);
+        $this->proUser->refresh();
+        $this->assertEquals($balanceBefore, $this->proUser->credits);
+
+        $feed = $this->getJson('/api/v1/community/assets')->assertOk()->json('data.items');
+        $this->assertNotContains($job->uuid, array_column($feed, 'uuid'));
     }
 
     /** @test */

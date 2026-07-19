@@ -72,12 +72,12 @@ export function CustomSelect({ value, onChange, options, placeholder, className,
         className={cn(
           "w-full flex items-center justify-between gap-1.5 rounded-xl transition-all duration-200 cursor-pointer outline-none",
           pill
-            ? "h-8 px-3 text-[11px] bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] focus:border-[#FF5A1F]/50"
-            : "h-9 px-3 text-[11px] bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] focus:border-[#FF5A1F]/50",
+            ? "h-8 px-3 text-[11px] bg-white/[0.04] border border-white/12 hover:border-white/[0.14] focus:border-[#FF5A1F]/50"
+            : "h-9 px-3 text-[11px] bg-white/[0.04] border border-white/12 hover:border-white/[0.14] focus:border-[#FF5A1F]/50",
           open && "border-[#FF5A1F]/50",
         )}
       >
-        <span className={cn("truncate text-left flex-1", value ? "text-slate-300" : "text-slate-600")}>
+        <span className={cn("truncate text-left flex-1", value ? "text-slate-300" : "text-slate-400")}>
           {display}
         </span>
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.15 }}>
@@ -92,7 +92,7 @@ export function CustomSelect({ value, onChange, options, placeholder, className,
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.12, ease: 'easeOut' }}
           style={dropdownStyle}
-          className="z-[999] min-w-[140px] bg-[#1C1C20] border border-white/[0.08] rounded-xl shadow-md py-1 overflow-y-auto max-h-[240px] backdrop-blur-2xl [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+          className="z-[999] min-w-[140px] bg-[#1C1C20] border border-white/12 rounded-xl shadow-md py-1 overflow-y-auto max-h-[240px] backdrop-blur-2xl [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
         >
           {items.map((item) => (
             <button

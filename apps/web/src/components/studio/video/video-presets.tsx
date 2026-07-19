@@ -49,12 +49,12 @@ export function VideoPresets({
   }, [examplePreset]);
 
   return (
-    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-3 md:p-4 space-y-2">
+    <div className="bg-[#16141a] border border-white/12 rounded-2xl p-3 md:p-4 space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-600 uppercase tracking-widest">
+        <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
           <Zap className="h-3 w-3" /> Mẫu có sẵn — chọn nhanh
         </div>
-        {searchable && <span className="text-[9px] text-slate-600">{filtered.length}/{directionPresets.length}</span>}
+        {searchable && <span className="text-[9px] text-slate-400">{filtered.length}/{directionPresets.length}</span>}
       </div>
 
       {searchable && (
@@ -64,7 +64,7 @@ export function VideoPresets({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Tìm mẫu..."
-            className="w-full bg-transparent text-[11px] text-white placeholder:text-slate-600 outline-none"
+            className="w-full bg-transparent text-[11px] text-white placeholder:text-slate-400 outline-none"
           />
           {query && (
             <button onClick={() => setQuery('')} className="text-slate-500 hover:text-white shrink-0"><X className="h-3 w-3" /></button>
@@ -78,10 +78,10 @@ export function VideoPresets({
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1.5 md:gap-2">
         {visible.map((preset) => (
           <button key={preset.id} onClick={() => onApplyPreset(targetSceneId, preset)}
-            className={`rounded-xl p-2 md:p-3 text-left transition-all cursor-pointer group relative ${isActivePreset(preset) ? 'border-[#FF5A1F] bg-[#FF5A1F]/5' : 'border-white/5 bg-white/[0.03] hover:border-[#FF5A1F]/30 hover:bg-white/[0.05]'} border`}>
+            className={`rounded-xl p-2 md:p-3 text-left transition-all cursor-pointer group relative ${isActivePreset(preset) ? 'border-[#FF5A1F] bg-[#FF5A1F]/5' : 'border-white/12 bg-white/[0.03] hover:border-[#FF5A1F]/30 hover:bg-white/[0.05]'} border`}>
             <preset.icon className={`h-5 w-5 transition-colors mb-1.5 ${isActivePreset(preset) ? 'text-[#FF5A1F]' : 'text-slate-400 group-hover:text-[#FF5A1F]'}`} />
             <div className={`text-[10px] font-bold transition-colors ${isActivePreset(preset) ? 'text-[#FF5A1F]' : 'text-white group-hover:text-[#FF5A1F]'}`}>{preset.label}</div>
-            <div className="text-[9px] text-slate-600 mt-0.5 leading-relaxed line-clamp-3">{preset.desc}</div>
+            <div className="text-[9px] text-slate-400 mt-0.5 leading-relaxed line-clamp-3">{preset.desc}</div>
             {preset.examplePrompt && (
               <span
                 onClick={(e) => { e.stopPropagation(); setExamplePreset(preset); }}
@@ -111,17 +111,17 @@ export function VideoPresets({
         {examplePreset && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#16141a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
             onClick={() => { setExamplePreset(null); }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="w-full max-w-lg bg-zinc-900 border border-white/[0.08] rounded-2xl shadow-md overflow-hidden"
+              className="w-full max-w-lg bg-[#1f1c25] border border-white/12 rounded-2xl shadow-md overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/12">
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-cyan-400" />
                   <span className="text-xs font-semibold text-white">Prompt mẫu · {examplePreset.label}</span>
@@ -146,14 +146,14 @@ export function VideoPresets({
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.04] bg-white/[0.01]">
+              <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/12 bg-white/[0.01]">
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(examplePreset.examplePrompt || '');
                     addToast('Đã sao chép (Tiếng Anh)', 'success');
                     setExamplePreset(null);
                   }}
-                  className="h-9 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 text-xs font-medium border border-white/[0.08] transition-colors cursor-pointer"
+                  className="h-9 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 text-xs font-medium border border-white/12 transition-colors cursor-pointer"
                 >
                   Copy EN
                 </button>

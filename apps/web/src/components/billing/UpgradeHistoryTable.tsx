@@ -88,9 +88,9 @@ export function UpgradeHistoryTable({ onUpgradeStatusChange }: UpgradeHistoryTab
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h3 className="text-xl font-bold text-white tracking-tight">{t('billing.upgradeHistory')}</h3>
-          <p className="text-xs text-slate-600 font-medium">Lịch sử nâng cấp và thanh toán</p>
+          <p className="text-xs text-slate-400 font-medium">Lịch sử nâng cấp và thanh toán</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+        <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
           <Clock className="h-3.5 w-3.5" />
           {historyStart}-{historyEnd} / {upgradeHistory.length}
         </div>
@@ -114,14 +114,14 @@ export function UpgradeHistoryTable({ onUpgradeStatusChange }: UpgradeHistoryTab
               className={`group flex flex-col sm:flex-row sm:items-center gap-4 p-4 md:p-5 rounded-2xl ${cfg.bg} border ${cfg.border} hover:bg-white/[0.02] transition-all`}
             >
               <div className="flex items-center gap-4 flex-1">
-                <div className={`h-10 w-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0`}>
+                <div className={`h-10 w-10 rounded-xl bg-white/5 border border-white/12 flex items-center justify-center shrink-0`}>
                   <ArrowRight className="h-4 w-4 text-slate-500 rotate-[-30deg]" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-white tracking-tight truncate">
-                    {upgrade.from_plan?.name || 'Free'} <span className="text-slate-600 mx-1">→</span> {upgrade.to_plan?.name}
+                    {upgrade.from_plan?.name || 'Free'} <span className="text-slate-400 mx-1">→</span> {upgrade.to_plan?.name}
                   </p>
-                  <p className="text-[11px] text-slate-600 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
                     {upgrade.created_at ? new Date(upgrade.created_at).toLocaleDateString('vi-VN') : '—'}
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export function UpgradeHistoryTable({ onUpgradeStatusChange }: UpgradeHistoryTab
                 <p className="text-sm font-bold text-white">
                   {upgrade.amount ? formatCurrency(upgrade.amount) : '—'}
                 </p>
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-950/20 ${cfg.text}`}>
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#16141a]/20 ${cfg.text}`}>
                   <div className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
                   <span className="text-[10px] font-bold uppercase tracking-wider">{cfg.label}</span>
                 </div>
@@ -147,13 +147,13 @@ export function UpgradeHistoryTable({ onUpgradeStatusChange }: UpgradeHistoryTab
           <button
             onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
             disabled={historyPage <= 1}
-            className="h-9 w-9 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="h-9 w-9 rounded-xl bg-[#16141a] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           {getHistoryPageNumbers().map((p, i) =>
             p === '...' ? (
-              <span key={`dots-${i}`} className="h-9 w-9 flex items-center justify-center text-slate-600 text-xs font-bold">...</span>
+              <span key={`dots-${i}`} className="h-9 w-9 flex items-center justify-center text-slate-400 text-xs font-bold">...</span>
             ) : (
               <button
                 key={p}
@@ -161,7 +161,7 @@ export function UpgradeHistoryTable({ onUpgradeStatusChange }: UpgradeHistoryTab
                 className={`h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all cursor-pointer ${
                   p === historyPage
                     ? 'bg-[#FF5A1F] text-white shadow-sm shadow-[#FF5A1F]/20'
-                    : 'bg-zinc-950 border border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'bg-[#16141a] border border-white/12 text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {p}
@@ -171,7 +171,7 @@ export function UpgradeHistoryTable({ onUpgradeStatusChange }: UpgradeHistoryTab
           <button
             onClick={() => setHistoryPage(p => Math.min(totalHistoryPages, p + 1))}
             disabled={historyPage >= totalHistoryPages}
-            className="h-9 w-9 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className="h-9 w-9 rounded-xl bg-[#16141a] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

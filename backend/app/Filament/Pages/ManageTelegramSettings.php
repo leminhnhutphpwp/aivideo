@@ -5,16 +5,19 @@ namespace App\Filament\Pages;
 use App\Services\TelegramService;
 use App\Settings\TelegramSettings;
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -44,6 +47,11 @@ class ManageTelegramSettings extends Page
         return 'Cấu hình Telegram Bot';
     }
 
+    public function getSubheading(): ?string
+    {
+        return 'Nhận thông báo qua Telegram khi có yêu cầu nạp credits hoặc nâng cấp gói.';
+    }
+
     public function mount(): void
     {
         $this->fillForm();
@@ -59,34 +67,59 @@ class ManageTelegramSettings extends Page
             }
 
             $this->form->fill([
+                'enabled' => $settings->enabled,
                 'bot_token' => $settings->bot_token,
                 'chat_ids' => $settings->chat_ids,
+                'notify_credit_purchase' => $settings->notify_credit_purchase,
+                'notify_plan_upgrade' => $settings->notify_plan_upgrade,
             ]);
         } catch (Throwable) {
+            // Settings row missing (e.g. migration not run yet) — show safe defaults.
             $this->form->fill([
+                'enabled' => false,
                 'bot_token' => '',
                 'chat_ids' => [],
+                'notify_credit_purchase' => true,
+                'notify_plan_upgrade' => true,
             ]);
         }
     }
 
     public function save(): void
     {
-        $this->validate([
-            'data.bot_token' => ['required', 'regex:/^\d+:[\w-]+$/'],
+        $enabled = (bool) ($this->data['enabled'] ?? false);
+
+        $rules = [
+            'data.enabled' => ['boolean'],
+            'data.notify_credit_purchase' => ['boolean'],
+            'data.notify_plan_upgrade' => ['boolean'],
+            'data.bot_token' => ['nullable', 'regex:/^\d+:[\w-]+$/'],
             'data.chat_ids' => ['nullable', 'array'],
             'data.chat_ids.*' => ['string'],
-        ], [
-            'data.bot_token.required' => 'Bot Token là bắt buộc.',
+        ];
+
+        // When notifications are turned on, credentials become mandatory.
+        if ($enabled) {
+            $rules['data.bot_token'] = ['required', 'regex:/^\d+:[\w-]+$/'];
+            $rules['data.chat_ids'] = ['required', 'array', 'min:1'];
+        }
+
+        $this->validate($rules, [
+            'data.bot_token.required' => 'Bot Token là bắt buộc khi bật thông báo.',
             'data.bot_token.regex' => 'Bot Token không đúng định dạng (vd: 123456:ABCdef...).',
+            'data.chat_ids.required' => 'Cần chọn ít nhất 1 Chat ID khi bật thông báo.',
+            'data.chat_ids.min' => 'Cần chọn ít nhất 1 Chat ID khi bật thông báo.',
         ]);
 
         try {
             $data = $this->data;
 
             $settings = app(TelegramSettings::class);
+            $settings->enabled = (bool) ($data['enabled'] ?? false);
             $settings->bot_token = $data['bot_token'] ?? '';
             $settings->chat_ids = array_values(array_filter(array_map('strval', $data['chat_ids'] ?? [])));
+            $settings->notify_credit_purchase = (bool) ($data['notify_credit_purchase'] ?? true);
+            $settings->notify_plan_upgrade = (bool) ($data['notify_plan_upgrade'] ?? true);
             $settings->save();
 
             Notification::make()
@@ -94,10 +127,11 @@ class ManageTelegramSettings extends Page
                 ->success()
                 ->send();
         } catch (Throwable $e) {
-            logger('TelegramSettings save error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            // Never log the token — message/trace could embed it via an HTTP URL.
+            logger('TelegramSettings save error', ['error' => $e->getMessage()]);
             Notification::make()
                 ->title('Lỗi khi lưu cấu hình')
-                ->body($e->getMessage())
+                ->body('Không thể lưu cấu hình. Vui lòng kiểm tra log hệ thống.')
                 ->danger()
                 ->send();
         }
@@ -148,38 +182,82 @@ class ManageTelegramSettings extends Page
     {
         return $schema
             ->components([
-                \Filament\Schemas\Components\Section::make('Telegram Bot')
-                    ->description('Cấu hình Bot Telegram để nhận thông báo khi có yêu cầu nạp credits mới.')
+                Section::make('Kích hoạt thông báo')
+                    ->description('Bật/tắt toàn bộ thông báo Telegram. Khi tắt, hệ thống sẽ không gửi bất kỳ thông báo tự động nào.')
+                    ->icon('heroicon-o-power')
                     ->components([
-                        Forms\Components\TextInput::make('bot_token')
+                        Toggle::make('enabled')
+                            ->label('Bật thông báo Telegram')
+                            ->helperText('Khi bật, cần khai báo Bot Token và ít nhất 1 Chat ID.')
+                            ->live(),
+                        Placeholder::make('bot_info')
+                            ->label('Trạng thái Bot')
+                            ->content(function () {
+                                $telegram = app(TelegramService::class);
+                                $info = $telegram->getBotInfo();
+                                if ($info) {
+                                    $name = $info['first_name'] ?? 'Unknown';
+                                    $username = $info['username'] ?? 'unknown';
+
+                                    return "✅ Hoạt động: @{$username} ({$name})";
+                                }
+
+                                return '❌ Chưa cấu hình hoặc token không hợp lệ';
+                            }),
+                    ])
+                    ->columns(2),
+
+                Section::make('Kết nối Bot')
+                    ->description('Thông tin xác thực với Telegram Bot API.')
+                    ->icon('heroicon-o-key')
+                    ->components([
+                        TextInput::make('bot_token')
                             ->label('Bot Token')
                             ->placeholder('1234567890:ABCdefGHIjklmNOPqrstUVwxyz')
                             ->password()
                             ->revealable()
-                            ->required()
+                            ->autocomplete('off')
+                            ->required(fn (Get $get): bool => (bool) $get('enabled'))
                             ->rule('regex:/^\d+:[\w-]+$/')
-                            ->helperText('Lấy từ @BotFather trên Telegram.'),
+                            ->helperText('Lấy từ @BotFather trên Telegram. Token được ẩn và không ghi vào log.'),
+                    ]),
+
+                Section::make('Kênh nhận thông báo')
+                    ->description('Danh sách Chat/Group sẽ nhận thông báo. Hãy gửi "/start" tới bot trong nhóm trước khi đồng bộ.')
+                    ->icon('heroicon-o-user-group')
+                    ->components([
                         Select::make('chat_ids')
                             ->label('Chat IDs')
                             ->multiple()
                             ->options(fn () => $this->chatOptions)
                             ->searchable()
+                            ->required(fn (Get $get): bool => (bool) $get('enabled'))
                             ->hintAction(
                                 Action::make('syncChats')
                                     ->label('Đồng bộ danh sách chat')
                                     ->icon('heroicon-o-arrow-path')
                                     ->action(function (Get $get, Set $set) {
                                         $token = $get('bot_token');
-                                        if (!$token) {
+                                        if (! $token) {
                                             Notification::make()
                                                 ->title('Vui lòng nhập Bot Token trước')
                                                 ->warning()
                                                 ->send();
+
                                             return;
                                         }
 
-                                        $response = Http::timeout(10)
-                                            ->get("https://api.telegram.org/bot{$token}/getUpdates");
+                                        try {
+                                            $response = Http::timeout(10)
+                                                ->get("https://api.telegram.org/bot{$token}/getUpdates");
+                                        } catch (Throwable) {
+                                            Notification::make()
+                                                ->title('Không kết nối được tới Telegram API')
+                                                ->danger()
+                                                ->send();
+
+                                            return;
+                                        }
 
                                         $updates = $response->json('result') ?? [];
 
@@ -190,7 +268,7 @@ class ManageTelegramSettings extends Page
                                                 ?? $update['channel_post']['chat']
                                                 ?? $update['my_chat_member']['chat']
                                                 ?? null;
-                                            if ($chat && !isset($seen[$chat['id']])) {
+                                            if ($chat && ! isset($seen[$chat['id']])) {
                                                 $seen[$chat['id']] = true;
                                                 $title = $chat['title'] ?? $chat['first_name'] ?? "Chat {$chat['id']}";
                                                 $options[(string) $chat['id']] = "{$title} ({$chat['id']})";
@@ -203,6 +281,7 @@ class ManageTelegramSettings extends Page
                                                 ->body('Hãy gửi tin nhắn "/start" vào bot trước.')
                                                 ->warning()
                                                 ->send();
+
                                             return;
                                         }
 
@@ -217,19 +296,20 @@ class ManageTelegramSettings extends Page
                                     })
                             )
                             ->helperText('Chọn các chat sẽ nhận thông báo. Bấm nút đồng bộ để lấy danh sách từ API.'),
-                        Forms\Components\Placeholder::make('bot_info')
-                            ->label('Trạng thái Bot')
-                            ->content(function () {
-                                $telegram = app(TelegramService::class);
-                                $info = $telegram->getBotInfo();
-                                if ($info) {
-                                    $name = $info['first_name'] ?? 'Unknown';
-                                    $username = $info['username'] ?? 'unknown';
-                                    return "✅ Hoạt động: @{$username} ({$name})";
-                                }
-                                return '❌ Chưa cấu hình hoặc token không hợp lệ';
-                            }),
                     ]),
+
+                Section::make('Sự kiện gửi thông báo')
+                    ->description('Chọn loại sự kiện sẽ kích hoạt thông báo Telegram.')
+                    ->icon('heroicon-o-bell-alert')
+                    ->components([
+                        Toggle::make('notify_credit_purchase')
+                            ->label('Yêu cầu nạp credits')
+                            ->helperText('Gửi thông báo khi người dùng tạo yêu cầu nạp credits.'),
+                        Toggle::make('notify_plan_upgrade')
+                            ->label('Yêu cầu nâng cấp gói')
+                            ->helperText('Gửi thông báo khi người dùng tạo yêu cầu nâng cấp gói.'),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -242,13 +322,15 @@ class ManageTelegramSettings extends Page
                 ->color('success')
                 ->requiresConfirmation()
                 ->modalHeading('Gửi tin nhắn test')
-                ->modalDescription('Bot sẽ gửi tin nhắn test đến tất cả chat IDs đã cấu hình.')
+                ->modalDescription('Bot sẽ gửi tin nhắn test đến tất cả chat IDs đã cấu hình (bỏ qua công tắc bật/tắt).')
                 ->action(function (TelegramService $telegram) {
-                    if (!$telegram->isConfigured()) {
+                    if (! $telegram->isConfigured()) {
                         Notification::make()
                             ->title('Chưa cấu hình Bot Token hoặc Chat IDs')
+                            ->body('Hãy lưu cấu hình trước khi gửi tin nhắn test.')
                             ->danger()
                             ->send();
+
                         return;
                     }
 
@@ -277,6 +359,7 @@ class ManageTelegramSettings extends Page
                             ->title('Không tìm thấy update nào. Gửi tin nhắn "/start" vào bot trước.')
                             ->warning()
                             ->send();
+
                         return;
                     }
 
@@ -291,6 +374,7 @@ class ManageTelegramSettings extends Page
                             ->title('Không tìm thấy chat nào.')
                             ->warning()
                             ->send();
+
                         return;
                     }
 

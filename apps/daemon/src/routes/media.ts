@@ -1082,6 +1082,16 @@ Respond with ONLY this JSON, no markdown:
         .catch((err: any) => {
           task.status = 'failed';
           const errorCode = err.code || extractProviderErrorCode(err.message);
+          // Log the RAW provider error — it is stored on the task but sanitized before it reaches
+          // the frontend, so without this line quota/billing/provider failures are undiagnosable
+          // from `docker logs` (e.g. DashScope 403 AllocationQuota.FreeTierOnly).
+          logger.error('MEDIA', 'Render task failed', {
+            taskId,
+            model: (task as any).model,
+            status: err.status,
+            code: errorCode,
+            message: String(err?.message ?? err).slice(0, 500),
+          });
           task.error = { message: err.message, status: err.status || 400, ...(errorCode ? { code: errorCode } : {}) };
           task.endedAt = Date.now();
           persistMediaTask(task);

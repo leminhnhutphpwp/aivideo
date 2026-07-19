@@ -101,7 +101,7 @@ export default function NotificationDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="h-8 w-8 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
-        <p className="text-xs text-slate-600 font-medium mt-4">Đang tải thông báo...</p>
+        <p className="text-xs text-slate-400 font-medium mt-4">Đang tải thông báo...</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function NotificationDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Bell className="h-12 w-12 text-slate-800 mb-4" />
-        <p className="text-sm text-slate-600 font-medium">Không tìm thấy thông báo</p>
+        <p className="text-sm text-slate-400 font-medium">Không tìm thấy thông báo</p>
         <button
           onClick={() => router.push('/notifications')}
           className="mt-4 h-9 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2"
@@ -146,7 +146,7 @@ export default function NotificationDetailPage() {
         className="space-y-6"
       >
         {/* Header card */}
-        <div className="p-5 md:p-6 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/5">
+        <div className="p-5 md:p-6 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/12">
           <div className="flex items-start gap-4">
             <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
               <Icon className="h-6 w-6" />
@@ -163,13 +163,13 @@ export default function NotificationDetailPage() {
               <h1 className="text-xl md:text-2xl font-display font-bold text-white tracking-tight mt-2 leading-snug">
                 {notif.title}
               </h1>
-              <div className="flex items-center gap-3 mt-3 text-[10px] text-slate-600">
+              <div className="flex items-center gap-3 mt-3 text-[10px] text-slate-400">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {notif.sent_at ? new Date(notif.sent_at).toLocaleString('vi-VN') : ''}
                 </span>
                 {notif.read_at && (
-                  <span className="flex items-center gap-1 text-slate-700">
+                  <span className="flex items-center gap-1 text-slate-500">
                     <Check className="h-3 w-3" />
                     Đã đọc
                   </span>
@@ -180,7 +180,7 @@ export default function NotificationDetailPage() {
         </div>
 
         {/* Body card */}
-        <div className="p-5 md:p-6 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/5">
+        <div className="p-5 md:p-6 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/12">
           <div
             className="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: notif.body }}

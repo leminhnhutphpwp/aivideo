@@ -31,7 +31,7 @@ export function ToastContainer() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border ${borderMap[toast.variant]} bg-zinc-950/90 backdrop-blur-xl px-5 py-4 min-w-[320px] max-w-[420px] shadow-md`}
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border ${borderMap[toast.variant]} bg-[#16141a]/90 backdrop-blur-xl px-5 py-4 min-w-[320px] max-w-[420px] shadow-md`}
           >
             {iconMap[toast.variant]}
             <div className="flex-1 min-w-0">
@@ -47,7 +47,7 @@ export function ToastContainer() {
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-slate-600 hover:text-white transition-colors shrink-0"
+              className="text-slate-400 hover:text-white transition-colors shrink-0"
             >
               <X className="h-4 w-4" />
             </button>

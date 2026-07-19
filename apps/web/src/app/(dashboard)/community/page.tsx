@@ -130,13 +130,13 @@ function CommunityContent() {
             </Link>
             <Link
               href="/community/trending"
-              className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/5 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/12 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2"
             >
               <Trophy className="h-4 w-4" /> Bảng xếp hạng
             </Link>
             <Link
               href="/community/likes"
-              className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/5 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/12 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2"
             >
               <Heart className="h-4 w-4" /> Đã lưu
             </Link>
@@ -152,7 +152,7 @@ function CommunityContent() {
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(ITEMS_PER_PAGE); }}
             placeholder="Tìm ý tưởng, prompt, creator..."
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-white/[0.05] bg-zinc-950/80 text-sm text-slate-300 outline-none focus:border-[#FF5A1F]/30 focus:shadow-[0_0_20px_rgba(255,90,31,0.04)] transition-all font-medium"
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-white/12 bg-[#16141a]/80 text-sm text-slate-300 outline-none focus:border-[#FF5A1F]/30 focus:shadow-[0_0_20px_rgba(255,90,31,0.04)] transition-all font-medium"
           />
           {searchQuery && (
             <button
@@ -187,7 +187,7 @@ function CommunityContent() {
               "shrink-0 h-9 px-4 rounded-full border text-xs font-bold transition-all uppercase tracking-wider cursor-pointer",
               selectedStyle === style.id
                 ? "bg-[#FF5A1F] border-[#FF5A1F] text-white shadow-[0_4px_12px_rgba(255,90,31,0.25)]"
-                : "bg-white/[0.02] border-white/5 hover:border-white/15 text-slate-400 hover:text-white"
+                : "bg-white/[0.02] border-white/12 hover:border-white/15 text-slate-400 hover:text-white"
             )}
           >
             {style.label}
@@ -215,26 +215,26 @@ function CommunityContent() {
           {hasMore && (
             <div className="flex justify-center pt-8">
               <button onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
-                className="px-10 py-6 rounded-2xl border border-white/5 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
+                className="px-10 py-6 rounded-2xl border border-white/12 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
                 Xem thêm ({filteredAssets.length - visibleCount})
               </button>
             </div>
           )}
         </>
       ) : (
-        <div className="text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-          <AlertCircle className="h-12 w-12 text-slate-700 mx-auto" />
+        <div className="text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+          <AlertCircle className="h-12 w-12 text-slate-500 mx-auto" />
           {hasActiveFilter ? (
             <>
               <p className="text-slate-500 font-medium">Không tìm thấy kết quả phù hợp</p>
-              <p className="text-xs text-slate-600 max-w-[320px] mx-auto">
+              <p className="text-xs text-slate-400 max-w-[320px] mx-auto">
                 Thử tìm từ khóa khác hoặc lọc lại theo các nhóm phong cách khác xem nhé.
               </p>
             </>
           ) : (
             <>
               <p className="text-slate-500 font-medium">Chưa có tác phẩm nào</p>
-              <p className="text-xs text-slate-600 max-w-[320px] mx-auto">
+              <p className="text-xs text-slate-400 max-w-[320px] mx-auto">
                 Cộng đồng chưa có tác phẩm nào được chia sẻ. Hãy là người đầu tiên tạo và đăng tải nhé!
               </p>
             </>

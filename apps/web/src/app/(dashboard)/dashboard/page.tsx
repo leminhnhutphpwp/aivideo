@@ -246,15 +246,15 @@ export default function DashboardPage() {
   if (!mounted) {
     return (
       <div className="flex flex-col gap-6 pb-20 animate-pulse">
-        <div className="h-[320px] rounded-2xl bg-white/[0.02] border border-white/5" />
+        <div className="h-[320px] rounded-2xl bg-white/[0.02] border border-white/12" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-white/[0.02] border border-white/5" />
+            <div key={i} className="h-24 rounded-2xl bg-white/[0.02] border border-white/12" />
           ))}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-4 auto-rows-[180px]">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-2xl bg-white/[0.02] border border-white/5" style={{ gridColumn: `span ${i === 0 ? 6 : 3}` }} />
+            <div key={i} className="rounded-2xl bg-white/[0.02] border border-white/12" style={{ gridColumn: `span ${i === 0 ? 6 : 3}` }} />
           ))}
         </div>
       </div>
@@ -331,7 +331,7 @@ export default function DashboardPage() {
                     const info = ASPECT_LABELS[r];
                     const Icon = info.icon;
                     return (
-                      <div key={r} className="hidden md:flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                      <div key={r} className="hidden md:flex items-center gap-1 px-2 py-1 rounded-lg bg-white/[0.03] border border-white/12 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
                         <Icon className="h-3 w-3" />
                         <span>{r}</span>
                       </div>
@@ -370,7 +370,7 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ delay: 0.45 + i * 0.05, duration: 0.4 }}
-                    className={cn('group relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all duration-300 cursor-pointer', colMap[cs] || 'col-span-1', rowMap[rs] || 'row-span-1')}
+                    className={cn('group relative rounded-2xl overflow-hidden border border-white/12 hover:border-white/15 transition-all duration-300 cursor-pointer', colMap[cs] || 'col-span-1', rowMap[rs] || 'row-span-1')}
                     onMouseEnter={() => setHoveredShowcase(itemKey)}
                     onMouseLeave={() => setHoveredShowcase(null)}
                     style={{ background: item.style }}
@@ -400,13 +400,13 @@ export default function DashboardPage() {
                       {/* Dark overlay for readability */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       {/* Aspect ratio badge */}
-                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-950/40 backdrop-blur-sm">
+                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#16141a]/40 backdrop-blur-sm">
                         <RatioIcon className="h-2.5 w-2.5 text-white/60" />
                         <span className="text-[8px] font-bold text-white/70 uppercase tracking-wider">{item.ratio}</span>
                       </div>
                       {/* Type badge */}
                       <div className="absolute top-2.5 left-2.5">
-                        <span className="px-2 py-0.5 rounded-full bg-zinc-950/40 backdrop-blur-sm text-[8px] font-bold text-white/80 uppercase tracking-wider">{item.type}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-[#16141a]/40 backdrop-blur-sm text-[8px] font-bold text-white/80 uppercase tracking-wider">{item.type}</span>
                       </div>
                       {/* Bottom info */}
                       <div className="absolute inset-x-0 bottom-0 p-3">
@@ -443,9 +443,9 @@ export default function DashboardPage() {
           />
 
           {projects.length === 0 ? (
-            <div className="p-6 md:p-6 rounded-2xl bg-[#090909] border border-dashed border-white/[0.08] flex flex-col items-center justify-center text-center gap-4 min-h-[200px] w-full">
+            <div className="p-6 md:p-6 rounded-2xl bg-[#1f1c25] border border-dashed border-white/12 flex flex-col items-center justify-center text-center gap-4 min-h-[200px] w-full">
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1 }} className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#FF5A1F]/20 to-[#FF5A1F]/5 flex items-center justify-center"><FolderOpen className="h-7 w-7 text-[#FF5A1F]/50" /></motion.div>
-              <div className="space-y-1"><p className="text-sm font-semibold text-white">{t('dashboard.noProjects')}</p><p className="text-xs text-slate-600">Bắt đầu tạo video đầu tiên của bạn</p></div>
+              <div className="space-y-1"><p className="text-sm font-semibold text-white">{t('dashboard.noProjects')}</p><p className="text-xs text-slate-400">Bắt đầu tạo video đầu tiên của bạn</p></div>
               <Link href="/studio"><Button className="h-10 px-6 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white font-bold text-xs shadow-sm shadow-[#FF5A1F]/20"><Wand2 className="h-4 w-4 mr-1.5" />{t('dashboard.createFirstProject')}</Button></Link>
             </div>
           ) : (
@@ -472,10 +472,10 @@ export default function DashboardPage() {
                 { icon: Crown, value: planName, label: 'Gói', color: '#F59E0B', href: '/billing', isStr: true },
               ].map((card) => (
                 <Link key={card.label} href={card.href} className="group block">
-                  <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-[#090909] border border-white/[0.06] hover:border-white/15 transition-all h-full">
+                  <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-[#1f1c25] border border-white/12 hover:border-white/15 transition-all h-full">
                     <div className="flex items-start justify-between">
                       <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${card.color}15` }}><card.icon className="h-4 w-4" style={{ color: card.color }} /></div>
-                      <ArrowUpRight className="h-3.5 w-3.5 text-slate-700 group-hover:text-white transition-colors" />
+                      <ArrowUpRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-white transition-colors" />
                     </div>
                     <div className="mt-1">
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{card.label}</p>
@@ -486,7 +486,7 @@ export default function DashboardPage() {
               ))}
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95 }} className="p-4 rounded-2xl bg-[#090909] border border-white/[0.06]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95 }} className="p-4 rounded-2xl bg-[#1f1c25] border border-white/12">
               <div className="flex items-center justify-between mb-3"><div className="flex items-center gap-2"><Library className="h-3.5 w-3.5 text-[#FF8A5B]" /><h3 className="text-xs font-bold text-white">Thư viện</h3></div><Link href="/assets"><span className="text-[9px] font-bold text-[#FF5A1F] uppercase tracking-wider hover:underline">Xem</span></Link></div>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -494,10 +494,10 @@ export default function DashboardPage() {
                   { label: 'Image', count: assetsSummary.image, icon: Image, color: '#FF5A1F' },
                   { label: 'Audio', count: assetsSummary.audio, icon: Music, color: '#FF5A1F' },
                 ].map((item) => (
-                  <div key={item.label} className="py-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-center group hover:border-white/10 transition-all">
+                  <div key={item.label} className="py-2 rounded-lg bg-white/[0.02] border border-white/12 text-center group hover:border-white/10 transition-all">
                     <div className="h-7 w-7 rounded-lg mx-auto mb-1 flex items-center justify-center" style={{ backgroundColor: `${item.color}15` }}><item.icon className="h-3.5 w-3.5" style={{ color: item.color }} /></div>
                     <p className="text-sm font-bold text-white">{item.count}</p>
-                    <p className="text-[8px] font-bold text-slate-600 uppercase tracking-wider">{item.label}</p>
+                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</p>
                   </div>
                 ))}
               </div>
@@ -506,7 +506,7 @@ export default function DashboardPage() {
 
           {/* COL 2: Activity Center */}
           <div className="space-y-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="h-full flex flex-col p-4 rounded-2xl bg-[#090909] border border-white/[0.06]">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="h-full flex flex-col p-4 rounded-2xl bg-[#1f1c25] border border-white/12">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2"><History className="h-3.5 w-3.5 text-[#FF8A5B]" /><h3 className="text-xs font-bold text-white">Nhật ký hoạt động</h3></div>
               </div>
@@ -527,14 +527,14 @@ export default function DashboardPage() {
                         <p className="text-[11px] text-white">
                           <span className="font-medium text-slate-300">{activity.user?.name || activity.user}</span> {activity.action || 'đã tạo'} <span className="font-bold">{activity.target || desc}</span>
                         </p>
-                        <p className="text-[9px] text-slate-600 mt-0.5">{activity.created_at ? new Date(activity.created_at).toLocaleString('vi-VN') : activity.time}</p>
+                        <p className="text-[9px] text-slate-400 mt-0.5">{activity.created_at ? new Date(activity.created_at).toLocaleString('vi-VN') : activity.time}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
               {activityData && (
-                <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                <div className="mt-4 pt-4 border-t border-white/12">
                   <div className="flex items-center justify-between mb-3"><div className="flex items-center gap-2"><TrendingUp className="h-3.5 w-3.5 text-emerald-400" /><h3 className="text-[10px] font-bold text-slate-400 uppercase">7 ngày qua</h3></div><span className="text-[9px] text-emerald-400/80 font-bold bg-emerald-400/10 px-1.5 py-0.5 rounded">{activityData.reduce((a, b) => a + b.value, 0)} events</span></div>
                   <BarChart data={activityData} height={50} />
                 </div>
@@ -544,7 +544,7 @@ export default function DashboardPage() {
 
           {/* COL 3: Live Jobs */}
           <div className="space-y-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05 }} className="h-full p-4 rounded-2xl bg-[#090909] border border-white/[0.06] flex flex-col">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05 }} className="h-full p-4 rounded-2xl bg-[#1f1c25] border border-white/12 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-[#FF5A1F] animate-pulse" />
@@ -557,12 +557,12 @@ export default function DashboardPage() {
               {liveJobs.length > 0 ? (
                 <div className="space-y-3 flex-1">
                   {liveJobs.map((job: any, idx: number) => (
-                    <div key={job.uuid || job.id || idx} className="space-y-1.5 bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.04]">
+                    <div key={job.uuid || job.id || idx} className="space-y-1.5 bg-white/[0.02] p-2.5 rounded-xl border border-white/12">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-medium text-white truncate pr-2">{job.name || (job.uuid || job.id || '').slice(0, 8) || 'Job'}</span>
                         <span className="text-[9px] font-bold text-slate-400">{job.status === 'processing' ? 'Đang xử lý' : 'Đang chờ'}</span>
                       </div>
-                      <div className="h-1.5 w-full rounded-full bg-zinc-950 overflow-hidden relative">
+                      <div className="h-1.5 w-full rounded-full bg-[#16141a] overflow-hidden relative">
                         <motion.div initial={{ width: 0 }} animate={{ width: `${job.progress || 0}%` }} transition={{ duration: 1, ease: 'easeOut' }} className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-[#FF5A1F] to-[#FF8A5B]" />
                       </div>
                       <div className="flex justify-end pt-0.5">
@@ -573,13 +573,13 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center opacity-50 min-h-[150px]">
-                  <Cpu className="h-8 w-8 text-slate-600 mb-2" />
+                  <Cpu className="h-8 w-8 text-slate-400 mb-2" />
                   <p className="text-[11px] text-slate-500 font-medium">Không có tiến trình render nào</p>
                 </div>
               )}
 
-              <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                <Link href="/jobs"><button className="w-full h-8 rounded-lg bg-white/[0.03] border border-white/[0.05] text-slate-400 font-bold text-[10px] uppercase tracking-wider hover:bg-white/[0.06] hover:text-white transition-all">Xem tất cả</button></Link>
+              <div className="mt-4 pt-4 border-t border-white/12">
+                <Link href="/jobs"><button className="w-full h-8 rounded-lg bg-white/[0.03] border border-white/12 text-slate-400 font-bold text-[10px] uppercase tracking-wider hover:bg-white/[0.06] hover:text-white transition-all">Xem tất cả</button></Link>
               </div>
             </motion.div>
           </div>
@@ -591,7 +591,7 @@ export default function DashboardPage() {
         {playingVideo && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/90 backdrop-blur-xl p-4 md:p-6"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#16141a]/90 backdrop-blur-xl p-4 md:p-6"
             onClick={() => setPlayingVideo(null)}
           >
             <button className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors" onClick={() => setPlayingVideo(null)}>
@@ -600,7 +600,7 @@ export default function DashboardPage() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
               className={cn(
-                "relative w-full rounded-2xl overflow-hidden bg-zinc-950 border border-white/10 shadow-md flex items-center justify-center",
+                "relative w-full rounded-2xl overflow-hidden bg-[#16141a] border border-white/10 shadow-md flex items-center justify-center",
                 (() => {
                   const item = showcaseItems.find(i => (i.asset_id || i.id) === playingVideo);
                   if (item?.ratio === '9:16') return 'aspect-[9/16] max-h-[85vh] max-w-[calc(85vh*9/16)]';

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Clock, CheckCircle2, XCircle, Play, ChevronRight, RefreshCw, Film, ExternalLink, Share2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MediaViewer, type MediaKind } from '@/components/ui/media-viewer';
 import { motion } from 'motion/react';
 import { daemon, laravel } from '@/lib/api/client';
 import Link from 'next/link';
@@ -228,17 +229,17 @@ export default function JobsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
+          <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-brand animate-spin" />
         </div>
       ) : tasks.length === 0 ? (
-        <div className="text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-          <Clock className="h-12 w-12 text-slate-700 mx-auto" />
+        <div className="text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+          <Clock className="h-12 w-12 text-slate-500 mx-auto" />
           <div className="space-y-1">
             <p className="text-slate-500 font-medium">{t('jobs.empty')}</p>
-            <p className="text-xs text-slate-600">Tạo video đầu tiên để bắt đầu theo dõi tiến trình</p>
+            <p className="text-xs text-slate-400">Tạo video đầu tiên để bắt đầu theo dõi tiến trình</p>
           </div>
           <Link href="/studio">
-            <Button className="bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white rounded-xl">
+            <Button className="bg-brand hover:bg-[#FF6A2B] text-white rounded-xl">
               {t('jobs.createFromStudio')}
             </Button>
           </Link>
@@ -254,7 +255,7 @@ export default function JobsPage() {
             <div className="flex justify-center pt-8">
               <Button onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
                 variant="ghost"
-                className="px-10 py-6 rounded-2xl border border-white/5 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
+                className="px-10 py-6 rounded-2xl border border-white/12 text-slate-400 hover:text-white hover:bg-white/5 transition-all text-sm font-semibold">
                 Xem thêm ({tasks.length - visibleCount})
               </Button>
             </div>
@@ -268,7 +269,9 @@ export default function JobsPage() {
 function JobItemCard({ task }: { task: TaskItem }) {
   const taskId = task.taskId || task.id;
   const status = STATUS_UI[task.status] || STATUS_UI.queued;
-  const isDone = task.status === 'done';
+  // Accept both daemon ('done') and Laravel/storyboard ('completed'/'succeeded') vocab —
+  // otherwise Laravel jobs mislabel, hide the publish button, and hide the result preview.
+  const isDone = ['done', 'completed', 'succeeded'].includes(task.status);
   const isRunning = task.status === 'running';
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [publishLoading, setPublishLoading] = useState(false);
@@ -277,6 +280,7 @@ function JobItemCard({ task }: { task: TaskItem }) {
   const isLaravelJob = typeof taskId === 'string' && taskId.startsWith('laravel:');
   const jobUuid = isLaravelJob ? taskId.replace('laravel:', '') : task.id;
   const isPublished = !!(task as any).published_at && (task as any).visibility !== 'private';
+  const isPendingReview = (task as any).moderation_status === 'pending_review';
 
   const handleUnpublish = async () => {
     if (!jobUuid) return;
@@ -293,15 +297,15 @@ function JobItemCard({ task }: { task: TaskItem }) {
   };
 
   return (
-    <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="relative bg-zinc-950 border border-white/5 hover:border-white/10 rounded-2xl overflow-hidden group transition-all">
+    <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="relative bg-[#16141a] border border-white/12 hover:border-white/10 rounded-2xl overflow-hidden group transition-all">
       <div className="flex flex-col md:flex-row items-start md:items-center p-4 md:p-5 gap-4 md:gap-6">
         
         {/* Thumbnail / Icon Area */}
         <div className="shrink-0 relative">
           <div className={cn("h-16 w-16 md:h-20 md:w-20 rounded-xl flex items-center justify-center shadow-inner transition-colors", status.color, "bg-opacity-20 border")}>
-             {isRunning ? <div className="h-6 w-6 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" /> 
-             : task.status === 'done' ? <CheckCircle2 className="h-6 w-6" /> 
-             : task.status === 'failed' ? <XCircle className="h-6 w-6" /> 
+             {isRunning ? <div className="h-6 w-6 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" />
+             : isDone ? <CheckCircle2 className="h-6 w-6" />
+             : task.status === 'failed' ? <XCircle className="h-6 w-6" />
              : <Clock className="h-6 w-6" />}
           </div>
         </div>
@@ -334,10 +338,23 @@ function JobItemCard({ task }: { task: TaskItem }) {
              {task.startedAt && <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{new Date(task.startedAt).toLocaleTimeString('vi-VN')}</span>}
           </div>
 
+          {/* Inline result preview — the Jobs list was metadata-only before. */}
+          {isDone && (() => {
+            const assets = ((task as any).assets ?? []) as { type: string; mime_type?: string; url: string }[];
+            const media = assets.find(a => a.type === 'video' || a.type === 'image' || a.mime_type?.startsWith('video/') || a.mime_type?.startsWith('image/'));
+            if (!media) return null;
+            const kind: MediaKind = (media.type === 'video' || media.mime_type?.startsWith('video/')) ? 'video' : 'image';
+            return (
+              <div className="mt-2 max-w-[320px] rounded-xl overflow-hidden border border-white/12">
+                <MediaViewer src={media.url} kind={kind} aspectRatio={(task as any).aspect_ratio || '16:9'} controls fit="cover" rounded={false} />
+              </div>
+            );
+          })()}
+
           {isRunning && task.progressPercentage !== undefined && (
             <div className="mt-3 flex items-center gap-3">
               <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-[#FF5A1F] transition-all duration-500" style={{ width: `${Math.min(100, task.progressPercentage)}%` }} />
+                <div className="h-full bg-brand transition-all duration-500" style={{ width: `${Math.min(100, task.progressPercentage)}%` }} />
               </div>
               <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">{Math.round(task.progressPercentage)}%</span>
             </div>
@@ -353,9 +370,15 @@ function JobItemCard({ task }: { task: TaskItem }) {
              <>
                {!isPublished ? (
                  <button onClick={() => setPublishModalOpen(true)} disabled={publishLoading}
-                   className="cursor-pointer h-8 flex items-center gap-1.5 px-3 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6B35] text-[11px] text-white font-semibold transition-all shadow-[0_2px_12px_rgba(255,90,31,0.25)] disabled:opacity-50 disabled:cursor-not-allowed">
+                   className="cursor-pointer h-8 flex items-center gap-1.5 px-3 rounded-xl bg-brand hover:bg-brand-hover text-[11px] text-white font-semibold transition-all shadow-[0_2px_12px_rgba(255,90,31,0.25)] disabled:opacity-50 disabled:cursor-not-allowed">
                    {publishLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Share2 className="h-3 w-3" />}
                    <span className="hidden sm:inline">Đăng</span>
+                 </button>
+               ) : isPendingReview ? (
+                 <button onClick={handleUnpublish} disabled={unpublishLoading} title="Đang chờ kiểm duyệt trước khi hiển thị công khai"
+                   className="cursor-pointer h-8 flex items-center gap-1.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-[11px] text-amber-300 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                   {unpublishLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Clock className="h-3 w-3" />}
+                   <span className="hidden sm:inline">Chờ duyệt</span>
                  </button>
                ) : (
                  <button onClick={handleUnpublish} disabled={unpublishLoading}
@@ -386,8 +409,12 @@ function JobItemCard({ task }: { task: TaskItem }) {
           onConfirm={async (visibility, tags) => {
             setPublishLoading(true);
             try {
-              await laravel.communityPublish(jobUuid, visibility, tags);
-              addToast('Đăng lên cộng đồng thành công!', 'success');
+              const res = await laravel.communityPublish(jobUuid, visibility, tags);
+              if (res?.pending_review) {
+                addToast('Tác phẩm đang chờ kiểm duyệt trước khi hiển thị công khai', 'info');
+              } else {
+                addToast('Đăng lên cộng đồng thành công!', 'success');
+              }
               window.location.reload();
             } catch (e: any) {
               if (e?.status === 403) {

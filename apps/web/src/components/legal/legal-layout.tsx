@@ -22,12 +22,12 @@ export type LegalLayoutProps = {
  */
 export function LegalLayout({ title, intro, effectiveDate, toc, children }: LegalLayoutProps) {
   return (
-    <div className="relative min-h-screen bg-[#050508] text-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#16141a] text-white overflow-x-hidden">
       {/* Ambient glow */}
       <div className="pointer-events-none absolute top-0 left-1/4 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[140px] opacity-10 bg-[#FF5A1F]" />
 
       {/* Simple top bar (legal pages are outside the anchor-scroll landing nav) */}
-      <header className="relative z-10 w-full border-b border-white/[0.05]">
+      <header className="relative z-10 w-full border-b border-white/12">
         <div className="max-w-[1100px] mx-auto flex items-center justify-between px-6 md:px-10 h-16">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#FF5A1F] to-[#FF8A5B] flex items-center justify-center">
@@ -64,7 +64,7 @@ export function LegalLayout({ title, intro, effectiveDate, toc, children }: Lega
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">
                 Mục lục
               </p>
-              <ul className="space-y-2 border-l border-white/[0.06]">
+              <ul className="space-y-2 border-l border-white/12">
                 {toc.map((item) => (
                   <li key={item.id}>
                     <a

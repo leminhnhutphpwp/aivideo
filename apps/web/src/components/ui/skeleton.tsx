@@ -26,7 +26,7 @@ export function Skeleton({ className, rounded = 'md', ...props }: SkeletonProps)
 
 export function SkeletonCard({ lines = 3 }: { lines?: number }) {
   return (
-    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5 space-y-4">
+    <div className="bg-[#16141a] border border-white/12 rounded-2xl p-5 space-y-4">
       <Skeleton className="h-5 w-2/3" />
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton key={i} className="h-3" style={{ width: `${60 + Math.random() * 40}%` }} />
@@ -50,7 +50,7 @@ export function SkeletonList({ items = 5 }: { items?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 p-3 bg-zinc-950 border border-white/5 rounded-xl">
+        <div key={i} className="flex items-center gap-3 p-3 bg-[#16141a] border border-white/12 rounded-xl">
           <Skeleton className="h-10 w-10 shrink-0" rounded="full" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-1/3" />

@@ -39,26 +39,10 @@ class ManageGeneralSettings extends SettingsPage
             SettingsTabs\WebsiteTab::class,
             SettingsTabs\SeoTab::class,
             SettingsTabs\AuthBackgroundTab::class,
-            SettingsTabs\FooterTab::class,
         ],
         'Dashboard (sau đăng nhập)' => [
             SettingsTabs\HeroTab::class,
             SettingsTabs\ShowcaseTab::class,
-        ],
-        'Landing Page (các khối)' => [
-            SettingsTabs\LandingHeroTab::class,
-            SettingsTabs\LandingReelTab::class,
-            SettingsTabs\LandingIntroTab::class,
-            SettingsTabs\LandingGenesisTab::class,
-            SettingsTabs\LandingForgeTab::class,
-            SettingsTabs\LandingWorkflowTab::class,
-            SettingsTabs\LandingDirectorTab::class,
-            SettingsTabs\LandingGalleryTab::class,
-            SettingsTabs\LandingSoundTab::class,
-            SettingsTabs\LandingEcosystemTab::class,
-            SettingsTabs\LandingStatsTab::class,
-            SettingsTabs\LandingVisionTab::class,
-            SettingsTabs\LandingPortalTab::class,
         ],
     ];
 

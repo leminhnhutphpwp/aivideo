@@ -228,9 +228,21 @@ export const laravel = {
       body: JSON.stringify({ plan_slug: planSlug }),
     }),
 
-  creditsPurchase: (amount: number) =>
-    laravelRequest<{ success: boolean; message: string; bank: { bank: string; account: string; holder: string }; amount: number; content: string; credits_to_receive: number; note: string }>(
-      '/credits/purchase', { method: 'POST', body: JSON.stringify({ amount }) }
+  creditsPurchase: (amount: number, couponCode?: string) =>
+    laravelRequest<{ success: boolean; message: string; bank: { bank: string; account: string; holder: string }; amount: number; original_amount?: number; discount_amount?: number; content: string; credits_to_receive: number; note: string }>(
+      '/credits/purchase', { method: 'POST', body: JSON.stringify({ amount, ...(couponCode ? { coupon_code: couponCode } : {}) }) }
+    ),
+
+  /** Nhập mã coupon tặng credits → cộng credits ngay. */
+  redeemCoupon: (code: string) =>
+    laravelRequest<{ success: boolean; message: string; credits_added: number; balance: number }>(
+      '/coupons/redeem', { method: 'POST', body: JSON.stringify({ code }) }
+    ),
+
+  /** Preview mã giảm giá cho một số tiền nạp (checkout). */
+  validateCoupon: (code: string, amount: number) =>
+    laravelRequest<{ success: boolean; discount_amount: number; final_amount: number }>(
+      '/coupons/validate', { method: 'POST', body: JSON.stringify({ code, amount }) }
     ),
 
   creditsUpgradeHistory: () =>
@@ -588,7 +600,7 @@ export const laravel = {
   },
 
   communityPublish: (uuid: string, visibility: 'sharing' | 'public', tags: string[]) =>
-    laravelRequest<{ success: boolean; data: any }>(`/render-jobs/${uuid}/publish`, {
+    laravelRequest<import('./community-types').PublishResponse>(`/render-jobs/${uuid}/publish`, {
       method: 'PATCH',
       body: JSON.stringify({ visibility, tags }),
     }),
@@ -707,6 +719,8 @@ export const daemon = {
     mode?: string;
     voiceover?: string;
     autoVoiceover?: boolean;
+    /** Locks/varies the generation (DashScope range 0..2147483647). Enables reproducible restores. */
+    seed?: number;
   }) =>
     daemonLaravel<{ taskId: string; status: string; startedAt: number }>(
       `/projects/${projectId}/media/generate`,

@@ -12,7 +12,7 @@ export function BankCard() {
     >
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] group-hover:bg-white/10 transition-colors" />
       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5" />
-      <div className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-zinc-950/10" />
+      <div className="absolute -left-10 -bottom-10 h-32 w-32 rounded-full bg-[#16141a]/10" />
 
       <div className="relative flex flex-col justify-between h-full">
         <div className="flex items-center justify-between">

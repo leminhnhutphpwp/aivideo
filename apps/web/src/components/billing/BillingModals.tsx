@@ -45,7 +45,7 @@ export function BillingModals({
         {upgradeConfirm && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#16141a]/70 backdrop-blur-md z-[200] flex items-center justify-center p-4"
             onClick={() => setUpgradeConfirm(null)}
           >
             <motion.div
@@ -53,7 +53,7 @@ export function BillingModals({
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-              className="w-full max-w-sm bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-md"
+              className="w-full max-w-sm bg-[#16141a] border border-white/10 rounded-2xl overflow-hidden shadow-md"
               onClick={e => e.stopPropagation()}
             >
               <div className="billing-zigzag-top h-3 w-full" />

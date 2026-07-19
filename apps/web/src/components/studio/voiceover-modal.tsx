@@ -47,7 +47,7 @@ export function VoiceoverModal({ open, onClose, storyboardUuid, defaultText, onS
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-zinc-950/80 backdrop-blur-md"
+        className="absolute inset-0 bg-[#16141a]/80 backdrop-blur-md"
       />
 
       <motion.div
@@ -55,11 +55,11 @@ export function VoiceoverModal({ open, onClose, storyboardUuid, defaultText, onS
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className="relative z-10 w-full max-w-[480px] bg-zinc-900 border border-white/[0.08] rounded-2xl overflow-hidden p-6 flex flex-col gap-5 text-left shadow-[0_0_80px_rgba(0,0,0,0.8)]"
+        className="relative z-10 w-full max-w-[480px] bg-[#1f1c25] border border-white/12 rounded-2xl overflow-hidden p-6 flex flex-col gap-5 text-left shadow-[0_0_80px_rgba(0,0,0,0.8)]"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 flex items-center justify-center transition-all cursor-pointer"
+          className="absolute top-4 right-4 z-20 h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/12 flex items-center justify-center transition-all cursor-pointer"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -79,7 +79,7 @@ export function VoiceoverModal({ open, onClose, storyboardUuid, defaultText, onS
             value={text}
             onChange={e => setText(e.target.value)}
             rows={4}
-            className="w-full bg-zinc-950/30 border border-white/[0.08] rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder:text-slate-600 outline-none resize-none focus:border-[#FF5A1F]/30 transition-all"
+            className="w-full bg-[#16141a]/30 border border-white/12 rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder:text-slate-400 outline-none resize-none focus:border-[#FF5A1F]/30 transition-all"
             placeholder="Nhập nội dung thuyết minh..."
           />
         </div>

@@ -51,7 +51,7 @@ export function VideoSidebar({
 }: VideoSidebarProps) {
   return (
     <div className="col-span-12 lg:col-span-4 space-y-4">
-      <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5 space-y-4">
+      <div className="bg-[#16141a] border border-white/12 rounded-2xl p-5 space-y-4">
         <h3 className="text-sm font-semibold text-white">Cấu hình chung</h3>
 
         {feature !== 'video-edit' && feature !== 'video-editing' && (
@@ -82,7 +82,7 @@ export function VideoSidebar({
         )}
 
         {(feature === 'image-to-video' || feature === 'reference-to-video' || feature === 'video-edit' || feature === 'video-editing') && (
-          <div className="text-[10px] text-slate-600 bg-white/[0.02] border border-white/5 rounded-xl p-3 leading-relaxed">
+          <div className="text-[10px] text-slate-400 bg-white/[0.02] border border-white/12 rounded-xl p-3 leading-relaxed">
             {FEATURE_TEXTS[feature] || 'Chỉnh sửa video dựa trên mô tả văn bản'}
           </div>
         )}
@@ -91,7 +91,7 @@ export function VideoSidebar({
       </div>
 
       <div className="sticky top-24 space-y-4 z-10 lg:top-24">
-        <div className="bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/5 rounded-2xl overflow-hidden flex flex-col shadow-md shadow-black/50">
+        <div className="bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/12 rounded-2xl overflow-hidden flex flex-col shadow-md shadow-black/50">
           <PricePreview
             priceData={priceData}
             loading={priceLoading}
@@ -100,7 +100,7 @@ export function VideoSidebar({
             className="border-0 rounded-none bg-transparent"
           />
 
-          <div className="p-5 space-y-3 border-t border-white/5 bg-zinc-950/20">
+          <div className="p-5 space-y-3 border-t border-white/12 bg-[#16141a]/20">
             <div className="flex justify-between text-sm">
               <span className="text-slate-500">Thời lượng</span>
               <span className="text-white font-semibold">{totalDuration}s</span>

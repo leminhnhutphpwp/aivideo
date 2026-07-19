@@ -88,14 +88,14 @@ export function RichSelect({ label, value, onChange, options, icon: LabelIcon, t
             className={cn(
               "w-full flex items-center gap-2 text-left transition-all cursor-pointer group outline-none",
               compact
-                ? "h-9 px-3 bg-white/[0.04] border border-white/[0.08] rounded-xl hover:border-white/[0.14] focus:border-[#FF5A1F]/50"
+                ? "h-9 px-3 bg-white/[0.04] border border-white/12 rounded-xl hover:border-white/[0.14] focus:border-[#FF5A1F]/50"
                 : "bg-white/5 border border-white/10 rounded-lg px-3 py-2 hover:border-white/20"
             )}
           >
             {selected ? (
               <OptionIcon icon={selected.icon} className={cn("text-[#FF5A1F] shrink-0", compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
             ) : (
-              <Film className={cn("text-slate-600 shrink-0", compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
+              <Film className={cn("text-slate-400 shrink-0", compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
             )}
             <div className="flex-1 min-w-0">
               <div className={cn("font-medium text-white truncate", compact ? "text-[11px]" : "text-xs")}>
@@ -114,14 +114,14 @@ export function RichSelect({ label, value, onChange, options, icon: LabelIcon, t
             sideOffset={4}
             collisionPadding={16}
             onCloseAutoFocus={() => setQuery('')}
-            className="z-[999] bg-zinc-900 border border-[#FF5A1F]/30 rounded-xl shadow-md overflow-y-auto max-h-[300px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+            className="z-[999] bg-[#1f1c25] border border-[#FF5A1F]/30 rounded-xl shadow-md overflow-y-auto max-h-[300px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
             style={{
               width: 'var(--radix-dropdown-menu-trigger-width)'
             }}
           >
             <>
             {searchable && (
-              <div className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm p-2 border-b border-white/10">
+              <div className="sticky top-0 z-10 bg-[#1f1c25]/95 backdrop-blur-sm p-2 border-b border-white/10">
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-2.5 h-8 focus-within:border-[#FF5A1F]/40">
                   <Search className="h-3.5 w-3.5 text-slate-500 shrink-0" />
                   <input
@@ -131,9 +131,9 @@ export function RichSelect({ label, value, onChange, options, icon: LabelIcon, t
                     // Stop Radix's typeahead/keyboard-nav from hijacking the keystrokes.
                     onKeyDown={(e) => { if (e.key !== 'Escape') e.stopPropagation(); }}
                     placeholder={`Tìm ${label.toLowerCase()}...`}
-                    className="w-full bg-transparent text-xs text-white placeholder:text-slate-600 outline-none"
+                    className="w-full bg-transparent text-xs text-white placeholder:text-slate-400 outline-none"
                   />
-                  <span className="text-[9px] text-slate-600 shrink-0">{filtered.length}</span>
+                  <span className="text-[9px] text-slate-400 shrink-0">{filtered.length}</span>
                 </div>
               </div>
             )}
@@ -162,7 +162,7 @@ export function RichSelect({ label, value, onChange, options, icon: LabelIcon, t
 
       {!noTooltip && hoveredDef && createPortal(
         <motion.div key={hoveredDef.value} initial={{ opacity: 0, x: dynamicSide === 'left' ? 8 : -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: dynamicSide === 'left' ? 8 : -8 }}
-          className="z-[9999] w-56 bg-zinc-900 border border-white/10 rounded-xl p-3 shadow-md pointer-events-none fixed"
+          className="z-[9999] w-56 bg-[#1f1c25] border border-white/10 rounded-xl p-3 shadow-md pointer-events-none fixed"
           style={tooltipStyle}
         >
           <div className="flex items-center gap-2 mb-1">
@@ -170,7 +170,7 @@ export function RichSelect({ label, value, onChange, options, icon: LabelIcon, t
             <span className="text-[11px] font-semibold text-white">{hoveredDef.label}</span>
           </div>
           <p className="text-[10px] text-slate-400 leading-relaxed">{hoveredDef.desc}</p>
-          <p className="text-[9px] text-slate-600 mt-1.5">
+          <p className="text-[9px] text-slate-400 mt-1.5">
             <span className="text-[#FF5A1F]/70">Phù hợp: </span>
             {hoveredDef.suitableFor}
           </p>

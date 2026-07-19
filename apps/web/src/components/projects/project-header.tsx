@@ -74,10 +74,10 @@ type StatusKey = keyof typeof statusConfig;
 
 function StatPill({ icon: Icon, label, value }: { icon?: React.ComponentType<{ className?: string }>; label: string; value: string | number }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/12">
       {Icon && <Icon className="h-3.5 w-3.5 text-slate-500 shrink-0" />}
       <div className="leading-none">
-        <p className="text-[8px] text-slate-600 font-semibold uppercase tracking-widest mb-0.5">{label}</p>
+        <p className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mb-0.5">{label}</p>
         <p className="text-sm font-bold text-white">{value}</p>
       </div>
     </div>
@@ -100,7 +100,7 @@ export function ProjectHeader({ project, job }: {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="rounded-2xl border border-white/[0.07] bg-[#0D0D10] overflow-hidden"
+      className="rounded-2xl border border-white/12 bg-[#1f1c25] overflow-hidden"
     >
       {/* Top accent line */}
       <div className="h-px w-full bg-gradient-to-r from-transparent via-[#FF5A1F]/40 to-transparent" />
@@ -127,7 +127,7 @@ export function ProjectHeader({ project, job }: {
           )}
 
           {/* Date */}
-          <div className="flex items-center gap-1 text-[10px] text-slate-600 font-medium ml-auto">
+          <div className="flex items-center gap-1 text-[10px] text-slate-400 font-medium ml-auto">
             <Clock className="h-3 w-3" />
             {fmtDate(project.createdAt ?? 0)}
           </div>
@@ -140,7 +140,7 @@ export function ProjectHeader({ project, job }: {
             {job?.prompt ? (
               <p className="text-sm text-slate-400 leading-relaxed line-clamp-3">{job.prompt}</p>
             ) : (
-              <p className="text-sm text-slate-600 italic">Chưa có mô tả</p>
+              <p className="text-sm text-slate-400 italic">Chưa có mô tả</p>
             )}
           </div>
 

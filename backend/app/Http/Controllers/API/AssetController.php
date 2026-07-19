@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AssetController extends Controller
@@ -116,7 +117,7 @@ class AssetController extends Controller
         ]);
     }
 
-    public function download(Asset $asset, Request $request): StreamedResponse|JsonResponse
+    public function download(Asset $asset, Request $request): StreamedResponse|BinaryFileResponse|JsonResponse
     {
         $this->authorize('view', $asset);
 

@@ -86,15 +86,20 @@ class SocialiteController extends Controller
             'uuid' => (string) Str::uuid(),
         ]);
 
+        // Start ở 0 credits (nhất quán với luồng email/password). Credits đến từ coupon
+        // (mã chào mừng tự động / phát tay) hoặc mua — không tặng cứng khi đăng nhập nữa.
         $freePlan = Plan::where('slug', 'free')->first();
         if ($freePlan) {
             $user->update([
                 'plan_id' => $freePlan->id,
-                'credits' => $freePlan->effective_credits ?? 100,
+                'credits' => 0,
             ]);
         }
 
         $user->assignRole('panel_user');
+
+        // Mã chào mừng tự động (nếu admin bật) — user Google đã verified sẵn.
+        app(\App\Services\CouponService::class)->issueWelcome($user);
 
         try {
             app(MailService::class)->sendToUser('welcome', $user, [

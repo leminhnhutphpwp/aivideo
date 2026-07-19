@@ -127,12 +127,12 @@ function PropertyChanges({ properties, event }: { properties?: any; event?: stri
   return (
     <div className="flex flex-wrap gap-2 mt-2">
       {changes.slice(0, 5).map(key => (
-        <span key={key} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-slate-400 border border-white/5">
+        <span key={key} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-slate-400 border border-white/12">
           {formatPropertyName(key)}: <span className="text-white">{String(properties.attributes[key] ?? '—')}</span>
         </span>
       ))}
       {changes.length > 5 && (
-        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-slate-600">+{changes.length - 5} khác</span>
+        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-slate-400">+{changes.length - 5} khác</span>
       )}
     </div>
   );
@@ -198,9 +198,9 @@ export default function ActivityLogsPage() {
           <p className="text-sm text-slate-500 font-medium mt-1">{t('activityLogs.desc')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-slate-600 font-bold">{total} mục</span>
+          <span className="text-[11px] text-slate-400 font-bold">{total} mục</span>
           <button onClick={toggleSort}
-            className="flex items-center gap-2 h-9 px-4 rounded-xl bg-zinc-950 border border-white/5 text-xs font-bold text-slate-400 hover:text-white transition-all uppercase tracking-widest">
+            className="flex items-center gap-2 h-9 px-4 rounded-xl bg-[#16141a] border border-white/12 text-xs font-bold text-slate-400 hover:text-white transition-all uppercase tracking-widest">
             <ArrowUpDown className="h-3.5 w-3.5" />
             {sortDir === 'desc' ? t('activityLogs.newest') : t('activityLogs.oldest')}
           </button>
@@ -210,7 +210,7 @@ export default function ActivityLogsPage() {
       <div className="space-y-2">
         {logs.map((log) => (
           <div key={log.id}
-            className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-950/60 border border-white/5 hover:bg-zinc-950/80 transition-all">
+            className="flex items-start gap-4 p-4 rounded-2xl bg-[#16141a]/60 border border-white/12 hover:bg-[#16141a]/80 transition-all">
             <div className={`p-2.5 rounded-xl ${getEventColor(log.event)}`}>
               {getSubjectIcon(log.subject_type)}
             </div>
@@ -229,7 +229,7 @@ export default function ActivityLogsPage() {
               )}
               <PropertyChanges properties={log.properties} event={log.event} />
               <div className="flex items-center gap-4 mt-1.5">
-                <span className="flex items-center gap-1 text-[11px] text-slate-600">
+                <span className="flex items-center gap-1 text-[11px] text-slate-400">
                   <Clock className="h-3 w-3" />
                   {new Date(log.created_at).toLocaleString('vi-VN')}
                 </span>
@@ -239,7 +239,7 @@ export default function ActivityLogsPage() {
         ))}
 
         {!loading && logs.length === 0 && (
-          <div className="text-center py-20 text-slate-600">
+          <div className="text-center py-20 text-slate-400">
             <ScrollText className="h-12 w-12 mx-auto mb-4 opacity-30" />
             <p className="text-sm font-medium">{t('activityLogs.empty')}</p>
           </div>
@@ -257,12 +257,12 @@ export default function ActivityLogsPage() {
           <button
             onClick={() => fetchLogs(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="h-10 w-10 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
+            className="h-10 w-10 rounded-xl bg-[#16141a] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
             <ChevronLeft className="h-4 w-4" />
           </button>
           {getPageNumbers().map((p, i) =>
             p === '...' ? (
-              <span key={`dots-${i}`} className="h-10 w-10 flex items-center justify-center text-slate-600 text-xs font-bold">...</span>
+              <span key={`dots-${i}`} className="h-10 w-10 flex items-center justify-center text-slate-400 text-xs font-bold">...</span>
             ) : (
               <button
                 key={p}
@@ -270,7 +270,7 @@ export default function ActivityLogsPage() {
                 className={`h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold transition-all cursor-pointer ${
                   p === currentPage
                     ? 'bg-[#FF5A1F] text-white shadow-sm shadow-[#FF5A1F]/20'
-                    : 'bg-zinc-950 border border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'bg-[#16141a] border border-white/12 text-slate-400 hover:text-white hover:bg-white/5'
                 }`}>
                 {p}
               </button>
@@ -279,7 +279,7 @@ export default function ActivityLogsPage() {
           <button
             onClick={() => fetchLogs(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="h-10 w-10 rounded-xl bg-zinc-950 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
+            className="h-10 w-10 rounded-xl bg-[#16141a] border border-white/12 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

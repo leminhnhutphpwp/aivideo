@@ -26,14 +26,14 @@ export function PricingPlans({ plans, currentPlanSlug, onUpgradeClick }: Pricing
   const planBorder = (slug: string) => {
     if (slug === 'pro') return 'border-[#FF5A1F]/[0.3]';
     if (slug === 'studio') return 'border-[#FF5A1F]/[0.3]';
-    return 'border-white/5';
+    return 'border-white/12';
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">Chọn gói phù hợp</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Chọn gói phù hợp</span>
         <div className="h-px flex-1 bg-gradient-to-l from-white/10 to-transparent" />
       </div>
 
@@ -62,7 +62,7 @@ export function PricingPlans({ plans, currentPlanSlug, onUpgradeClick }: Pricing
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 30 }}
-              className={`relative rounded-2xl border ${border} bg-zinc-900/50 p-5 flex flex-col gap-4 overflow-hidden group hover:border-opacity-60 transition-all duration-500 ${
+              className={`relative rounded-2xl border ${border} bg-[#1f1c25]/50 p-5 flex flex-col gap-4 overflow-hidden group hover:border-opacity-60 transition-all duration-500 ${
                 isPro ? 'md:-mt-1 md:mb-1 ring-1 ring-[#FF5A1F]/15 md:scale-[1.02]' : ''
               }`}
             >
@@ -123,7 +123,7 @@ export function PricingPlans({ plans, currentPlanSlug, onUpgradeClick }: Pricing
                           <span className="text-3xl font-bold text-white tracking-tight">0đ</span>
                         )}
                         {plan.price_regular > 0 && (
-                          <span className="text-xs text-slate-600 font-medium">
+                          <span className="text-xs text-slate-400 font-medium">
                             /{t('billing.perMonth').toLowerCase()}
                           </span>
                         )}
@@ -141,17 +141,17 @@ export function PricingPlans({ plans, currentPlanSlug, onUpgradeClick }: Pricing
               {/* Features list */}
               <div className="relative space-y-2 flex-1">
                 {features.map((f, idx) => (
-                  <div key={idx} className={`flex items-center gap-2 text-xs ${f.included ? (f as any).coming ? 'text-orange-300' : 'text-slate-300' : 'text-slate-600'}`}>
+                  <div key={idx} className={`flex items-center gap-2 text-xs ${f.included ? (f as any).coming ? 'text-orange-300' : 'text-slate-300' : 'text-slate-400'}`}>
                     <div className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 ${(f as any).coming ? 'bg-orange-500/15' : f.included ? 'bg-emerald-500/15' : 'bg-white/5'}`}>
                       {(f as any).coming ? (
                         <Sparkles className="h-3 w-3 text-orange-400" />
                       ) : f.included ? (
                         <Check className="h-3 w-3 text-emerald-400" />
                       ) : (
-                        <X className="h-3 w-3 text-slate-600" />
+                        <X className="h-3 w-3 text-slate-400" />
                       )}
                     </div>
-                    <span className={`font-medium ${(f as any).coming ? 'text-orange-300' : f.included ? 'text-slate-300' : 'text-slate-600'}`}>{f.label}</span>
+                    <span className={`font-medium ${(f as any).coming ? 'text-orange-300' : f.included ? 'text-slate-300' : 'text-slate-400'}`}>{f.label}</span>
                     {(f as any).coming && (
                       <span className="text-[8px] font-bold text-orange-400 bg-orange-500/15 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Sắp có</span>
                     )}
@@ -170,7 +170,7 @@ export function PricingPlans({ plans, currentPlanSlug, onUpgradeClick }: Pricing
                 disabled={isComingSoon || current || plan.price_regular <= 0}
                 className={`h-10 rounded-lg text-xs font-bold tracking-tight transition-all mt-2 ${
                   isComingSoon
-                    ? 'bg-white/5 text-slate-600 border border-white/5 cursor-not-allowed opacity-50'
+                    ? 'bg-white/5 text-slate-400 border border-white/12 cursor-not-allowed opacity-50'
                     : current
                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
                     : plan.price_regular <= 0

@@ -191,7 +191,7 @@ export function VoiceSelector({ value, onChange, onUsableChange }: { value: stri
           </button>
         ))}
         {!loading && filtered.length === 0 && (
-          <p className="text-[10px] text-slate-600 text-center py-3">Không tìm thấy giọng phù hợp</p>
+          <p className="text-[10px] text-slate-400 text-center py-3">Không tìm thấy giọng phù hợp</p>
         )}
       </div>
     </div>

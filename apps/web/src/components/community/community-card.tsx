@@ -172,9 +172,9 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
       onMouseLeave={handleMouseLeave}
       onDoubleClick={handleDoubleClick}
       onClick={handleSingleClick}
-      className="group relative rounded-2xl bg-zinc-950/80 border border-white/[0.05] hover:border-[#FF5A1F]/30 hover:shadow-[0_0_30px_rgba(255,90,31,0.06)] overflow-hidden cursor-pointer transition-all duration-300 select-none animate-item-rise"
+      className="group relative rounded-2xl bg-[#16141a]/80 border border-white/12 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(255,90,31,0.06)] overflow-hidden cursor-pointer transition-all duration-300 select-none animate-item-rise"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#16141a] flex items-center justify-center">
         {isVideo ? (
           <video
             ref={videoRef}
@@ -210,7 +210,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
           )}
 
           {isVideo && !isHovered && (
-            <div className="h-7 w-7 rounded-full bg-zinc-950/60 border border-white/10 flex items-center justify-center backdrop-blur-md">
+            <div className="h-7 w-7 rounded-full bg-[#16141a]/60 border border-white/10 flex items-center justify-center backdrop-blur-md">
               <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
             </div>
           )}
@@ -226,7 +226,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="absolute pointer-events-none z-20"
             >
-              <Heart className="h-7 w-7 text-[#FF5A1F] fill-[#FF5A1F] filter drop-shadow-[0_0_8px_#FF5A1F]" />
+              <Heart className="h-7 w-7 text-brand fill-brand filter drop-shadow-[0_0_8px_#FF5A1F]" />
             </motion.div>
           ))}
         </AnimatePresence>
@@ -244,7 +244,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
             {asset.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[9px] font-bold text-slate-500 uppercase tracking-wider"
+                className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/12 text-[9px] font-bold text-slate-500 uppercase tracking-wider"
               >
                 {tag}
               </span>
@@ -252,7 +252,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
+        <div className="flex items-center justify-between pt-1 border-t border-white/12">
           <Link
             href={`/community/creators/${asset.user?.username || 'unknown'}`}
             className="flex items-center gap-2 cursor-pointer group/author"
@@ -264,7 +264,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
               className="h-6 w-6 rounded-full object-cover border border-white/10"
             />
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-slate-200 group-hover/author:text-[#FF5A1F] transition-colors leading-tight">
+              <span className="text-[10px] font-bold text-slate-200 group-hover/author:text-brand transition-colors leading-tight">
                 @{asset.user?.username || 'unknown'}
               </span>
               <CreatorLevelBadge level={asset.user?.reputation_level || 'newbie'} className="text-[8px] px-1.5 py-0" />
@@ -275,11 +275,11 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
             <button
               onClick={handleLikeToggle}
               className={cn(
-                "flex items-center gap-1.5 text-slate-500 hover:text-[#FF5A1F] transition-colors cursor-pointer",
-                isLiked && "text-[#FF5A1F]"
+                "flex items-center gap-1.5 text-slate-500 hover:text-brand transition-colors cursor-pointer",
+                isLiked && "text-brand"
               )}
             >
-              <Heart className={cn("h-4 w-4 transition-transform active:scale-75", isLiked && "fill-[#FF5A1F]")} />
+              <Heart className={cn("h-4 w-4 transition-transform active:scale-75", isLiked && "fill-brand")} />
               <span className="text-[10px] font-extrabold tracking-tight">
                 {formatNum(likeCount)}
               </span>

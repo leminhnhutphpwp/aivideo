@@ -50,7 +50,7 @@ export function ConfirmDialog() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#16141a]/60 backdrop-blur-sm"
             onClick={handleCancel}
           />
           <motion.div
@@ -58,11 +58,11 @@ export function ConfirmDialog() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-            className="relative w-[90vw] max-w-md bg-zinc-950 border border-white/5 rounded-2xl shadow-md p-6"
+            className="relative w-[90vw] max-w-md bg-[#16141a] border border-white/12 rounded-2xl shadow-md p-6"
           >
             <button
               onClick={handleCancel}
-              className="absolute top-5 right-5 text-slate-600 hover:text-white transition-colors"
+              className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
             >
               <X className="h-5 w-5" />
             </button>

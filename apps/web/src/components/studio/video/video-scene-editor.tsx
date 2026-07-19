@@ -35,14 +35,14 @@ function ImageUpload({ label, preview, fileName, icon: Icon = ImageIcon, onSelec
       <label className="text-[10px] font-semibold text-slate-500">{label}</label>
       {preview ? (
         <div className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group max-w-[200px]">
-          <div className="w-full aspect-square relative overflow-hidden bg-zinc-950">
+          <div className="w-full aspect-square relative overflow-hidden bg-[#16141a]">
             <img src={preview} alt="" className="w-full h-full object-cover" />
           </div>
           <button onClick={onClear}
-            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
+            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
             <X className="h-3 w-3" />
           </button>
-          <div className="p-2 border-t border-white/5">
+          <div className="p-2 border-t border-white/12">
             <p className="text-[10px] font-medium text-white truncate">{fileName || label}</p>
           </div>
         </div>
@@ -71,17 +71,17 @@ export function VideoSceneEditor({
 }: VideoSceneEditorProps) {
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-      className="bg-zinc-950 border border-white/5 rounded-2xl relative"
+      className="bg-[#16141a] border border-white/12 rounded-2xl relative"
     >
-      <div className="flex items-center justify-between px-3 md:px-5 py-2 md:py-3 bg-white/[0.02] border-b border-white/5 rounded-t-2xl">
+      <div className="flex items-center justify-between px-3 md:px-5 py-2 md:py-3 bg-white/[0.02] border-b border-white/12 rounded-t-2xl">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-white">Cảnh</span>
-          {scene.prompt && <span className="text-xs text-slate-600">{scene.duration}s</span>}
+          {scene.prompt && <span className="text-xs text-slate-400">{scene.duration}s</span>}
           <div className="hidden md:flex items-center gap-1 ml-2">
-            {findOption(filteredStyleOptions, scene.style) && <OptionIcon icon={findOption(filteredStyleOptions, scene.style)!.icon} className="h-3 w-3 text-slate-600" />}
-            {findOption(filteredMoodOptions, scene.mood) && <OptionIcon icon={findOption(filteredMoodOptions, scene.mood)!.icon} className="h-3 w-3 text-slate-600" />}
-            {findOption(filteredCameraOptions, scene.camera) && <OptionIcon icon={findOption(filteredCameraOptions, scene.camera)!.icon} className="h-3 w-3 text-slate-600" />}
-            {findOption(filteredLightingOptions, scene.lighting) && <OptionIcon icon={findOption(filteredLightingOptions, scene.lighting)!.icon} className="h-3 w-3 text-slate-600" />}
+            {findOption(filteredStyleOptions, scene.style) && <OptionIcon icon={findOption(filteredStyleOptions, scene.style)!.icon} className="h-3 w-3 text-slate-400" />}
+            {findOption(filteredMoodOptions, scene.mood) && <OptionIcon icon={findOption(filteredMoodOptions, scene.mood)!.icon} className="h-3 w-3 text-slate-400" />}
+            {findOption(filteredCameraOptions, scene.camera) && <OptionIcon icon={findOption(filteredCameraOptions, scene.camera)!.icon} className="h-3 w-3 text-slate-400" />}
+            {findOption(filteredLightingOptions, scene.lighting) && <OptionIcon icon={findOption(filteredLightingOptions, scene.lighting)!.icon} className="h-3 w-3 text-slate-400" />}
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export function VideoSceneEditor({
         <textarea value={scene.prompt} onChange={e => onUpdate('prompt', e.target.value)}
           placeholder="Mô tả cảnh quay: chủ thể, hành động, bối cảnh..."
           rows={3} maxLength={feature === 'video-edit' || feature === 'video-editing' ? 5000 : 2000}
-          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-700 resize-none font-medium leading-relaxed"
+          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-500 resize-none font-medium leading-relaxed"
         />
         <div className="flex items-center justify-between">
           <EnhancePromptButton
@@ -105,7 +105,7 @@ export function VideoSceneEditor({
             }}
             onApply={(v) => onUpdate('prompt', v)}
           />
-          <span className="text-[10px] text-slate-600">{scene.prompt.length}/{feature === 'video-edit' || feature === 'video-editing' ? 5000 : 2000}</span>
+          <span className="text-[10px] text-slate-400">{scene.prompt.length}/{feature === 'video-edit' || feature === 'video-editing' ? 5000 : 2000}</span>
         </div>
 
         <div className="bg-[#FF5A1F]/5 border border-[#FF5A1F]/10 rounded-xl p-3">
@@ -136,13 +136,13 @@ export function VideoSceneEditor({
         </div>
 
         {feature === 'image-to-video' && (
-          <div className="border-t border-white/5 pt-3 mt-3">
+          <div className="border-t border-white/12 pt-3 mt-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <ImageUpload label="First frame" preview={scene.referencePreview} fileName={scene.referenceImage}
                 onSelect={() => onOpenPicker(scene.id, 'firstFrame')}
                 onClear={() => { onUpdate('referenceImage', ''); onUpdate('referencePreview', ''); }}
               />
-              <div className="flex items-center gap-2 text-[10px] text-slate-600">
+              <div className="flex items-center gap-2 text-[10px] text-slate-400">
                 <div className="h-px w-8 bg-white/[0.06]" />
                 <span>or add last frame for frame interpolation</span>
                 <div className="h-px w-8 bg-white/[0.06]" />
@@ -156,24 +156,24 @@ export function VideoSceneEditor({
         )}
 
         {(feature === 'video-edit' || feature === 'video-editing') && (
-          <div className="border-t border-white/5 pt-3 mt-3">
+          <div className="border-t border-white/12 pt-3 mt-3">
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold text-slate-500">Video tham chiếu</label>
               {scene.referencePreview ? (
                 <div className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group max-w-[200px]">
-                  <div className="w-full aspect-square relative group/preview overflow-hidden bg-zinc-950">
+                  <div className="w-full aspect-square relative group/preview overflow-hidden bg-[#16141a]">
                     <video src={scene.referencePreview} className="w-full h-full object-cover" muted preload="metadata" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#16141a]/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                       <div className="h-8 w-8 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm">
                         <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
                       </div>
                     </div>
                   </div>
                   <button onClick={() => { onUpdate('referenceImage', ''); onUpdate('referencePreview', ''); }}
-                    className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
+                    className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
                     <X className="h-3 w-3" />
                   </button>
-                  <div className="p-2 border-t border-white/5">
+                  <div className="p-2 border-t border-white/12">
                     <p className="text-[10px] font-medium text-white truncate">{scene.referenceImage || 'Video tham chiếu'}</p>
                   </div>
                 </div>
@@ -188,7 +188,7 @@ export function VideoSceneEditor({
         )}
 
         {feature === 'character-animation' && (
-          <div className="border-t border-white/5 pt-3 mt-3">
+          <div className="border-t border-white/12 pt-3 mt-3">
             <ImageUpload label="Ảnh nhân vật" preview={scene.referencePreview} fileName={scene.referenceImage} icon={UserRound}
               onSelect={() => onOpenPicker(scene.id, 'firstFrame')}
               onClear={() => { onUpdate('referenceImage', ''); onUpdate('referencePreview', ''); }}
@@ -196,14 +196,14 @@ export function VideoSceneEditor({
           </div>
         )}
 
-        <div className="pt-3 border-t border-white/5">
+        <div className="pt-3 border-t border-white/12">
           <label className="text-[10px] font-semibold text-slate-500">Những thứ không muốn xuất hiện (negative prompt)</label>
           <textarea value={scene.negativePrompt} onChange={e => onUpdate('negativePrompt', e.target.value)}
             placeholder="Ví dụ: người, chữ, biển báo, mờ, nhiễu..."
             rows={2} maxLength={500}
-            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-700 resize-none font-medium"
+            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-500 resize-none font-medium"
           />
-          <div className="flex justify-end text-[10px] text-slate-600">{scene.negativePrompt.length}/500</div>
+          <div className="flex justify-end text-[10px] text-slate-400">{scene.negativePrompt.length}/500</div>
         </div>
       </div>
     </motion.div>

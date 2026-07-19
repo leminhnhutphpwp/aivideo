@@ -14,7 +14,14 @@ import { PulsingEdge } from '@/components/studio/pulsing-edge';
 import { Storyboard } from '@/lib/api/storyboard-types';
 import { CinematicGenerationStatus } from '@/components/projects/cinematic-generation-status';
 import { VoiceoverModal } from '@/components/studio/voiceover-modal';
+import { MediaViewer } from '@/components/ui/media-viewer';
 import { downloadBlob } from '@/lib/download';
+
+// Voiceover (TTS) is DISABLED for the "AI Phục chế" pivot: the feature is currently broken (the
+// daemon TTS key is a placeholder → 401 on submit) and is out of scope for the image-restoration
+// product. Backend route + providers are left intact — re-enable by flipping this to true AND
+// supplying a real CKEY_API_KEY / ELEVENLABS_API_KEY in apps/daemon/.env.
+const VOICEOVER_ENABLED = false;
 
 const COLORS = ['#FF5A1F', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
 const STATUS: Record<string, { label: string; cls: string }> = {
@@ -328,12 +335,19 @@ export default function FlowViewerPage() {
     }
   }, [uuid, sb?.title, addToast]);
 
+  // Result hero visibility — the completed render plays inline (was download-only before).
+  const [showResult, setShowResult] = useState(true);
+
   if (loading) return <div className="h-full w-full flex items-center justify-center bg-zinc-950"><Loader2 className="h-6 w-6 animate-spin text-slate-600" /></div>;
   if (!sb) return <div className="h-full w-full flex items-center justify-center bg-zinc-950"><p className="text-sm text-slate-600">Không tìm thấy storyboard</p></div>;
 
   const st = STATUS[sb.status] || STATUS.draft;
   const Icon = sb.status === 'completed' ? CheckCircle : sb.status === 'failed' ? AlertCircle : null;
   const active = POLLING.includes(sb.status);
+  // Scene-graph modes (multi_scene) have nodes; one-shot / multi-panel storyboards have none —
+  // the ReactFlow canvas would be blank for them, so we hide the "Xem sơ đồ" toggle & canvas.
+  const hasScenes = nodes.length > 0;
+  const isMultiPanel = sb.render_mode === 'storyboard_image';
 
   return (
     <div className="h-full w-full flex flex-col bg-zinc-950">
@@ -382,10 +396,14 @@ export default function FlowViewerPage() {
           {sb.status === 'failed' && (sb.retries_remaining ?? 1) <= 0 && <span className="flex items-center gap-1 text-[10px] text-amber-400/90"><AlertCircle className="h-3 w-3" /> Đã dùng hết {sb.max_render_attempts ?? 5} lần thử — hãy tạo storyboard mới</span>}
           {active && <button onClick={async () => { setCancelling(true); try { await laravel.cancelStoryboard(uuid); addToast('Đã hủy storyboard', 'success'); fetch(true); } catch (e: any) { addToast(e?.message || 'Lỗi', 'error'); } finally { setCancelling(false); } }} disabled={cancelling} className="cursor-pointer h-8 flex items-center gap-1.5 px-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-[11px] text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><XCircle className="h-3 w-3" /> {cancelling ? 'Đang hủy...' : 'Hủy'}</button>}
           {sb.status === 'completed' && <>
-            <button onClick={() => setVoiceoverOpen(true)}
+            {hasScenes && <button onClick={() => setShowResult(v => !v)}
+              className="cursor-pointer h-8 flex items-center gap-1.5 px-3 rounded-xl bg-[#18181B] border border-white/[0.06] hover:border-white/[0.10] text-[11px] text-slate-400 transition-colors">
+              {showResult ? <><Film className="h-3 w-3" /> Xem sơ đồ</> : <><Play className="h-3 w-3" /> Xem kết quả</>}
+            </button>}
+            {VOICEOVER_ENABLED && <button onClick={() => setVoiceoverOpen(true)}
               className="cursor-pointer h-8 flex items-center gap-1.5 px-3 rounded-xl bg-[#18181B] border border-white/[0.06] hover:border-white/[0.10] text-[11px] text-slate-400 transition-colors">
               <Mic className="h-3 w-3" /> Thêm giọng đọc
-            </button>
+            </button>}
             <button onClick={handleDownload} disabled={downloading} className="cursor-pointer h-8 flex items-center gap-1.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-[11px] text-white font-semibold transition-all shadow-[0_2px_12px_rgba(16,185,129,0.25)] disabled:opacity-50 disabled:cursor-not-allowed">{downloading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />} {downloading ? 'Đang tải...' : 'Tải về'}</button>
           </>}
           <div className="w-px h-5 bg-white/10" />
@@ -409,34 +427,121 @@ export default function FlowViewerPage() {
         </div>
       )}
       <div className="flex-1 relative">
-        <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
-          proOptions={{ hideAttribution: true }}
-          nodesDraggable={false} nodesConnectable={false} elementsSelectable={false}
-          fitView fitViewOptions={{ maxZoom: 1, padding: 0.3 }} minZoom={0.08} maxZoom={2}>
-          <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#ffffff06" />
-          <Controls className={cn(
-            "!bg-[#18181B] !border !border-white/[0.08] !rounded-2xl !shadow-md !overflow-hidden",
-            "[&_button]:!bg-[#18181B] [&_button]:!border-b [&_button]:!border-white/[0.08] last:[&_button]:!border-b-0",
-            "[&_svg]:!fill-slate-400 hover:[&_svg]:!fill-white",
-            "hover:[&_button]:!bg-white/[0.06] [&_button]:!transition-colors",
-          )} position="bottom-right" showInteractive={false} />
-          <MiniMap className="!bg-[#18181B] !border-white/[0.08] !rounded-2xl" nodeColor="#FF5A1F40" maskColor="#000" position="bottom-left" />
-          <Panel position="top-right">
-            <div className="bg-[#18181B] border border-white/[0.06] rounded-2xl p-3 text-[10px] space-y-1.5 text-slate-400 shadow-sm">
-              <div className="flex items-center gap-2 text-slate-400"><Film className="h-3 w-3" /> {VIDEO_TYPE_LABELS[sb.video_type] ?? sb.video_type}</div>
-              <div>CL: {QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</div><div>Credits: {sb.credits_cost}</div>
+        {sb.status === 'completed' && showResult && (
+          // Scroll viewport on the OUTER wrapper + `m-auto` inner content: centers when it fits,
+          // top-aligns & scrolls (never clips the top under the toolbar) when taller than the area.
+          <div className="absolute inset-0 z-20 overflow-y-auto bg-zinc-950/85 backdrop-blur-sm">
+            <div className="min-h-full flex flex-col p-4 sm:p-6 md:p-8">
+              <div className={cn("m-auto w-full", isMultiPanel ? "max-w-6xl" : "max-w-4xl")}>
+                {/* Header */}
+                <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-brand/15 border border-brand/30 text-[10px] font-bold text-brand uppercase tracking-wider shrink-0">
+                      {isMultiPanel ? <><Presentation className="h-3 w-3" /> Multi-Panel</> : sb.render_mode === 'single_flow' ? <><Sparkles className="h-3 w-3" /> One-Shot</> : <><Film className="h-3 w-3" /> Ghép cảnh</>}
+                    </span>
+                    <h2 className="text-base md:text-lg font-bold text-white truncate">{sb.title}</h2>
+                  </div>
+                  {hasScenes && (
+                    <button onClick={() => setShowResult(false)} title="Ẩn kết quả, xem sơ đồ"
+                      className="cursor-pointer shrink-0 h-8 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center gap-1.5 text-[11px] font-medium transition-colors">
+                      <Film className="h-3.5 w-3.5" /> Sơ đồ
+                    </button>
+                  )}
+                </div>
+
+                {/* Media */}
+                {isMultiPanel ? (
+                  <div className="grid gap-4 lg:gap-5 lg:grid-cols-2 items-start">
+                    <figure className="min-w-0">
+                      <figcaption className="flex items-center gap-1.5 mb-2 text-[10px] font-bold uppercase tracking-wider text-brand/90">
+                        <Play className="h-3 w-3" /> Video hoàn chỉnh
+                      </figcaption>
+                      <div className="rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.55)] ring-1 ring-brand/15">
+                        <MediaViewer src={`/api/storyboards/${uuid}/download`} kind="video" aspectRatio="16:9" controls autoPlay rounded={false} />
+                      </div>
+                    </figure>
+                    <figure className="min-w-0">
+                      <figcaption className="flex items-center gap-1.5 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        <Presentation className="h-3 w-3" /> Bảng phân cảnh
+                      </figcaption>
+                      <div className="rounded-2xl overflow-hidden border border-white/10 bg-zinc-950 shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
+                        <MediaViewer src={`/api/storyboards/${uuid}/multi-panel`} kind="image" aspectRatio="16:9" fit="contain" controls={false} rounded={false} />
+                      </div>
+                    </figure>
+                  </div>
+                ) : (
+                  // Cap the hero by viewport-height so a 16:9 video never grows past the fold.
+                  <div className="mx-auto w-full" style={{ maxWidth: 'min(100%, calc(64vh * 16 / 9))' }}>
+                    <div className="rounded-2xl overflow-hidden border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,0.6)] ring-1 ring-brand/15">
+                      <MediaViewer src={`/api/storyboards/${uuid}/download`} kind="video" aspectRatio="16:9" controls autoPlay rounded={false} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Metadata */}
+                <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] text-slate-500">
+                  <span className="flex items-center gap-1"><Film className="h-3.5 w-3.5" /> {VIDEO_TYPE_LABELS[sb.video_type] ?? sb.video_type}</span>
+                  <span className="text-white/15">·</span>
+                  <span>{QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</span>
+                  <span className="text-white/15">·</span>
+                  <span>{sb.credits_cost} credits</span>
+                  {typeof sb.total_duration === 'number' && sb.total_duration > 0 && <><span className="text-white/15">·</span><span>{sb.total_duration}s</span></>}
+                </div>
+              </div>
             </div>
-          </Panel>
-        </ReactFlow>
+          </div>
+        )}
+        {hasScenes ? (
+          <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+            proOptions={{ hideAttribution: true }}
+            nodesDraggable={false} nodesConnectable={false} elementsSelectable={false}
+            fitView fitViewOptions={{ maxZoom: 1, padding: 0.3 }} minZoom={0.08} maxZoom={2}>
+            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#ffffff06" />
+            <Controls className={cn(
+              "!bg-[#18181B] !border !border-white/[0.08] !rounded-2xl !shadow-md !overflow-hidden",
+              "[&_button]:!bg-[#18181B] [&_button]:!border-b [&_button]:!border-white/[0.08] last:[&_button]:!border-b-0",
+              "[&_svg]:!fill-slate-400 hover:[&_svg]:!fill-white",
+              "hover:[&_button]:!bg-white/[0.06] [&_button]:!transition-colors",
+            )} position="bottom-right" showInteractive={false} />
+            <MiniMap className="!bg-[#18181B] !border-white/[0.08] !rounded-2xl" nodeColor="#FF5A1F40" maskColor="#000" position="bottom-left" />
+            <Panel position="top-right">
+              <div className="bg-[#18181B] border border-white/[0.06] rounded-2xl p-3 text-[10px] space-y-1.5 text-slate-400 shadow-sm">
+                <div className="flex items-center gap-2 text-slate-400"><Film className="h-3 w-3" /> {VIDEO_TYPE_LABELS[sb.video_type] ?? sb.video_type}</div>
+                <div>CL: {QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</div><div>Credits: {sb.credits_cost}</div>
+              </div>
+            </Panel>
+          </ReactFlow>
+        ) : (
+          // One-shot / multi-panel storyboards have no scene graph — show an info panel instead of a blank canvas.
+          !(sb.status === 'completed' && showResult) && (
+            <div className="absolute inset-0 flex items-center justify-center p-8 [background-image:radial-gradient(circle_at_1px_1px,#ffffff06_1px,transparent_0)] [background-size:24px_24px]">
+              <div className="max-w-md w-full text-center">
+                <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                  {isMultiPanel ? <Presentation className="h-6 w-6 text-brand" /> : <Sparkles className="h-6 w-6 text-brand" />}
+                </div>
+                <h3 className="text-sm font-bold text-slate-200 mb-1">{isMultiPanel ? 'Chế độ Multi-Panel' : sb.render_mode === 'single_flow' ? 'Chế độ One-Shot' : 'Chưa có cảnh'}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">Storyboard này tạo video từ một prompt tổng hợp — không dùng sơ đồ cảnh. Kết quả sẽ hiển thị tại đây khi hoàn thành.</p>
+                {sb.compiled_prompt && (
+                  <div className="mt-4 text-left rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-600 mb-1 font-bold">Prompt tổng hợp</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-4">{sb.compiled_prompt}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        )}
       </div>
       <div className="h-8 flex items-center justify-between px-4 border-t border-white/[0.06] bg-[#18181B] shrink-0 z-10">
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-600">Xem trước</span>
-          <div className="h-3 w-px bg-white/5" />
-          <button onClick={handlePlayback} disabled={playbackActive}
-            className={cn("cursor-pointer flex items-center gap-1 text-[10px] transition-colors", playbackActive ? "text-[#FF5A1F]" : "text-slate-600 hover:text-slate-400")}>
-            <Presentation className="h-3 w-3" /> {playbackActive ? 'Đang trình chiếu...' : 'Trình chiếu'}
-          </button>
+          {hasScenes && <>
+            <div className="h-3 w-px bg-white/5" />
+            <button onClick={handlePlayback} disabled={playbackActive}
+              className={cn("cursor-pointer flex items-center gap-1 text-[10px] transition-colors", playbackActive ? "text-[#FF5A1F]" : "text-slate-600 hover:text-slate-400")}>
+              <Presentation className="h-3 w-3" /> {playbackActive ? 'Đang trình chiếu...' : 'Trình chiếu'}
+            </button>
+          </>}
         </div>
         <div className="flex items-center gap-3 text-[10px] text-slate-600">
           <span>{sb.scenes?.length || 0} cảnh</span><div className="w-px h-3 bg-white/5" /><span>{sb.credits_cost} credits</span><div className="w-px h-3 bg-white/5" /><span>{QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</span>

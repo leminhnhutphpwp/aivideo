@@ -146,6 +146,11 @@ class User extends Authenticatable implements JWTSubject, FilamentUser, HasAppAu
         return $this->hasMany(CreditTransaction::class);
     }
 
+    public function couponRedemptions(): HasMany
+    {
+        return $this->hasMany(CouponRedemption::class);
+    }
+
     public function apiKeys(): HasMany
     {
         return $this->hasMany(ApiKey::class);

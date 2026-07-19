@@ -86,7 +86,7 @@ export function CommentSection({ assetUuid, isOpen }: CommentSectionProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="border-t border-white/[0.04] pt-4 pb-2">
+    <div className="border-t border-white/12 pt-4 pb-2">
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle className="h-4 w-4 text-[#FF5A1F]" />
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -101,7 +101,7 @@ export function CommentSection({ assetUuid, isOpen }: CommentSectionProps) {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder={replyTo ? "Viết phản hồi..." : "Viết bình luận..."}
-          className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A1F]/30"
+          className="flex-1 bg-white/[0.03] border border-white/12 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A1F]/30"
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         />
         <button
@@ -202,7 +202,7 @@ function CommentItem({ comment, onReply, onDelete, currentUserUuid }: {
 
         {/* Nested replies */}
         {comment.replies && comment.replies.length > 0 && (
-          <div className="mt-3 pl-4 border-l border-white/[0.04] space-y-3">
+          <div className="mt-3 pl-4 border-l border-white/12 space-y-3">
             {comment.replies.map((reply) => (
               <CommentItem
                 key={reply.id}

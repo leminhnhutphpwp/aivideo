@@ -224,18 +224,18 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
       {open && (
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-zinc-950/70 backdrop-blur-md z-[999] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-[#16141a]/70 backdrop-blur-md z-[999] flex items-center justify-center p-4"
           onClick={onClose}
         >
         <motion.div
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-md overflow-hidden"
+          className="w-full max-w-2xl bg-[#16141a] border border-white/10 rounded-2xl shadow-md overflow-hidden"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/5">
+          <div className="flex items-center justify-between p-5 border-b border-white/12">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#FF5A1F] to-[#6B2415] flex items-center justify-center">
                 <Image className="h-4 w-4 text-white" />
@@ -252,7 +252,7 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
 
           {/* Tabs */}
           {canUpload ? (
-            <div className="flex p-1.5 mx-4 mt-4 bg-zinc-950 rounded-2xl border border-white/5">
+            <div className="flex p-1.5 mx-4 mt-4 bg-[#16141a] rounded-2xl border border-white/12">
               <button
                 onClick={() => { setActiveTab('library'); setSelectedIds([]); }}
                 className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'library' ? 'bg-[#FF5A1F] text-white shadow-md shadow-[#FF5A1F]/20' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
@@ -270,10 +270,10 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
             </div>
           ) : (
             <div className="mx-4 mt-4">
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.02] border border-white/12">
                 <FolderOpen className="h-3.5 w-3.5 text-slate-500" />
                 <span className="text-xs font-medium text-slate-400">Tài nguyên sẵn có</span>
-                <span className="ml-auto text-[10px] text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-full">Gói Free</span>
+                <span className="ml-auto text-[10px] text-slate-400 bg-white/[0.03] px-2 py-0.5 rounded-full">Gói Free</span>
               </div>
             </div>
           )}
@@ -284,7 +284,7 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
               <div className="space-y-4">
                 {/* Filter + Search */}
                 <div className="flex gap-3">
-                  <div className="flex p-1 rounded-xl bg-zinc-950 border border-white/5">
+                  <div className="flex p-1 rounded-xl bg-[#16141a] border border-white/12">
                     {TYPE_FILTERS.map(f => (
                       <button key={f.slug}
                         onClick={() => setTypeFilter(f.slug)}
@@ -294,13 +294,13 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                       </button>
                     ))}
                   </div>
-                  <div className="flex-1 flex items-center gap-2 rounded-xl border border-white/5 bg-zinc-950 px-3 h-9">
-                    <Search className="h-3.5 w-3.5 text-slate-600" />
+                  <div className="flex-1 flex items-center gap-2 rounded-xl border border-white/12 bg-[#16141a] px-3 h-9">
+                    <Search className="h-3.5 w-3.5 text-slate-400" />
                     <input
                       placeholder="Tìm kiếm..."
                       value={search}
                       onChange={e => setSearch(e.target.value)}
-                      className="flex-1 bg-transparent text-xs text-white outline-none placeholder:text-slate-600"
+                      className="flex-1 bg-transparent text-xs text-white outline-none placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -311,9 +311,9 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                   </div>
                 ) : filteredAssets.length === 0 ? (
                   <div className="text-center py-16 space-y-3">
-                    <FolderOpen className="h-10 w-10 text-slate-700 mx-auto" />
+                    <FolderOpen className="h-10 w-10 text-slate-500 mx-auto" />
                     <p className="text-sm text-slate-500">Chưa có tài nguyên phù hợp</p>
-                    <p className="text-xs text-slate-600">{canUpload ? 'Chuyển sang tab Upload mới để tải lên' : 'Tạo video AI để có tài nguyên sử dụng lại'}</p>
+                    <p className="text-xs text-slate-400">{canUpload ? 'Chuyển sang tab Upload mới để tải lên' : 'Tạo video AI để có tài nguyên sử dụng lại'}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
@@ -327,13 +327,13 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                             multiSelect ? toggleAsset(asset.id) : setSelectedIds([asset.id]);
                           }}
                           disabled={isDisabled}
-                          className={`relative rounded-xl border overflow-hidden transition-all group ${isDisabled ? 'opacity-50 cursor-not-allowed border-white/5' : isSelected ? 'border-[#FF5A1F] ring-2 ring-[#FF5A1F]/30 cursor-pointer' : 'border-white/10 hover:border-white/20 cursor-pointer'}`}
+                          className={`relative rounded-xl border overflow-hidden transition-all group ${isDisabled ? 'opacity-50 cursor-not-allowed border-white/12' : isSelected ? 'border-[#FF5A1F] ring-2 ring-[#FF5A1F]/30 cursor-pointer' : 'border-white/10 hover:border-white/20 cursor-pointer'}`}
                         >
                           {asset.previewUrl && asset.type === 'video' ? (
-                            <div className="w-full aspect-square relative group/preview overflow-hidden bg-zinc-950">
+                            <div className="w-full aspect-square relative group/preview overflow-hidden bg-[#16141a]">
                               <video src={asset.previewUrl} className="w-full h-full object-cover" muted preload="metadata" />
                               {!isDisabled && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#16141a]/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                                   <div className="h-8 w-8 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm">
                                     <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
                                   </div>
@@ -344,7 +344,7 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                             <img src={asset.previewUrl} alt={asset.name} className="w-full aspect-square object-cover" />
                           ) : (
                             <div className="w-full aspect-square bg-white/[0.02] flex items-center justify-center">
-                              {asset.type === 'video' ? <Film className="h-8 w-8 text-slate-700" /> : <Image className="h-8 w-8 text-slate-700" />}
+                              {asset.type === 'video' ? <Film className="h-8 w-8 text-slate-500" /> : <Image className="h-8 w-8 text-slate-500" />}
                             </div>
                           )}
                           
@@ -355,12 +355,12 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                           )}
 
                           {isDisabled && (
-                            <div className="absolute inset-0 bg-zinc-950/60 flex items-center justify-center">
-                              <span className="text-[10px] font-medium text-white/70 bg-zinc-950/50 px-2 py-1 rounded-md">Đã chọn</span>
+                            <div className="absolute inset-0 bg-[#16141a]/60 flex items-center justify-center">
+                              <span className="text-[10px] font-medium text-white/70 bg-[#16141a]/50 px-2 py-1 rounded-md">Đã chọn</span>
                             </div>
                           )}
 
-                          <div className="p-2 border-t border-white/5">
+                          <div className="p-2 border-t border-white/12">
                             <p className="text-[10px] font-medium text-white truncate">{asset.name}</p>
                             <p className="text-[9px] text-slate-500">{asset.size}</p>
                           </div>
@@ -381,9 +381,9 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                         return (
                           <div key={`${file.name}-${file.size}-${index}`} className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group">
                             {file.type.startsWith('video/') && previewUrl ? (
-                              <div className="w-full aspect-square relative group/preview overflow-hidden bg-zinc-950">
+                              <div className="w-full aspect-square relative group/preview overflow-hidden bg-[#16141a]">
                                 <video src={previewUrl} className="w-full h-full object-cover" muted preload="metadata" />
-                                <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#16141a]/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                                   <div className="h-8 w-8 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm">
                                     <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
                                   </div>
@@ -393,16 +393,16 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                               <img src={previewUrl} alt={file.name} className="w-full aspect-square object-cover" />
                             ) : (
                               <div className="w-full aspect-square flex items-center justify-center">
-                                {file.type.startsWith('video/') ? <Film className="h-8 w-8 text-slate-600" /> : <Image className="h-8 w-8 text-slate-600" />}
+                                {file.type.startsWith('video/') ? <Film className="h-8 w-8 text-slate-400" /> : <Image className="h-8 w-8 text-slate-400" />}
                               </div>
                             )}
                             <button
                               onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
-                              className="absolute top-1.5 right-1.5 cursor-pointer h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-zinc-950/80"
+                              className="absolute top-1.5 right-1.5 cursor-pointer h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#16141a]/80"
                             >
                               <X className="h-3 w-3 text-white" />
                             </button>
-                            <div className="p-2 border-t border-white/5">
+                            <div className="p-2 border-t border-white/12">
                               <p className="text-[10px] font-medium text-white truncate">{file.name}</p>
                               <p className="text-[9px] text-slate-500">{formatSize(file.size)}</p>
                             </div>
@@ -422,9 +422,9 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
                     onClick={() => fileInputRef.current?.click()}
                     className="border-2 border-dashed border-white/10 rounded-2xl p-6 text-center hover:border-[#FF5A1F]/30 transition-all cursor-pointer"
                   >
-                    <Upload className="h-10 w-10 text-slate-600 mx-auto mb-3" />
+                    <Upload className="h-10 w-10 text-slate-400 mx-auto mb-3" />
                     <p className="text-sm font-medium text-slate-400 mb-1">Kéo thả hoặc bấm để chọn file</p>
-                    <p className="text-xs text-slate-600">{acceptTypes.split(',').join(', ')} · tối đa {maxSizeMB}MB</p>
+                    <p className="text-xs text-slate-400">{acceptTypes.split(',').join(', ')} · tối đa {maxSizeMB}MB</p>
                   </div>
                 )}
                 <input
@@ -441,8 +441,8 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
 
           {/* Footer */}
           {activeTab === 'library' && (
-            <div className="flex items-center justify-between p-4 border-t border-white/5">
-              <p className="text-[10px] text-slate-600">
+            <div className="flex items-center justify-between p-4 border-t border-white/12">
+              <p className="text-[10px] text-slate-400">
                 {multiSelect
                   ? `${filteredAssets.length} tài nguyên · đã chọn ${selectedIds.length}`
                   : `${filteredAssets.length} tài nguyên · chọn file để dùng lại`}

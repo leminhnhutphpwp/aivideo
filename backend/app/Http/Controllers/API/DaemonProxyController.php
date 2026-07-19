@@ -328,6 +328,9 @@ class DaemonProxyController extends Controller
             'direction' => ['sometimes', 'string', 'max:255'],
             'image' => ['sometimes', 'string', 'max:2048'],
             'last_frame' => ['sometimes', 'string', 'max:2048'],
+            // Seed lets the restore studio lock/vary a result (DashScope range 0..2147483647).
+            // Already forwarded via $safeData; validate it so only a clean integer passes through.
+            'seed' => ['sometimes', 'integer', 'min:0', 'max:2147483647'],
             'skillId' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
         if ($validationError) return $validationError;

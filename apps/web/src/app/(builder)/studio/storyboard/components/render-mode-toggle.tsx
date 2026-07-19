@@ -42,7 +42,7 @@ export function RenderModeToggle() {
 
   return (
     <>
-      <div className="flex items-center h-8 bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
+      <div className="flex items-center h-8 bg-white/[0.04] rounded-xl p-0.5 border border-white/12">
         <button
           onClick={() => handleToggle('single_flow')}
           className={cn(
@@ -76,7 +76,7 @@ export function RenderModeToggle() {
               ? 'bg-[#FF5A1F]/15 text-[#FF5A1F]'
               : MULTI_SCENE_ENABLED
                 ? 'text-slate-500 hover:text-slate-300'
-                : 'text-slate-600'
+                : 'text-slate-400'
           )}
         >
           <Film className="h-3.5 w-3.5 shrink-0" /> <span className={renderMode === 'multi_scene' ? '' : 'hidden lg:inline'}>Ghép cảnh</span>
@@ -94,14 +94,14 @@ export function RenderModeToggle() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/70 backdrop-blur-md z-[60] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#16141a]/70 backdrop-blur-md z-[60] flex items-center justify-center p-4"
             onClick={() => setConfirmSwitch(null)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm bg-zinc-900 border border-white/[0.08] rounded-2xl shadow-md overflow-hidden"
+              className="w-full max-w-sm bg-[#1f1c25] border border-white/12 rounded-2xl shadow-md overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6 text-center">
@@ -128,7 +128,7 @@ export function RenderModeToggle() {
                   Canvas (cảnh & kết nối) được giữ nguyên — bạn sẽ không mất dữ liệu.
                 </p>
               </div>
-              <div className="flex border-t border-white/[0.04]">
+              <div className="flex border-t border-white/12">
                 <button
                   onClick={() => setConfirmSwitch(null)}
                   className="flex-1 h-11 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-white/[0.02] transition-colors cursor-pointer"
@@ -137,7 +137,7 @@ export function RenderModeToggle() {
                 </button>
                 <button
                   onClick={confirmSwitchMode}
-                  className="flex-1 h-11 text-[11px] font-semibold text-[#FF5A1F] hover:bg-[#FF5A1F]/5 transition-colors border-l border-white/[0.04] cursor-pointer"
+                  className="flex-1 h-11 text-[11px] font-semibold text-[#FF5A1F] hover:bg-[#FF5A1F]/5 transition-colors border-l border-white/12 cursor-pointer"
                 >
                   {confirmLabel(confirmSwitch)}
                 </button>

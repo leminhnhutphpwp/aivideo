@@ -47,7 +47,7 @@ export function PasswordInput({ value, onChange, onKeyDown, placeholder, showGen
         onChange={e => onChange(e.target.value)}
         onKeyDown={onKeyDown}
         placeholder={placeholder || '••••••••••••'}
-        className={`w-full ${h} bg-zinc-950 border border-white/5 ${rounded} ${pl} ${pr} text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500`}
+        className={`w-full ${h} bg-[#16141a] border border-white/12 ${rounded} ${pl} ${pr} text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500`}
       />
       <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
         {showGenerate && (

@@ -655,11 +655,11 @@ export default function VideoFeaturePage() {
               uploadingSceneId={pickerSceneId} />
 
             {feature === 'reference-to-video' && (
-              <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4 space-y-3">
+              <div className="bg-[#16141a] border border-white/12 rounded-2xl p-4 space-y-3">
                 <label className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
                   <ImageIcon className="h-3 w-3" /> Ảnh/Video tham chiếu
                 </label>
-                <p className="text-[10px] text-slate-600 leading-relaxed">
+                <p className="text-[10px] text-slate-400 leading-relaxed">
                   Tải lên tối đa 5 ảnh/video. Trong prompt, bạn có thể gọi 'Video 1', 'Image 1' để tham chiếu đến từng entity.
                 </p>
                 {multiReferencePreviews.length > 0 && (
@@ -670,9 +670,9 @@ export default function VideoFeaturePage() {
                       return (
                         <div key={`${file.name}-${i}`} className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group">
                           {file.type.startsWith('video/') && previewUrl ? (
-                            <div className="w-full aspect-square relative group/preview overflow-hidden bg-zinc-950">
+                            <div className="w-full aspect-square relative group/preview overflow-hidden bg-[#16141a]">
                               <video src={previewUrl} className="w-full h-full object-cover" muted preload="metadata" />
-                              <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                              <div className="absolute inset-0 flex items-center justify-center bg-[#16141a]/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                                 <div className="h-8 w-8 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm">
                                   <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
                                 </div>
@@ -682,17 +682,17 @@ export default function VideoFeaturePage() {
                             <img src={previewUrl} alt={file.name} className="w-full aspect-square object-cover" />
                           ) : (
                             <div className="w-full aspect-square flex items-center justify-center bg-white/[0.02]">
-                              {file.type.startsWith('video/') ? <Film className="h-8 w-8 text-slate-600" /> : <ImageIcon className="h-8 w-8 text-slate-600" />}
+                              {file.type.startsWith('video/') ? <Film className="h-8 w-8 text-slate-400" /> : <ImageIcon className="h-8 w-8 text-slate-400" />}
                             </div>
                           )}
-                          <span className="absolute top-1.5 left-1.5 bg-zinc-950/60 text-[10px] text-white px-1.5 py-0.5 rounded-md font-medium">
+                          <span className="absolute top-1.5 left-1.5 bg-[#16141a]/60 text-[10px] text-white px-1.5 py-0.5 rounded-md font-medium">
                             {file.type.startsWith('video/') ? `Video ${i + 1}` : `Image ${i + 1}`}
                           </span>
                           <button onClick={() => removeMultiReference(i)}
-                            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all text-white/70 hover:text-white text-xs cursor-pointer">
+                            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all text-white/70 hover:text-white text-xs cursor-pointer">
                             ✕
                           </button>
-                          <div className="p-2 border-t border-white/5 flex items-center gap-1">
+                          <div className="p-2 border-t border-white/12 flex items-center gap-1">
                             <p className="text-[10px] font-medium text-white truncate flex-1">{file.name}</p>
                             <button onClick={() => handleVoiceUpload(i)}
                               className={`shrink-0 cursor-pointer h-6 px-1.5 rounded-md text-[9px] font-medium transition-all ${referenceVoices[i] ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/5 text-slate-500 hover:text-white border border-white/10'}`}
@@ -723,11 +723,11 @@ export default function VideoFeaturePage() {
             )}
 
             {(feature === 'video-edit' || feature === 'video-editing') && (
-              <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4 space-y-3">
+              <div className="bg-[#16141a] border border-white/12 rounded-2xl p-4 space-y-3">
                 <label className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
                   <ImageIcon className="h-3 w-3" /> Ảnh tham chiếu (tuỳ chọn, tối đa 4)
                 </label>
-                <p className="text-[10px] text-slate-600 leading-relaxed">
+                <p className="text-[10px] text-slate-400 leading-relaxed">
                   Thêm ảnh tham chiếu để AI hiểu rõ hơn về ngữ cảnh chỉnh sửa.
                 </p>
                 {editReferencePreviews.length > 0 && (
@@ -738,9 +738,9 @@ export default function VideoFeaturePage() {
                       return (
                         <div key={`${file.name}-${i}`} className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group">
                           {file.type.startsWith('video/') && previewUrl ? (
-                            <div className="w-full aspect-square relative group/preview overflow-hidden bg-zinc-950">
+                            <div className="w-full aspect-square relative group/preview overflow-hidden bg-[#16141a]">
                               <video src={previewUrl} className="w-full h-full object-cover" muted preload="metadata" />
-                              <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                              <div className="absolute inset-0 flex items-center justify-center bg-[#16141a]/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                                 <div className="h-8 w-8 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm">
                                   <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
                                 </div>
@@ -750,17 +750,17 @@ export default function VideoFeaturePage() {
                             <img src={previewUrl} alt={file.name} className="w-full aspect-square object-cover" />
                           ) : (
                             <div className="w-full aspect-square flex items-center justify-center bg-white/[0.02]">
-                              {file.type.startsWith('video/') ? <Film className="h-8 w-8 text-slate-600" /> : <ImageIcon className="h-8 w-8 text-slate-600" />}
+                              {file.type.startsWith('video/') ? <Film className="h-8 w-8 text-slate-400" /> : <ImageIcon className="h-8 w-8 text-slate-400" />}
                             </div>
                           )}
-                          <span className="absolute top-1.5 left-1.5 bg-zinc-950/60 text-[10px] text-white px-1.5 py-0.5 rounded-md font-medium">
+                          <span className="absolute top-1.5 left-1.5 bg-[#16141a]/60 text-[10px] text-white px-1.5 py-0.5 rounded-md font-medium">
                             {file.type.startsWith('video/') ? `Video ${i + 1}` : `Image ${i + 1}`}
                           </span>
                           <button onClick={() => removeEditReference(i)}
-                            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all text-white/70 hover:text-white text-xs cursor-pointer">
+                            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all text-white/70 hover:text-white text-xs cursor-pointer">
                             ✕
                           </button>
-                          <div className="p-2 border-t border-white/5">
+                          <div className="p-2 border-t border-white/12">
                             <p className="text-[10px] font-medium text-white truncate">{file.name}</p>
                           </div>
                         </div>
@@ -776,9 +776,9 @@ export default function VideoFeaturePage() {
                     </button>
                   )}
                 </div>
-                  <div className="border-t border-white/5 pt-3 space-y-3">
+                  <div className="border-t border-white/12 pt-3 space-y-3">
                   <label className="text-[10px] font-semibold text-slate-500">Âm thanh</label>
-                  <p className="text-[10px] text-slate-600 leading-relaxed">Chọn "Có" để giữ nguyên audio gốc của video đầu vào. Chọn "Không" để AI tự tạo audio mới phù hợp với nội dung đã chỉnh sửa.</p>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">Chọn "Có" để giữ nguyên audio gốc của video đầu vào. Chọn "Không" để AI tự tạo audio mới phù hợp với nội dung đã chỉnh sửa.</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-400">Giữ audio gốc</span>
                     <div className="flex gap-1">
@@ -793,18 +793,18 @@ export default function VideoFeaturePage() {
             )}
 
             {feature === 'reference-to-video' && config.showLastFrame && (
-              <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4 space-y-3">
+              <div className="bg-[#16141a] border border-white/12 rounded-2xl p-4 space-y-3">
                 <label className="text-[10px] font-semibold text-slate-500">First frame (tuỳ chọn)</label>
                 {scene.lastFramePreview ? (
                   <div className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group max-w-[200px]">
-                    <div className="w-full aspect-square relative overflow-hidden bg-zinc-950">
+                    <div className="w-full aspect-square relative overflow-hidden bg-[#16141a]">
                       <img src={scene.lastFramePreview} alt="" className="w-full h-full object-cover" />
                     </div>
                     <button onClick={() => { updateScene('lastFrameImage', ''); updateScene('lastFramePreview', ''); }}
-                      className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
+                      className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
                       <X className="h-3 w-3" />
                     </button>
-                    <div className="p-2 border-t border-white/5">
+                    <div className="p-2 border-t border-white/12">
                       <p className="text-[10px] font-medium text-white truncate">{scene.lastFrameImage || 'First frame'}</p>
                     </div>
                   </div>
@@ -818,28 +818,28 @@ export default function VideoFeaturePage() {
             )}
 
             {feature === 'character-animation' && (
-              <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4 space-y-3">
+              <div className="bg-[#16141a] border border-white/12 rounded-2xl p-4 space-y-3">
                 <label className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
                   <Film className="h-3 w-3" /> Video tham chiếu chuyển động
                 </label>
-                <p className="text-[10px] text-slate-600 leading-relaxed">
+                <p className="text-[10px] text-slate-400 leading-relaxed">
                   Tải lên video chuyển động để làm mẫu cho nhân vật. MP4/AVI/MOV, 2-30s, tối đa 200MB.
                 </p>
                 {animateVideoPreview ? (
                   <div className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group max-w-[200px]">
-                    <div className="w-full aspect-square relative group/preview overflow-hidden bg-zinc-950">
+                    <div className="w-full aspect-square relative group/preview overflow-hidden bg-[#16141a]">
                       <video src={animateVideoPreview} className="w-full h-full object-cover" muted preload="metadata" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 flex items-center justify-center bg-[#16141a]/40 opacity-0 group-hover/preview:opacity-100 transition-opacity">
                         <div className="h-8 w-8 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm">
                           <Play className="h-3.5 w-3.5 text-white fill-white ml-0.5" />
                         </div>
                       </div>
                     </div>
                     <button onClick={() => { setAnimateVideoFile(null); setAnimateVideoPreview(''); }}
-                      className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-zinc-950/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
+                      className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-[#16141a]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 text-white/70 hover:text-white cursor-pointer">
                       <X className="h-3 w-3" />
                     </button>
-                    <div className="p-2 border-t border-white/5">
+                    <div className="p-2 border-t border-white/12">
                       <p className="text-[10px] font-medium text-white truncate">{animateVideoFile?.name || 'Video tham chiếu'}</p>
                     </div>
                   </div>
@@ -849,9 +849,9 @@ export default function VideoFeaturePage() {
                     <Film className="h-4 w-4" /> Chọn video chuyển động
                   </button>
                 )}
-                <div className="border-t border-white/5 pt-3 space-y-3">
+                <div className="border-t border-white/12 pt-3 space-y-3">
                   <label className="text-[10px] font-semibold text-slate-500">Chất lượng</label>
-                  <p className="text-[10px] text-slate-600 leading-relaxed">Chọn chế độ tạo ảnh động cho nhân vật. Standard tạo nhanh với chất lượng cơ bản (15fps). Professional cho chuyển động mượt mà hơn (25fps) nhưng tốn nhiều credits hơn.</p>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">Chọn chế độ tạo ảnh động cho nhân vật. Standard tạo nhanh với chất lượng cơ bản (15fps). Professional cho chuyển động mượt mà hơn (25fps) nhưng tốn nhiều credits hơn.</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-400">Chế độ tạo</span>
                     <div className="flex gap-1">

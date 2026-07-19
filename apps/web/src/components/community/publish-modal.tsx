@@ -70,7 +70,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-zinc-950/80 backdrop-blur-md"
+        className="absolute inset-0 bg-[#16141a]/80 backdrop-blur-md"
       />
 
       <motion.div
@@ -78,11 +78,11 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className="relative z-10 w-full max-w-[560px] bg-zinc-950/95 border border-white/[0.08] shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden backdrop-blur-xl p-6 md:p-6 flex flex-col gap-6 text-left"
+        className="relative z-10 w-full max-w-[560px] bg-[#16141a]/95 border border-white/12 shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden backdrop-blur-xl p-6 md:p-6 flex flex-col gap-6 text-left"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-zinc-950/60 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 flex items-center justify-center transition-all cursor-pointer"
+          className="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-[#16141a]/60 hover:bg-white/10 text-slate-400 hover:text-white border border-white/12 flex items-center justify-center transition-all cursor-pointer"
         >
           <X className="h-4.5 w-4.5" />
         </button>
@@ -106,11 +106,11 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
             <div
               onClick={() => setVisibility('private')}
               className={cn(
-                "p-4 rounded-2xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.02] flex items-start gap-3.5 cursor-pointer transition-all",
+                "p-4 rounded-2xl border border-white/12 bg-white/[0.01] hover:bg-white/[0.02] flex items-start gap-3.5 cursor-pointer transition-all",
                 visibility === 'private' && "border-[#FF5A1F]/30 bg-[#FF5A1F]/[0.02] shadow-[0_0_15px_rgba(255,90,31,0.02)]"
               )}
             >
-              <div className={cn("h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 border border-white/[0.06] text-slate-500", visibility === 'private' && "bg-[#FF5A1F]/15 border-[#FF5A1F]/20 text-[#FF5A1F]")}>
+              <div className={cn("h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 border border-white/12 text-slate-500", visibility === 'private' && "bg-[#FF5A1F]/15 border-[#FF5A1F]/20 text-[#FF5A1F]")}>
                 <Lock className="h-4.5 w-4.5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -123,11 +123,11 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
             <div
               onClick={() => setVisibility('sharing')}
               className={cn(
-                "p-4 rounded-2xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.02] flex items-start gap-3.5 cursor-pointer transition-all",
+                "p-4 rounded-2xl border border-white/12 bg-white/[0.01] hover:bg-white/[0.02] flex items-start gap-3.5 cursor-pointer transition-all",
                 visibility === 'sharing' && "border-[#FF5A1F]/30 bg-[#FF5A1F]/[0.02] shadow-[0_0_15px_rgba(255,90,31,0.02)]"
               )}
             >
-              <div className={cn("h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 border border-white/[0.06] text-slate-500", visibility === 'sharing' && "bg-[#FF5A1F]/15 border-[#FF5A1F]/20 text-[#FF5A1F]")}>
+              <div className={cn("h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 border border-white/12 text-slate-500", visibility === 'sharing' && "bg-[#FF5A1F]/15 border-[#FF5A1F]/20 text-[#FF5A1F]")}>
                 <Eye className="h-4.5 w-4.5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -140,7 +140,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
             <div
               onClick={() => setVisibility('public')}
               className={cn(
-                "p-4 rounded-2xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.02] flex items-start gap-3.5 cursor-pointer transition-all relative overflow-hidden",
+                "p-4 rounded-2xl border border-white/12 bg-white/[0.01] hover:bg-white/[0.02] flex items-start gap-3.5 cursor-pointer transition-all relative overflow-hidden",
                 visibility === 'public' && "border-[#FF5A1F]/30 bg-[#FF5A1F]/[0.02] shadow-[0_0_15px_rgba(255,90,31,0.02)]"
               )}
             >
@@ -148,7 +148,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
                 VIP ONLY
               </div>
 
-              <div className={cn("h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 border border-white/[0.06] text-slate-500", visibility === 'public' && "bg-amber-500/15 border-amber-500/30 text-amber-500")}>
+              <div className={cn("h-9 w-9 rounded-xl bg-white/[0.04] flex items-center justify-center shrink-0 border border-white/12 text-slate-500", visibility === 'public' && "bg-amber-500/15 border-amber-500/30 text-amber-500")}>
                 <Award className="h-4.5 w-4.5" />
               </div>
               <div className="flex-1 min-w-0 pr-8">
@@ -169,7 +169,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
               Gắn từ khóa tìm kiếm (Tối đa 5 thẻ)
             </span>
             
-            <div className="p-2.5 rounded-2xl border border-white/[0.04] bg-[#030303] flex flex-wrap gap-2 items-center focus-within:border-[#FF5A1F]/30 transition-all min-h-[50px]">
+            <div className="p-2.5 rounded-2xl border border-white/12 bg-[#16141a] flex flex-wrap gap-2 items-center focus-within:border-[#FF5A1F]/30 transition-all min-h-[50px]">
               {tags.map((tag, idx) => (
                 <span key={tag} className="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] text-slate-300 font-bold uppercase tracking-wider font-mono">
                   #{tag}
@@ -187,7 +187,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Gõ tag & Enter..."
-                    className="w-full h-8 bg-transparent text-xs text-slate-300 outline-none placeholder:text-slate-600 pl-1 font-medium font-mono"
+                    className="w-full h-8 bg-transparent text-xs text-slate-300 outline-none placeholder:text-slate-400 pl-1 font-medium font-mono"
                   />
                   {tagInput.trim() && (
                     <button onClick={handleAddTag} className="absolute right-1 top-1 h-6 w-6 rounded-md bg-[#FF5A1F]/10 hover:bg-[#FF5A1F]/20 text-[#FF5A1F] flex items-center justify-center transition-all cursor-pointer">
@@ -199,7 +199,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
             </div>
             
             {tags.length === 5 && (
-              <p className="text-[9px] text-slate-600 font-mono tracking-tight flex items-center gap-1">
+              <p className="text-[9px] text-slate-400 font-mono tracking-tight flex items-center gap-1">
                 <AlertCircle className="h-3 w-3 text-slate-500 shrink-0" />
                 Đã đạt giới hạn tối đa 5 thẻ từ khóa.
               </p>
@@ -208,7 +208,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
         )}
 
         <div className="flex gap-3 pt-2">
-          <button onClick={onClose} className="flex-1 h-12 rounded-xl border border-white/5 hover:border-white/20 bg-white/[0.01] hover:bg-white/[0.03] text-slate-400 hover:text-white font-bold text-sm tracking-tight transition-all cursor-pointer">
+          <button onClick={onClose} className="flex-1 h-12 rounded-xl border border-white/12 hover:border-white/20 bg-white/[0.01] hover:bg-white/[0.03] text-slate-400 hover:text-white font-bold text-sm tracking-tight transition-all cursor-pointer">
             Hủy
           </button>
           <button onClick={handlePublishSubmit} className="flex-1 h-12 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white font-extrabold text-sm tracking-tight shadow-[0_10px_20px_rgba(255,90,31,0.15)] hover:shadow-[0_12px_24px_rgba(255,90,31,0.25)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-97">

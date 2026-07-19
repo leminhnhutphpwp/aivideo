@@ -115,8 +115,12 @@ class PlanSeeder extends Seeder
                     'reference_to_video' => 'wan2.7-r2v',
                     'video_editing' => 'wan2.7-videoedit',
                     'character_animation' => 'wan2.2-animate-mix',
-                    'image_generation' => 'qwen-image-2.0-pro',
-                    'image_editing' => 'qwen-image-edit-max',
+                    // Ảnh thu flat 200 credit (2.000đ) — bỏ mọi multiplier (PricingCalculator isFlatFee).
+                    // Trước đây Studio map model $0.075 (qwen-image-2.0-pro / qwen-image-edit-max) →
+                    // biên chỉ ~6,25% (unit-economics-2026-07-18). Đổi sang model rẻ hơn cùng capability:
+                    // qwen-image-2.0 $0.035 (t2i/i2i/inpaint) → biên ~56%; qwen-image-edit-plus $0.03 → ~62,5%.
+                    'image_generation' => 'qwen-image-2.0',
+                    'image_editing' => 'qwen-image-edit-plus',
                     'storyboard_video' => 'wan2.7-t2v-2026-04-25',
                 ],
                 'provider_config' => $defaultProviderConfig,

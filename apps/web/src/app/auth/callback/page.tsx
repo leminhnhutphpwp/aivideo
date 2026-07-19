@@ -77,7 +77,7 @@ function CallbackContent() {
 
 export default function AuthCallbackPage() {
   return (
-    <div className="min-h-screen bg-[#000000] flex items-center justify-center">
+    <div className="min-h-screen bg-[#16141a] flex items-center justify-center">
       <Suspense fallback={
         <div className="text-center space-y-4">
           <div className="h-8 w-8 rounded-full border-2 border-[#FF5A1F]/30 border-t-[#FF5A1F] animate-spin mx-auto" />

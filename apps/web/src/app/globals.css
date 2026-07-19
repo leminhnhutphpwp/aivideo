@@ -2,23 +2,39 @@
 
 
 @theme {
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
+  /* ===== Elevated brighter-dark palette (warm-tinted, lifted off pure black) =====
+     Base surfaces sit at #16141a instead of near-black #09090b, with clear
+     elevation steps for panels/cards. Keeps the ember-orange brand accent. */
+  --color-background: #16141a;
+  --color-foreground: #f6f6f8;
   --color-primary: #FF5A1F;
-  --color-secondary: #18181b;
+  --color-secondary: #211e26;
   --color-accent: #FF5A1F;
+  /* Brand token — single source for the ember accent (was hardcoded #FF5A1F everywhere). */
+  --color-brand: #FF5A1F;
+  --color-brand-hover: #FF6B35;
+  /* Layered surface scale — reference via bg-[var(--surface-N)] where useful. */
+  --color-surface-0: #16141a; /* app base */
+  --color-surface-1: #1f1c25; /* panels / elevated */
+  --color-surface-2: #2a2632; /* cards / higher elevation */
+  --color-surface-3: #342f3d; /* hover / active */
   --font-display-heading: "Playfair Display", serif;
 }
 
 :root {
   color-scheme: dark;
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card-bg: #18181b;
-  --card-border: rgba(255,255,255,0.08);
-  --muted: #a1a1aa;
-  --muted-foreground: #71717a;
-  --surface: #09090b;
+  --background: #16141a;
+  --foreground: #f6f6f8;
+  --card-bg: #211e26;
+  --card-border: rgba(255,255,255,0.12);
+  --muted: #c2c0cb;
+  --muted-foreground: #9d9aa8;
+  --surface: #16141a;
+  /* Layered surface scale (mirrors @theme tokens for style={} consumers). */
+  --surface-0: #16141a;
+  --surface-1: #1f1c25;
+  --surface-2: #2a2632;
+  --surface-3: #342f3d;
   --accent: #FF5A1F;
   --accent-foreground: #ffffff;
   --primary: 255 90 31;
@@ -48,11 +64,13 @@ body {
 }
 
 .cinematic-card {
-  @apply bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl transition-all duration-500 overflow-hidden;
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+  @apply backdrop-blur-xl border border-white/12 rounded-2xl transition-all duration-500 overflow-hidden;
 }
 
 .cinematic-card:hover {
-  @apply border-white/20 bg-zinc-900/80 shadow-sm;
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  @apply border-white/20 shadow-sm;
 }
 
 .btn-creative {
@@ -444,16 +462,16 @@ body {
 .letterbox::after { bottom: 0; }
 
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .glass-hover:hover {
-  border-color: rgba(255, 90, 31, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 40px rgba(255, 90, 31, 0.08);
+  border-color: rgba(255, 90, 31, 0.28);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 40px rgba(255, 90, 31, 0.1);
 }
 
 .text-gradient-ember {
@@ -502,7 +520,7 @@ body {
   border: 1px solid rgba(255, 90, 31, 0.3);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(42, 38, 50, 0.55);
   color: #ffffff;
   backdrop-filter: blur(12px);
 }

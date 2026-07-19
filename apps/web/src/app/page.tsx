@@ -22,7 +22,7 @@ const PortalSection = dynamic(() => import("@/sections/portal-section").then((m)
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen bg-zinc-950 text-white overflow-x-hidden">
+    <main className="relative min-h-screen bg-[#16141a] text-white overflow-x-hidden">
       {/* Cinematic Full Screen Preloader Intro */}
       <Preloader />
 

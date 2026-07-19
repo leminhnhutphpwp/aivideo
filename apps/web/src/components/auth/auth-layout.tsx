@@ -82,7 +82,7 @@ export function AuthLayout({ leftContent, rightContent, bgMedia }: AuthLayoutPro
   }, [handleMouseMove]);
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white flex flex-col lg:flex-row font-sans">
+    <div className="min-h-screen bg-[#16141a] text-white flex flex-col lg:flex-row font-sans">
       {/* Brand section - hidden on mobile, shown on desktop */}
       <div ref={leftRef} className="hidden lg:flex lg:order-1 lg:w-[45%] relative p-6 flex-col justify-between overflow-hidden isolate min-h-screen gap-6">
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -122,7 +122,7 @@ export function AuthLayout({ leftContent, rightContent, bgMedia }: AuthLayoutPro
         {/* Desktop spotlight */}
         <div className="login-spotlight absolute inset-0 z-[1] transition-none hidden lg:block" />
         <div
-          className="login-magnetic-card w-full max-w-md rounded-2xl border border-white/5 bg-[#050505]/40 backdrop-blur-sm p-5 md:p-6 relative"
+          className="login-magnetic-card w-full max-w-md rounded-2xl border border-white/12 bg-[#16141a]/40 backdrop-blur-sm p-5 md:p-6 relative"
           onPointerLeave={(e) => {
             const card = e.currentTarget;
             card.style.setProperty('--magnetic-x', '50%');

@@ -10,6 +10,11 @@ use Illuminate\Support\Str;
 class RenderJob extends Model
 {
     use SoftDeletes;
+
+    public const MODERATION_APPROVED = 'approved';
+    public const MODERATION_PENDING = 'pending_review';
+    public const MODERATION_REJECTED = 'rejected';
+
     protected $fillable = [
         'uuid', 'user_id', 'status', 'prompt', 'negative_prompt', 'model', 'capability',
         'skill_id', 'quality_tier', 'video_type',
@@ -21,6 +26,7 @@ class RenderJob extends Model
         'preview_path', 'output_size_bytes', 'queued_at', 'started_at',
         'completed_at', 'failed_at', 'error_message', 'error_metadata',
         'visibility', 'published_at', 'creator_payout', 'usage_count', 'tags',
+        'moderation_status', 'moderated_at',
     ];
 
     protected $hidden = ['id', 'user_id'];
@@ -36,6 +42,7 @@ class RenderJob extends Model
         'completed_at' => 'datetime',
         'failed_at' => 'datetime',
         'published_at' => 'datetime',
+        'moderated_at' => 'datetime',
     ];
 
     public function getRouteKeyName(): string
@@ -89,7 +96,14 @@ class RenderJob extends Model
     {
         return $query->whereIn('visibility', ['sharing', 'public'])
             ->where('status', 'completed')
+            ->where('moderation_status', self::MODERATION_APPROVED)
             ->whereNotNull('published_at');
+    }
+
+    /** Assets held for manual review (e.g. a degraded image-moderation verdict). */
+    public function scopePendingReview($query)
+    {
+        return $query->where('moderation_status', self::MODERATION_PENDING);
     }
 
     public function scopeVisibleTo($query, User $user)
@@ -208,12 +222,14 @@ class RenderJob extends Model
         return in_array($this->visibility, ['sharing', 'public']) && $this->published_at !== null;
     }
 
-    public function publish(string $visibility, array $tags = []): void
+    public function publish(string $visibility, array $tags = [], string $moderationStatus = self::MODERATION_APPROVED): void
     {
+        // Creator payout is deferred while an asset is held for review — otherwise a user could
+        // farm the payout by publishing content a degraded verdict never actually cleared.
+        // approveModeration() grants it on approval; rejectModeration() never does.
         $payout = 0;
-        if ($visibility === 'public') {
-            $settings = app(\App\Settings\CommunitySettings::class);
-            $payout = (int) floor($this->credits_cost * $settings->creator_payout_percent / 100);
+        if ($visibility === 'public' && $moderationStatus === self::MODERATION_APPROVED) {
+            $payout = $this->computeCreatorPayout();
         }
 
         $this->update([
@@ -221,6 +237,8 @@ class RenderJob extends Model
             'published_at' => now(),
             'creator_payout' => $payout,
             'tags' => $tags,
+            'moderation_status' => $moderationStatus,
+            'moderated_at' => $moderationStatus === self::MODERATION_APPROVED ? null : now(),
         ]);
 
         if ($payout > 0) {
@@ -234,6 +252,55 @@ class RenderJob extends Model
         if (!empty($tags)) {
             \App\Models\Tag::upsertFromArray($tags);
         }
+    }
+
+    /** Credits paid back to the creator for a public publish (0 for non-public). */
+    protected function computeCreatorPayout(): int
+    {
+        $settings = app(\App\Settings\CommunitySettings::class);
+        return (int) floor($this->credits_cost * $settings->creator_payout_percent / 100);
+    }
+
+    /**
+     * Admin approves a held asset: it becomes visible in the public feed and, if published as
+     * public, the deferred creator payout is granted now (idempotent — only if not already paid).
+     */
+    public function approveModeration(): void
+    {
+        if ($this->moderation_status === self::MODERATION_APPROVED) {
+            return;
+        }
+
+        $previousPayout = (int) $this->creator_payout;
+        $payout = ($this->visibility === 'public' && $previousPayout === 0)
+            ? $this->computeCreatorPayout()
+            : $previousPayout;
+
+        $this->update([
+            'moderation_status' => self::MODERATION_APPROVED,
+            'moderated_at' => now(),
+            'creator_payout' => $payout,
+        ]);
+
+        $delta = $payout - $previousPayout;
+        if ($delta > 0) {
+            app(\App\Services\CreditService::class)->addCredits(
+                $this->user,
+                $delta,
+                "Community creator payout for asset #{$this->uuid}"
+            );
+        }
+    }
+
+    /** Admin rejects a held asset: mark rejected and hide it from the community feed. */
+    public function rejectModeration(): void
+    {
+        $this->update([
+            'moderation_status' => self::MODERATION_REJECTED,
+            'moderated_at' => now(),
+        ]);
+
+        $this->unpublish();
     }
 
     public function unpublish(): void

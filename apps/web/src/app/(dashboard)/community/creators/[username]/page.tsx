@@ -82,7 +82,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
         </Link>
       </div>
 
-      <div className="relative rounded-2xl bg-zinc-950/80 border border-white/[0.05] p-6 md:p-6 overflow-hidden">
+      <div className="relative rounded-2xl bg-[#16141a]/80 border border-white/12 p-6 md:p-6 overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 rounded-full bg-[#FF5A1F]/10 blur-[100px] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-40" />
 
@@ -106,7 +106,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
                 @{profile.username}
               </p>
 
-              <div className="flex items-center justify-center sm:justify-start gap-6 pt-2 border-t border-white/[0.04]">
+              <div className="flex items-center justify-center sm:justify-start gap-6 pt-2 border-t border-white/12">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Users className="h-4 w-4" />
                   <strong className="text-slate-200 font-bold">{formatNum(profile.stats.published_count)}</strong> tác phẩm
@@ -128,7 +128,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
           </div>
 
           <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[200px]">
-            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between gap-6">
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/12 flex items-center justify-between gap-6">
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">Uy tín</span>
                 <span className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-[#FF5A1F] font-mono leading-none mt-1">
@@ -138,7 +138,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
               <ShieldCheck className="h-5 w-5 text-amber-500" />
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between gap-6">
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/12 flex items-center justify-between gap-6">
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">Tổng Likes</span>
                 <span className="text-lg font-black text-slate-200 font-mono leading-none mt-1">
@@ -167,7 +167,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
       </div>
 
       <div className="space-y-6">
-        <h2 className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2 border-b border-white/[0.04] pb-3">
+        <h2 className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2 border-b border-white/12 pb-3">
           <Flame className="h-5 w-5 text-[#FF5A1F]" /> Tác phẩm công khai ({assets.length})
         </h2>
 
@@ -179,7 +179,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
           </div>
         ) : (
           <div className="py-20 rounded-2xl border border-white/[0.03] bg-white/[0.01] flex flex-col items-center justify-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/5 text-slate-500">
+            <div className="h-12 w-12 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/12 text-slate-500">
               <Award className="h-6 w-6" />
             </div>
             <p className="text-sm font-bold text-slate-300">Creator chưa công khai tác phẩm nào</p>

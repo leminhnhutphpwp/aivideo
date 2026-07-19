@@ -10,6 +10,7 @@ use App\Http\Controllers\API\SkillAuthoringController;
 use App\Http\Controllers\API\PromptEnhancementController;
 use App\Http\Controllers\API\PlanController;
 use App\Http\Controllers\API\CreditController;
+use App\Http\Controllers\API\CouponController;
 use App\Http\Controllers\API\AssetController;
 use App\Http\Controllers\API\ApiKeyController;
 use App\Http\Controllers\API\BroadcastController;
@@ -172,66 +173,8 @@ Route::get('/auth/bg/stream/{token}', function (string $token) {
     ]);
 })->where('token', '[A-Za-z0-9]+');
 
-// Public: Landing page settings
-Route::get('/landing-page', function () {
-    $settings = app(\App\Settings\GeneralSettings::class);
-    return response()->json([
-        'hero_label' => $settings->hero_label,
-        'hero_title_line1' => $settings->hero_title_line1,
-        'hero_title_line2' => $settings->hero_title_line2,
-        'hero_subtitle' => $settings->hero_subtitle,
-        'hero_cta_text' => $settings->hero_cta_text,
-        'hero_cta_url' => $settings->hero_cta_url,
-        'hero_typewriter_words' => $settings->hero_typewriter_words,
-        'portal_label_texts' => $settings->portal_label_texts,
-        'portal_title_line1' => $settings->portal_title_line1,
-        'portal_title_line2' => $settings->portal_title_line2,
-        'portal_subtitle' => $settings->portal_subtitle,
-        'portal_cta_text' => $settings->portal_cta_text,
-        'portal_login_text' => $settings->portal_login_text,
-        'portal_login_label' => $settings->portal_login_label,
-        'reel_label' => $settings->reel_label,
-        'reel_title_line1' => $settings->reel_title_line1,
-        'reel_title_line2' => $settings->reel_title_line2,
-        'intro_label' => $settings->intro_label,
-        'intro_title_line1' => $settings->intro_title_line1,
-        'intro_title_line2' => $settings->intro_title_line2,
-        'intro_subtitle' => $settings->intro_subtitle,
-        'intro_features' => $settings->intro_features,
-        'genesis_label' => $settings->genesis_label,
-        'genesis_title_line1' => $settings->genesis_title_line1,
-        'genesis_title_line2' => $settings->genesis_title_line2,
-        'forge_label' => $settings->forge_label,
-        'forge_cta_text' => $settings->forge_cta_text,
-        'workflow_label' => $settings->workflow_label,
-        'director_label' => $settings->director_label,
-        'director_title_line1' => $settings->director_title_line1,
-        'director_title_line2' => $settings->director_title_line2,
-        'director_subtitle' => $settings->director_subtitle,
-        'gallery_label' => $settings->gallery_label,
-        'gallery_title_line1' => $settings->gallery_title_line1,
-        'gallery_title_line2' => $settings->gallery_title_line2,
-        'sound_label' => $settings->sound_label,
-        'sound_title_line1' => $settings->sound_title_line1,
-        'sound_title_line2' => $settings->sound_title_line2,
-        'ecosystem_label' => $settings->ecosystem_label,
-        'ecosystem_title_line1' => $settings->ecosystem_title_line1,
-        'ecosystem_title_line2' => $settings->ecosystem_title_line2,
-        'ecosystem_subtitle' => $settings->ecosystem_subtitle,
-        'stats_label' => $settings->stats_label,
-        'stats_title_line1' => $settings->stats_title_line1,
-        'stats_title_line2' => $settings->stats_title_line2,
-        'vision_label' => $settings->vision_label,
-        'vision_title_line1' => $settings->vision_title_line1,
-        'vision_title_line2' => $settings->vision_title_line2,
-        'vision_description_p1' => $settings->vision_description_p1,
-        'vision_description_p2' => $settings->vision_description_p2,
-        'footer_copyright' => $settings->footer_copyright,
-        'footer_privacy_url' => $settings->footer_privacy_url,
-        'footer_terms_url' => $settings->footer_terms_url,
-        'footer_contact_url' => $settings->footer_contact_url,
-    ]);
-});
+// Landing page content is hardcoded in the Next.js app (apps/web hooks/use-landing-settings.ts).
+// The former /landing-page CMS endpoint + GeneralSettings landing props were removed.
 
 // Public: SEO settings
 Route::get('/seo', function () {
@@ -339,6 +282,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/credits/upgrade', [CreditController::class, 'upgrade'])->middleware(ThrottleApiRequests::class . ':10,1');
     Route::get('/credits/upgrade-history', [CreditController::class, 'upgradeHistory']);
 
+    // Coupons: nhập mã tặng credits / preview mã giảm giá. Throttle chặt để chống dò mã.
+    Route::post('/coupons/redeem', [CouponController::class, 'redeem'])->middleware(ThrottleApiRequests::class . ':10,1');
+    Route::post('/coupons/validate', [CouponController::class, 'validateDiscount'])->middleware(ThrottleApiRequests::class . ':20,1');
+
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
@@ -368,6 +315,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/storyboards/{storyboard:uuid}/compile-prompt', [StoryboardController::class, 'compilePrompt']);
     Route::post('/storyboards/{storyboard:uuid}/generate-multi-panel-image', [StoryboardController::class, 'generateMultiPanelImage']);
     Route::get('/storyboards/{storyboard:uuid}/download', [StoryboardController::class, 'download']);
+    Route::get('/storyboards/{storyboard:uuid}/multi-panel', [StoryboardController::class, 'multiPanel']);
     Route::post('/storyboards/{storyboard:uuid}/add-voiceover', [StoryboardController::class, 'addVoiceover']);
 
     Route::post('/assets', [AssetController::class, 'store']);

@@ -1,3 +1,20 @@
+export type ModerationStatus = 'approved' | 'pending_review' | 'rejected';
+
+/** Response shape of PATCH /render-jobs/{uuid}/publish. */
+export interface PublishResponse {
+  success: boolean;
+  /** true when the asset was held for manual moderation review (degraded verdict). */
+  pending_review: boolean;
+  message: string | null;
+  data: {
+    uuid: string;
+    visibility: 'sharing' | 'public';
+    moderation_status: ModerationStatus;
+    creator_payout: number;
+    published_at: string | null;
+  };
+}
+
 export interface AssetCard {
   uuid: string;
   title: string;
@@ -10,6 +27,7 @@ export interface AssetCard {
   duration_seconds: number | null;
   credits_cost: number;
   visibility: 'sharing' | 'public';
+  moderation_status?: ModerationStatus;
   tags: string[];
   like_count: number;
   usage_count: number;

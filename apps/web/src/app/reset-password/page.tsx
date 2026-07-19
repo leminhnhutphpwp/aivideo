@@ -14,7 +14,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 
 export default function ResetPasswordPageWrapper() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-zinc-950" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#16141a]" />}>
       <ResetPasswordPage />
     </Suspense>
   );
@@ -98,15 +98,15 @@ function ResetPasswordPage() {
                 <div className="space-y-2.5">
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">{t('auth.email')}</label>
                   <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                    className="w-full h-11 bg-zinc-950 border border-white/5 rounded-xl px-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium" />
+                    className="w-full h-11 bg-[#16141a] border border-white/12 rounded-xl px-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium" />
                 </div>
                 <div className="space-y-2.5">
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">{t('auth.resetCode')}</label>
                   <div className="relative">
-                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <input type="text" value={code} onChange={e => setCode(e.target.value)}
                       placeholder="000000"
-                      className="w-full h-11 bg-zinc-950 border border-white/5 rounded-xl pl-11 pr-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium tracking-widest text-center text-lg" />
+                      className="w-full h-11 bg-[#16141a] border border-white/12 rounded-xl pl-11 pr-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium tracking-widest text-center text-lg" />
                   </div>
                 </div>
               </div>
@@ -131,7 +131,7 @@ function ResetPasswordPage() {
                 </Button>
               </div>
             </div>
-            <p className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-widest animate-item-rise" style={{ animationDelay: '240ms' }}>
+            <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest animate-item-rise" style={{ animationDelay: '240ms' }}>
               <Link href="/forgot-password" className="text-[#FF5A1F] hover:underline inline-flex items-center gap-1">
                 <ArrowLeft className="h-3 w-3" /> {t('auth.resetBack')}
               </Link>
@@ -187,7 +187,7 @@ function ResetPasswordPage() {
               </Button>
             </div>
           </div>
-          <p className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-widest animate-item-rise" style={{ animationDelay: '240ms' }}>
+          <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest animate-item-rise" style={{ animationDelay: '240ms' }}>
             <Link href="/forgot-password" className="text-[#FF5A1F] hover:underline inline-flex items-center gap-1">
               <ArrowLeft className="h-3 w-3" /> {t('auth.resetBack')}
             </Link>

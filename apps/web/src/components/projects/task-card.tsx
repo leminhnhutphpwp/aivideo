@@ -6,6 +6,7 @@ import { CheckCircle2, XCircle, Clock, FileType, Download, Play, AlertCircle, Lo
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
+import { toCssRatio } from '@/components/ui/media-viewer';
 import type { TaskRecord } from './types';
 
 function fmtBytes(bytes: number): string {
@@ -35,11 +36,11 @@ function StatusIcon({ status }: { status?: string }) {
   return (
     <div className={cn(
       "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-500",
-      isRunning && "bg-[#FF5A1F]/10 text-[#FF5A1F] border border-[#FF5A1F]/20",
-      isQueued && "bg-[#FF5A1F]/5 text-[#FF5A1F]/70 border border-[#FF5A1F]/10",
+      isRunning && "bg-brand/10 text-brand border border-brand/20",
+      isQueued && "bg-brand/5 text-brand/70 border border-brand/10",
       isDone && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
       isFailed && "bg-red-500/10 text-red-400 border border-red-500/20",
-      !status && "bg-white/5 border border-white/5 text-slate-500",
+      !status && "bg-white/5 border border-white/12 text-slate-500",
     )}>
       {isRunning ? (
         <Loader2 className="h-5 w-5 animate-spin" />
@@ -89,7 +90,7 @@ function ProgressMessages({ progress }: { progress?: string[] }) {
 
 function TimingInfo({ task }: { task: TaskRecord }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-600">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
       <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{elapsedStr(task.startedAt, task.endedAt)}</span>
       {task.startedAt && <span>Bắt đầu: {new Date(task.startedAt).toLocaleTimeString('vi-VN')}</span>}
       {task.endedAt && <span>Kết thúc: {new Date(task.endedAt).toLocaleTimeString('vi-VN')}</span>}
@@ -148,7 +149,7 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
   };
 
   return (
-    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 space-y-2 flex flex-col h-full">
+    <div className="bg-white/[0.02] border border-white/12 rounded-xl p-3 space-y-2 flex flex-col h-full">
       <div className="flex flex-wrap items-center gap-3 text-[11px]">
         {file.mime && <span className="text-slate-500"><FileType className="h-3 w-3 inline" /> {file.mime}</span>}
         {file.size != null && <span className="text-slate-500">{fmtBytes(file.size)}</span>}
@@ -156,14 +157,10 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
 
       {/* Video player */}
       {isVideo && (
-        <div className="relative rounded-xl overflow-hidden border border-white/[0.06] bg-zinc-950/60 shadow-sm shadow-black/40 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '16:9').split(':').map(Number); return w < h ? 280 : 448; })() }}>
+        <div className="relative rounded-xl overflow-hidden border border-white/12 bg-[#16141a]/60 shadow-sm shadow-black/40 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '16:9').split(':').map(Number); return w < h ? 280 : 448; })() }}>
           {previewUrl ? (
             <>
-              <div className={cn(
-                "w-full",
-                aspectRatio && `aspect-[${aspectRatio.replace(':', '/')}]`,
-                !aspectRatio && "aspect-video"
-              )}>
+              <div className="w-full" style={{ aspectRatio: toCssRatio(aspectRatio) ?? '16 / 9' }}>
                 <video
                   src={previewUrl}
                   controls
@@ -182,9 +179,9 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
           ) : (
             <div className="flex items-center justify-center aspect-video">
               {loading ? (
-                <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
+                <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-brand animate-spin" />
               ) : (
-                <button onClick={loadPreview} className="text-xs text-[#FF5A1F] hover:underline cursor-pointer">
+                <button onClick={loadPreview} className="text-xs text-brand hover:underline cursor-pointer">
                   Nhấn để xem video
                 </button>
               )}
@@ -195,7 +192,7 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
 
       {/* Audio player */}
       {isAudio && (
-        <div className="relative rounded-xl overflow-hidden border border-white/[0.06] bg-white/[0.02] max-w-[400px] shadow-sm shadow-black/20">
+        <div className="relative rounded-xl overflow-hidden border border-white/12 bg-white/[0.02] max-w-[400px] shadow-sm shadow-black/20">
           {previewUrl ? (
             <div className="px-4 py-5">
               <audio
@@ -211,9 +208,9 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
           ) : (
             <div className="flex items-center justify-center h-16">
               {loading ? (
-                <div className="h-5 w-5 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
+                <div className="h-5 w-5 rounded-full border-2 border-white/10 border-t-brand animate-spin" />
               ) : (
-                <button onClick={loadPreview} className="text-xs text-[#FF5A1F] hover:underline cursor-pointer">
+                <button onClick={loadPreview} className="text-xs text-brand hover:underline cursor-pointer">
                   Nhấn để nghe
                 </button>
               )}
@@ -225,21 +222,17 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
 
       {/* Image preview */}
       {isImage && (
-        <div className="relative rounded-xl overflow-hidden border border-white/[0.06] bg-zinc-950/40 shadow-sm shadow-black/20 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '4:3').split(':').map(Number); return w < h ? 320 : 400; })() }}>
+        <div className="relative rounded-xl overflow-hidden border border-white/12 bg-[#16141a]/40 shadow-sm shadow-black/20 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '4:3').split(':').map(Number); return w < h ? 320 : 400; })() }}>
           {previewUrl ? (
-            <div className={cn(
-              "w-full",
-              aspectRatio && `aspect-[${aspectRatio.replace(':', '/')}]`,
-              !aspectRatio && "aspect-[4/3]"
-            )}>
+            <div className="w-full" style={{ aspectRatio: toCssRatio(aspectRatio) ?? '4 / 3' }}>
               <img src={previewUrl} alt={file.name || 'Preview'} className="w-full h-full object-contain" />
             </div>
           ) : (
             <div className="flex items-center justify-center aspect-[4/3]">
               {loading ? (
-                <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
+                <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-brand animate-spin" />
               ) : (
-                <button onClick={loadPreview} className="text-xs text-[#FF5A1F] hover:underline cursor-pointer">
+                <button onClick={loadPreview} className="text-xs text-brand hover:underline cursor-pointer">
                   Nhấn để xem ảnh
                 </button>
               )}
@@ -307,8 +300,8 @@ export function TaskCard({ task, projectId, onFetchFile, onRetry, retrying, aspe
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className={cn(
         "relative overflow-hidden rounded-xl border transition-all duration-700",
-        "bg-zinc-950 border-white/5",
-        isActive && "border-[#FF5A1F]/10 shadow-[0_0_30px_rgba(255,90,31,0.03)]",
+        "bg-[#16141a] border-white/12",
+        isActive && "border-brand/10 shadow-[0_0_30px_rgba(255,90,31,0.03)]",
         isDone && "border-emerald-500/10 bg-gradient-to-r from-[#0A1510]/50 to-[#0A0A0A]",
         isFailed && "border-red-500/10 bg-gradient-to-r from-[#150A0A]/50 to-[#0A0A0A]",
       )}
@@ -390,27 +383,23 @@ function InputImagePreview({ fileName, label = 'Ảnh gốc', projectId, onFetch
   }, [fileName, projectId]);
 
   return (
-    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 space-y-2 flex flex-col h-full">
+    <div className="bg-white/[0.02] border border-white/12 rounded-xl p-3 space-y-2 flex flex-col h-full">
       <div className="flex flex-wrap items-center gap-3 text-[11px]">
         <span className="text-slate-500 font-medium uppercase tracking-widest">{label}</span>
       </div>
       
-      <div className="relative rounded-xl overflow-hidden border border-white/[0.06] bg-zinc-950/40 shadow-sm shadow-black/20 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '4:3').split(':').map(Number); return w < h ? 320 : 400; })() }}>
+      <div className="relative rounded-xl overflow-hidden border border-white/12 bg-[#16141a]/40 shadow-sm shadow-black/20 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '4:3').split(':').map(Number); return w < h ? 320 : 400; })() }}>
         {previewUrl ? (
-          <div className={cn(
-            "w-full",
-            aspectRatio && `aspect-[${aspectRatio.replace(':', '/')}]`,
-            !aspectRatio && "aspect-[4/3]"
-          )}>
+          <div className="w-full" style={{ aspectRatio: toCssRatio(aspectRatio) ?? '4 / 3' }}>
             <img src={previewUrl} alt={label} className="w-full h-full object-contain" />
           </div>
         ) : loading ? (
-          <div className={cn("flex items-center justify-center w-full", aspectRatio ? `aspect-[${aspectRatio.replace(':', '/')}]` : "aspect-[4/3]")}>
-            <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
+          <div className="flex items-center justify-center w-full" style={{ aspectRatio: toCssRatio(aspectRatio) ?? '4 / 3' }}>
+            <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[color:var(--color-brand,#FF5A1F)] animate-spin" />
           </div>
         ) : (
-          <div className={cn("flex items-center justify-center w-full", aspectRatio ? `aspect-[${aspectRatio.replace(':', '/')}]` : "aspect-[4/3]")}>
-            <span className="text-[10px] text-slate-600">...</span>
+          <div className="flex items-center justify-center w-full" style={{ aspectRatio: toCssRatio(aspectRatio) ?? '4 / 3' }}>
+            <span className="text-[10px] text-slate-400">...</span>
           </div>
         )}
       </div>

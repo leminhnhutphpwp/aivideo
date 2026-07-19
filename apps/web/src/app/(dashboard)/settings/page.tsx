@@ -34,7 +34,7 @@ const ACCENT = '#FF5A1F';
 
 // Shared field styling — orange focus ring, calm surface, generous touch target.
 const FIELD_CLASS =
-  'w-full h-11 rounded-xl bg-black/30 border border-white/[0.08] px-4 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-[#FF5A1F]/60 focus:ring-4 focus:ring-[#FF5A1F]/10 focus:bg-black/50';
+  'w-full h-11 rounded-xl bg-black/30 border border-white/12 px-4 text-sm text-white outline-none transition-all placeholder:text-slate-400 focus:border-[#FF5A1F]/60 focus:ring-4 focus:ring-[#FF5A1F]/10 focus:bg-black/50';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -78,7 +78,7 @@ export default function SettingsPage() {
                   className={`group relative flex-1 lg:flex-none lg:w-full flex flex-col lg:flex-row items-center lg:items-center gap-1.5 lg:gap-3.5 px-2.5 lg:px-4 py-3 lg:py-3.5 rounded-2xl text-center lg:text-left transition-all duration-300 cursor-pointer border ${
                     active
                       ? 'bg-[#FF5A1F]/[0.1] border-[#FF5A1F]/25 text-white'
-                      : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-white hover:bg-white/[0.04] hover:border-white/10'
+                      : 'bg-white/[0.02] border-white/12 text-slate-400 hover:text-white hover:bg-white/[0.04] hover:border-white/10'
                   }`}
                 >
                   {active && (
@@ -139,9 +139,9 @@ function SettingsCard({
 }) {
   return (
     <section
-      className={`rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.03] to-white/[0.01] overflow-hidden ${className}`}
+      className={`rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.03] to-white/[0.01] overflow-hidden ${className}`}
     >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 md:p-6 border-b border-white/[0.05]">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 md:p-6 border-b border-white/12">
         <div className="flex items-center gap-3.5 flex-1 min-w-0">
           {Icon && (
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FF5A1F]/10 text-[#FF5A1F]">
@@ -275,7 +275,7 @@ function ProfileTab() {
       className="space-y-5"
     >
       {/* Identity banner — signature element: an ID card for the creator */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#FF5A1F]/[0.08] via-white/[0.02] to-transparent p-6 md:p-7">
+      <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-[#FF5A1F]/[0.08] via-white/[0.02] to-transparent p-6 md:p-7">
         <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-[#FF5A1F]/20 blur-[80px]" />
         <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
           <label className="relative group cursor-pointer shrink-0">
@@ -285,7 +285,7 @@ function ProfileTab() {
                 {user?.avatar_url ? (
                   <AvatarImage src={user.avatar_url as string} className="object-cover" />
                 ) : null}
-                <AvatarFallback className="bg-zinc-900 text-[#FF5A1F] text-4xl font-bold">
+                <AvatarFallback className="bg-[#1f1c25] text-[#FF5A1F] text-4xl font-bold">
                   {(user?.name || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -314,7 +314,7 @@ function ProfileTab() {
                   <AlertTriangle className="h-3.5 w-3.5" /> Chưa xác thực
                 </span>
               )}
-              <span className="text-[11px] text-slate-600 font-medium">JPEG, PNG, GIF, WebP · Tối đa 5MB</span>
+              <span className="text-[11px] text-slate-400 font-medium">JPEG, PNG, GIF, WebP · Tối đa 5MB</span>
             </div>
           </div>
         </div>
@@ -335,7 +335,7 @@ function ProfileTab() {
           <div>
             <FieldLabel htmlFor="pf-email">Email</FieldLabel>
             <input id="pf-email" value={email} placeholder="user@horizon.studio" readOnly
-              className={`${FIELD_CLASS} opacity-50 cursor-not-allowed focus:ring-0 focus:border-white/[0.08]`} />
+              className={`${FIELD_CLASS} opacity-50 cursor-not-allowed focus:ring-0 focus:border-white/12`} />
           </div>
           <div>
             <FieldLabel htmlFor="pf-phone">Số điện thoại</FieldLabel>
@@ -352,10 +352,10 @@ function ProfileTab() {
             <div className="relative">
               <select id="pf-gender" value={gender} onChange={e => setGender(e.target.value)}
                 className={`${FIELD_CLASS} appearance-none cursor-pointer pr-10`}>
-                <option value="" className="bg-zinc-950 text-slate-500">Chọn giới tính</option>
-                <option value="male" className="bg-zinc-950">Nam</option>
-                <option value="female" className="bg-zinc-950">Nữ</option>
-                <option value="other" className="bg-zinc-950">Khác</option>
+                <option value="" className="bg-[#16141a] text-slate-500">Chọn giới tính</option>
+                <option value="male" className="bg-[#16141a]">Nam</option>
+                <option value="female" className="bg-[#16141a]">Nữ</option>
+                <option value="other" className="bg-[#16141a]">Khác</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             </div>
@@ -364,12 +364,12 @@ function ProfileTab() {
             <FieldLabel htmlFor="pf-address">Địa chỉ</FieldLabel>
             <textarea id="pf-address" value={address} onChange={e => setAddress(e.target.value)}
               placeholder="Nhập địa chỉ của bạn" rows={3}
-              className="w-full rounded-xl bg-black/30 border border-white/[0.08] p-4 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-[#FF5A1F]/60 focus:ring-4 focus:ring-[#FF5A1F]/10 focus:bg-black/50 resize-none"
+              className="w-full rounded-xl bg-black/30 border border-white/12 p-4 text-sm text-white outline-none transition-all placeholder:text-slate-400 focus:border-[#FF5A1F]/60 focus:ring-4 focus:ring-[#FF5A1F]/10 focus:bg-black/50 resize-none"
             />
           </div>
         </div>
 
-        <div className="flex justify-end pt-6 mt-6 border-t border-white/[0.05]">
+        <div className="flex justify-end pt-6 mt-6 border-t border-white/12">
           <Button onClick={handleSave} disabled={saving}
             className="h-11 px-8 rounded-xl bg-[#FF5A1F] text-white hover:bg-[#FF5A1F]/90 font-bold text-sm shadow-lg shadow-[#FF5A1F]/20 transition-all disabled:opacity-60">
             {saving ? (
@@ -461,7 +461,7 @@ function SecurityTab() {
   };
 
   const pwInputClass =
-    '[&_input]:h-11 [&_input]:bg-black/30 [&_input]:border-white/[0.08] [&_input]:rounded-xl [&_input]:px-4';
+    '[&_input]:h-11 [&_input]:bg-black/30 [&_input]:border-white/12 [&_input]:rounded-xl [&_input]:px-4';
 
   return (
     <motion.div
@@ -541,7 +541,7 @@ function SecurityTab() {
         ) : (
           <div className="space-y-2.5">
             {sessions.map((session) => (
-              <div key={session.id} className="flex items-center justify-between gap-3 p-3.5 md:p-4 bg-black/20 border border-white/[0.06] rounded-xl hover:border-white/[0.12] transition-all">
+              <div key={session.id} className="flex items-center justify-between gap-3 p-3.5 md:p-4 bg-black/20 border border-white/12 rounded-xl hover:border-white/[0.12] transition-all">
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div className={`h-11 w-11 shrink-0 rounded-xl flex items-center justify-center ${session.is_current ? 'bg-emerald-400/10 text-emerald-400' : 'bg-white/[0.04] text-slate-400'}`}>
                     <Monitor className="h-5 w-5" />
@@ -570,7 +570,7 @@ function SecurityTab() {
                 </button>
                 {getPageList(sessionPage, totalPages).map((p, i) =>
                   p === '…' ? (
-                    <span key={`gap-${i}`} className="px-1 text-slate-600 text-xs select-none">…</span>
+                    <span key={`gap-${i}`} className="px-1 text-slate-400 text-xs select-none">…</span>
                   ) : (
                     <button
                       key={p}

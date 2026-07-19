@@ -39,7 +39,7 @@ export default function AudioStudioPage() {
             <p className="text-xs md:text-sm text-slate-500 mt-0.5">{t('studio.audioDesc')}</p>
           </div>
         </div>
-        <div className="relative flex flex-col items-center justify-center py-16 md:py-24 px-4 md:px-6 rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/5 overflow-hidden">
+        <div className="relative flex flex-col items-center justify-center py-16 md:py-24 px-4 md:px-6 rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/12 overflow-hidden">
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#FF5A1F]/5 blur-[100px] pointer-events-none" />
           <div className="relative flex flex-col items-center gap-6">
             <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#FF5A1F]/20 to-[#FF8A5B]/10 border border-[#FF5A1F]/20 flex items-center justify-center shadow-sm shadow-[#FF5A1F]/10">
@@ -98,11 +98,11 @@ export default function AudioStudioPage() {
         </div>
       </div>
 
-      <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 space-y-5">
+      <div className="bg-[#16141a] border border-white/12 rounded-2xl p-6 space-y-5">
         <textarea value={prompt} onChange={e => setPrompt(e.target.value)}
           placeholder={t('studio.audioPlaceholder')}
           rows={3} maxLength={2000}
-          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-700 resize-none font-medium leading-relaxed"
+          className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-500 resize-none font-medium leading-relaxed"
         />
 
         <div className="space-y-3">
@@ -124,7 +124,7 @@ export default function AudioStudioPage() {
           </div>
         </div>
 
-        <div className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
+        <div className="bg-white/[0.02] border border-white/12 rounded-xl overflow-hidden">
           <button onClick={() => setVoiceoverEnabled(!voiceoverEnabled)}
             className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/[0.02] transition-all cursor-pointer">
             <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1.5">
@@ -140,7 +140,7 @@ export default function AudioStudioPage() {
               <textarea value={voiceoverText} onChange={e => setVoiceoverText(e.target.value)}
                 placeholder="Nội dung thuyết minh..."
                 rows={3}
-                className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-700 resize-none"
+                className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-500 resize-none"
               />
             </div>
           )}

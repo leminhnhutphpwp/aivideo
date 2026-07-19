@@ -60,7 +60,7 @@ function OrbPulse({ status }: { status: string }) {
         "absolute inset-0 rounded-2xl border transition-colors duration-500",
         isActive && "border-[#FF5A1F]/20 bg-[#FF5A1F]/5",
         isDone && "border-emerald-500/20 bg-emerald-500/5",
-        !isActive && !isDone && "border-white/5 bg-white/5"
+        !isActive && !isDone && "border-white/12 bg-white/5"
       )} />
       {isActive ? (
         <Loader2 className="h-6 w-6 text-[#FF5A1F] animate-spin" />
@@ -114,7 +114,7 @@ function ProgressStream({ messages, active }: { messages?: string[]; active: boo
               "text-xs flex items-center gap-2",
               i === messages.slice(-4).length - 1 && active
                 ? "text-slate-300"
-                : "text-slate-600"
+                : "text-slate-400"
             )}
           >
             <motion.span

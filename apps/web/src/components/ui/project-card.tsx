@@ -55,7 +55,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      className="bg-zinc-900 border border-white/[0.06] rounded-2xl overflow-hidden group hover:border-[#FF5A1F]/20 hover:shadow-sm hover:shadow-black/30 transition-all duration-300 flex flex-col"
+      className="bg-[#1f1c25] border border-white/12 rounded-2xl overflow-hidden group hover:border-[#FF5A1F]/20 hover:shadow-sm hover:shadow-black/30 transition-all duration-300 flex flex-col"
     >
       <Link href={`/projects/${project.uuid}`} className="flex flex-col h-full">
         <div className="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-[#141418] to-[#0A0A0A] shrink-0">
@@ -75,7 +75,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
             </div>
           )}
           <div className="absolute top-2 left-2">
-             <span className={`inline-flex items-center gap-1 px-2 h-5 text-[8px] font-semibold uppercase tracking-wider rounded-md border backdrop-blur-md ${statusConfig.color} bg-zinc-950/60`}>
+             <span className={`inline-flex items-center gap-1 px-2 h-5 text-[8px] font-semibold uppercase tracking-wider rounded-md border backdrop-blur-md ${statusConfig.color} bg-[#16141a]/60`}>
                {StatusIcon && <StatusIcon className={`h-2.5 w-2.5 ${taskStatus === 'running' ? 'animate-spin' : ''}`} />}
                {statusConfig.label}
              </span>
@@ -85,9 +85,9 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
         <div className="p-2.5 space-y-1.5 flex-1 flex flex-col justify-between">
           <div className="min-w-0">
             <h3 className="text-[11px] font-semibold text-white group-hover:text-[#FF5A1F] transition-colors truncate leading-snug">{project.name || 'Untitled'}</h3>
-            <p className="text-[9px] text-slate-600 mt-0.5">{updated}</p>
+            <p className="text-[9px] text-slate-400 mt-0.5">{updated}</p>
           </div>
-          <span className="text-[8px] font-semibold text-slate-600 uppercase tracking-wider">{surface}</span>
+          <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider">{surface}</span>
         </div>
       </Link>
     </motion.div>

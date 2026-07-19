@@ -163,7 +163,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#16141a]/60 backdrop-blur-sm"
             onClick={resetAndClose}
           />
           <motion.div
@@ -171,14 +171,14 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-            className="relative w-[90vw] max-w-2xl bg-zinc-950 border border-white/5 rounded-2xl shadow-md flex flex-col max-h-[85vh]"
+            className="relative w-[90vw] max-w-2xl bg-[#16141a] border border-white/12 rounded-2xl shadow-md flex flex-col max-h-[85vh]"
           >
             <div className="flex items-center justify-between p-6 pb-0">
               <div className="space-y-1">
                 <h2 className="text-lg font-display font-semibold text-white tracking-tight">{t('upload.title')}</h2>
                 <p className="text-xs text-slate-500 font-medium">{t('upload.subtitle')}</p>
               </div>
-              <button onClick={resetAndClose} className="text-slate-600 hover:text-white transition-colors">
+              <button onClick={resetAndClose} className="text-slate-400 hover:text-white transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -191,20 +191,20 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
               className={`mx-8 mt-6 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
                 dragOver
                   ? 'border-[#FF5A1F] bg-[#FF5A1F]/5'
-                  : 'border-white/10 bg-[#050505] hover:border-white/20'
+                  : 'border-white/10 bg-[#16141a] hover:border-white/20'
               }`}
             >
               <input ref={inputRef} type="file" multiple className="hidden"
                 accept={ALLOWED_MIME_TYPES.join(',')} onChange={handleInputChange} />
               <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
                 <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 transition-all ${
-                  dragOver ? 'bg-[#FF5A1F]/20 text-[#FF5A1F]' : 'bg-white/5 text-slate-600'
+                  dragOver ? 'bg-[#FF5A1F]/20 text-[#FF5A1F]' : 'bg-white/5 text-slate-400'
                 }`}>
                   <UploadCloud className="h-7 w-7" />
                 </div>
                 <p className="text-sm font-semibold text-white mb-1">{t('upload.dropzone')}</p>
                 <p className="text-[11px] text-slate-500 font-medium">{t('upload.orClick')}</p>
-                <p className="text-[10px] text-slate-700 font-medium mt-3">
+                <p className="text-[10px] text-slate-500 font-medium mt-3">
                   {t('upload.maxSize')}: {MAX_FILE_SIZE_MB}MB · {t('upload.allowedTypes')}: PNG, JPG, WebP, MP4, WebM, MOV, MP3, WAV, OGG, GLB, glTF
                 </p>
               </div>
@@ -215,10 +215,10 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
                 {files.map(entry => (
                   <div key={entry.id}
                     className={`flex items-center gap-4 p-3 rounded-xl transition-all ${
-                      entry.error ? 'bg-red-500/5 border border-red-500/10' : 'bg-white/[0.02] border border-white/5'
+                      entry.error ? 'bg-red-500/5 border border-red-500/10' : 'bg-white/[0.02] border border-white/12'
                     }`}>
                     {entry.preview ? (
-                      <div className="h-12 w-12 rounded-lg overflow-hidden shrink-0 bg-[#050505]">
+                      <div className="h-12 w-12 rounded-lg overflow-hidden shrink-0 bg-[#16141a]">
                         <img src={entry.preview} alt="" className="h-full w-full object-cover" />
                       </div>
                     ) : (
@@ -232,7 +232,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
                       <p className={`text-sm font-semibold truncate ${entry.error ? 'text-red-400' : 'text-white'}`}>
                         {entry.file.name}
                       </p>
-                      <p className="text-[10px] text-slate-600 font-medium">
+                      <p className="text-[10px] text-slate-400 font-medium">
                         {formatSize(entry.file.size)}
                         {entry.error && <span className="text-red-400 ml-2">· {entry.error}</span>}
                       </p>
@@ -241,7 +241,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
                       <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
                     ) : (
                       <button onClick={(e) => { e.stopPropagation(); removeFile(entry.id); }}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-500/5 transition-all shrink-0">
+                        className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all shrink-0">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
@@ -251,7 +251,7 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
             )}
 
             <div className="flex items-center justify-between p-6 pt-6">
-              <div className="text-[11px] text-slate-600 font-medium">
+              <div className="text-[11px] text-slate-400 font-medium">
                 {validFiles.length > 0
                   ? `${validFiles.length} ${t('upload.filesReady')}`
                   : t('upload.noFiles')}

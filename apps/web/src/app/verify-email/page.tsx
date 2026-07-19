@@ -52,9 +52,9 @@ export default function VerifyEmailPage() {
     setLoading(true);
     try {
       await laravel.verifyEmail(code);
-      showApiResponse({ success: true, message: 'Xác thực email thành công! Credits đã được cấp.' });
+      showApiResponse({ success: true, message: 'Xác thực email thành công!' });
 
-      // Refresh user data để lấy credits mới
+      // Refresh user data (email_verified_at, và credits nếu có mã chào mừng)
       const refreshedUser = await laravel.me();
       setUser(refreshedUser);
 
@@ -98,7 +98,7 @@ export default function VerifyEmailPage() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF5A1F] to-[#FF8A5B]">Email</span>
             </h1>
             <p className="text-sm md:text-base text-slate-400 font-medium leading-relaxed max-w-sm">
-              Vui lòng kiểm tra hộp thư đến của bạn và nhập mã xác thực 6 chữ số để kích hoạt tài khoản và nhận credits.
+              Vui lòng kiểm tra hộp thư đến của bạn và nhập mã xác thực 6 chữ số để kích hoạt tài khoản.
             </p>
           </div>
         </>
@@ -121,10 +121,10 @@ export default function VerifyEmailPage() {
             <div className="p-4 rounded-xl bg-[#FF5A1F]/5 border border-[#FF5A1F]/10 space-y-2">
               <div className="flex items-center gap-2 text-[#FF5A1F]">
                 <CheckCircle className="h-4 w-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Lợi ích sau khi xác thực</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Vì sao cần xác thực?</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Tài khoản của bạn sẽ được cấp credits miễn phí để bắt đầu tạo video. Đây là bước bắt buộc để sử dụng nền tảng.
+                Xác thực email giúp bảo mật tài khoản và kích hoạt đầy đủ tính năng của nền tảng. Đây là bước bắt buộc để bắt đầu sử dụng.
               </p>
             </div>
 
@@ -143,9 +143,9 @@ export default function VerifyEmailPage() {
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="000000"
-                className="w-full h-11 bg-zinc-950 border border-white/5 rounded-xl px-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium text-center tracking-[0.5em] text-lg"
+                className="w-full h-11 bg-[#16141a] border border-white/12 rounded-xl px-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium text-center tracking-[0.5em] text-lg"
               />
-              <p className="text-[10px] text-slate-600 ml-1">Mã có hiệu lực trong 10 phút</p>
+              <p className="text-[10px] text-slate-400 ml-1">Mã có hiệu lực trong 10 phút</p>
             </div>
 
             {error && (

@@ -57,7 +57,7 @@ export function EnhancePromptButton({ prompt, context, onApply, label = 'AI gợ
       {open && result && (
         <>
           <div className="fixed inset-0 z-40" onClick={dismiss} />
-          <div className="absolute left-0 top-10 z-50 w-[min(420px,90vw)] max-sm:fixed max-sm:inset-x-3 max-sm:left-3 max-sm:right-3 max-sm:top-auto max-sm:bottom-4 max-sm:w-auto max-sm:max-h-[80vh] max-sm:overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 shadow-xl p-4 space-y-3">
+          <div className="absolute left-0 top-10 z-50 w-[min(420px,90vw)] max-sm:fixed max-sm:inset-x-3 max-sm:left-3 max-sm:right-3 max-sm:top-auto max-sm:bottom-4 max-sm:w-auto max-sm:max-h-[80vh] max-sm:overflow-y-auto rounded-xl border border-white/10 bg-[#1f1c25] shadow-xl p-4 space-y-3">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-[#FF5A1F]">
               <Sparkles className="h-3.5 w-3.5" /> Prompt gợi ý
             </div>

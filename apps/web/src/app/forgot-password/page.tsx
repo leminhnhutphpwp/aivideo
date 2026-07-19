@@ -212,7 +212,7 @@ export default function ForgotPasswordPage() {
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">{t('auth.email')}</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="user@horizon.studio"
-                  className="w-full h-11 bg-zinc-950 border border-white/5 rounded-xl px-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium" />
+                  className="w-full h-11 bg-[#16141a] border border-white/12 rounded-xl px-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 focus:bg-white/[0.02] transition-all placeholder:text-slate-500 font-medium" />
               </div>
             </div>
 
@@ -238,7 +238,7 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <p className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-widest animate-item-rise" style={{ animationDelay: '240ms' }}>
+          <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest animate-item-rise" style={{ animationDelay: '240ms' }}>
             <Link href="/login" className="text-[#FF5A1F] hover:underline inline-flex items-center gap-1">
               <ArrowLeft className="h-3 w-3" /> {t('auth.forgotBackToLogin')}
             </Link>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Coupon;
 use App\Models\Plan;
 use App\Models\User;
 use App\Models\WhitelistIp;
@@ -58,8 +59,9 @@ class RegistrationAbuseTest extends TestCase
     }
 
     /** @test */
-    public function verify_email_grants_credits()
+    public function verify_email_marks_verified_without_auto_credits()
     {
+        // Không còn tặng credits cứng khi verify. Không có welcome coupon → credits vẫn 0.
         $this->call('POST', '/api/auth/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -84,7 +86,42 @@ class RegistrationAbuseTest extends TestCase
         $user->refresh();
 
         $this->assertNotNull($user->email_verified_at);
-        $this->assertEquals(2000, $user->credits, 'User must receive 2000 credits after email verification');
+        $this->assertEquals(0, $user->credits, 'Không tặng credits tự động khi verify (không có welcome coupon)');
+    }
+
+    /** @test */
+    public function verify_email_grants_welcome_coupon_when_active()
+    {
+        // Có welcome coupon đang bật → verify tự cấp đúng số credits của coupon.
+        Coupon::create([
+            'code' => 'WELCOME',
+            'type' => 'credits',
+            'value' => 500,
+            'is_welcome' => true,
+            'is_active' => true,
+            'max_uses_per_user' => 1,
+        ]);
+
+        $this->call('POST', '/api/auth/register', [
+            'name' => 'Welcome User',
+            'email' => 'welcome@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ], [], [], ['REMOTE_ADDR' => '10.0.0.12']);
+
+        $login = $this->postJson('/api/auth/login', [
+            'email' => 'welcome@example.com',
+            'password' => 'password123',
+        ]);
+        $token = $login->json('data.token');
+        $user = User::where('email', 'welcome@example.com')->first();
+
+        $this->withHeaders(['Authorization' => "Bearer {$token}"])
+            ->postJson('/api/auth/verify-email', ['code' => $user->email_verification_code])
+            ->assertStatus(200);
+
+        $user->refresh();
+        $this->assertEquals(500, $user->credits, 'Welcome coupon phải cấp 500 credits khi verify');
     }
 
     /** @test */
@@ -253,7 +290,7 @@ class RegistrationAbuseTest extends TestCase
         $verify->assertStatus(200);
 
         $user->refresh();
-        $this->assertEquals(2000, $user->credits, 'Credits must be granted after verify');
+        $this->assertEquals(0, $user->credits, 'Không tặng credits tự động khi verify (không có welcome coupon)');
         $this->assertNotNull($user->email_verified_at);
     }
 

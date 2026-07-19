@@ -49,7 +49,7 @@ function MobileNavItem({ item, pathname, searchParams, onClose }: { item: NavIte
             <span className="text-sm">{item.title}</span>
           </div>
           {hasChildren && (
-            <ChevronDown className={cn('h-4 w-4 text-slate-600 transition-transform', expanded && 'rotate-180')} />
+            <ChevronDown className={cn('h-4 w-4 text-slate-400 transition-transform', expanded && 'rotate-180')} />
           )}
         </Link>
       </button>
@@ -63,7 +63,7 @@ function MobileNavItem({ item, pathname, searchParams, onClose }: { item: NavIte
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="pl-4 ml-3 border-l border-white/[0.06] space-y-0.5 mt-0.5">
+            <div className="pl-4 ml-3 border-l border-white/12 space-y-0.5 mt-0.5">
               {item.children!.map((child) => {
                 const childActive = isActivePath(pathname, searchParams, child.href);
                 return (
@@ -111,7 +111,7 @@ export function MobileSidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={toggleMobileMenu}
-            className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-50 bg-[#16141a]/60 backdrop-blur-sm lg:hidden"
           />
 
           <motion.div
@@ -119,7 +119,7 @@ export function MobileSidebar() {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0B0B0F] border-r border-white/5 p-6 shadow-md lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 w-72 bg-[#1f1c25] border-r border-white/12 p-6 shadow-md lg:hidden"
           >
             <div className="flex items-center justify-between mb-8">
               <Link href="/dashboard" className="flex items-center gap-3" onClick={toggleMobileMenu}>
@@ -140,7 +140,7 @@ export function MobileSidebar() {
                 ))}
               </div>
 
-              <div className="border-t border-white/5 pt-6 space-y-1">
+              <div className="border-t border-white/12 pt-6 space-y-1">
                 {SECONDARY_NAVIGATION.map((item) => (
                   <Link key={item.href} href={item.href} onClick={toggleMobileMenu}
                     className={cn(

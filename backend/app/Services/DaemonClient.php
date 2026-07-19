@@ -26,10 +26,16 @@ class DaemonClient
 
     protected function withAuth(): \Illuminate\Http\Client\PendingRequest
     {
-        $signature = hash_hmac('sha256', 'laravel-app', $this->webhookSecret);
+        $userId = 'laravel-app';
+        // Timestamped HMAC binds each request to a time window so a captured
+        // signature cannot be replayed indefinitely. The daemon verifies
+        // HMAC("{userId}.{timestamp}") within DAEMON_SIGNATURE_WINDOW_SECONDS.
+        $timestamp = (string) time();
+        $signature = hash_hmac('sha256', $userId . '.' . $timestamp, $this->webhookSecret);
         return Http::timeout($this->timeout)
             ->withHeaders([
-                'X-User-ID' => 'laravel-app',
+                'X-User-ID' => $userId,
+                'X-Timestamp' => $timestamp,
                 'X-Daemon-Signature' => $signature,
             ]);
     }

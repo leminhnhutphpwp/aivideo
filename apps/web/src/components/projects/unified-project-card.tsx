@@ -17,10 +17,30 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
   const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
-    const pid = project.source === 'daemon' ? project.daemon?.projectId
-      : project.source === 'storyboard' ? project.storyboard?.uuid : null;
-    const file = project.source === 'daemon' ? project.daemon?.lastTaskFile
-      : project.source === 'storyboard' ? project.storyboard?.outputPath : null;
+    // Storyboards serve their final video via an auth-gated Laravel route, not the daemon file
+    // proxy — fetch it with the Bearer token so the real thumbnail shows on the Projects grid.
+    if (project.source === 'storyboard' && project.storyboard?.uuid && project.storyboard?.outputPath) {
+      const base = process.env.NEXT_PUBLIC_LARAVEL_URL || 'http://localhost:8000';
+      const url = `${base}/api/storyboards/${project.storyboard.uuid}/download`;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      let created: string | null = null;
+      let cancelled = false;
+      setPreviewLoading(true);
+      fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.blob(); })
+        .then(blob => {
+          if (cancelled) return;
+          created = URL.createObjectURL(blob);
+          setPreviewUrl(created);
+          setPreviewMime(blob.type || 'video/mp4');
+        })
+        .catch(() => {})
+        .finally(() => { if (!cancelled) setPreviewLoading(false); });
+      return () => { cancelled = true; if (created) URL.revokeObjectURL(created); };
+    }
+
+    const pid = project.source === 'daemon' ? project.daemon?.projectId : null;
+    const file = project.source === 'daemon' ? project.daemon?.lastTaskFile : null;
 
     if (pid && file) {
       setPreviewLoading(true);
@@ -57,23 +77,23 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
   return (
     <div
       className={cn(
-        "group relative bg-zinc-950 rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_-16px_rgba(255,90,31,0.28)]",
+        "group relative bg-[#16141a] rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_-16px_rgba(255,90,31,0.28)]",
         project.status === 'processing' ? "border-orange-500/20 hover:border-orange-500/40"
           : project.status === 'done' ? "border-emerald-500/15 hover:border-emerald-500/30"
-          : "border-white/5 hover:border-[#FF5A1F]/20",
+          : "border-white/12 hover:border-brand/20",
       )}
     >
       {/* Hover top-edge accent sweep */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-px z-20 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-[#FF5A1F]/60 transition-all duration-500" />
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-px z-20 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:via-brand/60 transition-all duration-500" />
       <Link href={project.href} className="block">
         {/* Thumbnail */}
-        <div className="relative aspect-[4/3] bg-zinc-900 overflow-hidden">
+        <div className="relative aspect-[4/3] bg-[#1f1c25] overflow-hidden">
           {previewUrl && previewMime?.startsWith('video/') ? (
             <>
               <video src={previewUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" muted preload="metadata" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/10 to-transparent group-hover:from-black/60 transition-all duration-500" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <div className="h-12 w-12 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm shadow-[#FF5A1F]/40 scale-90 group-hover:scale-100 transition-transform">
+                <div className="h-12 w-12 rounded-full bg-brand flex items-center justify-center shadow-sm shadow-brand/40 scale-90 group-hover:scale-100 transition-transform">
                   <Play className="h-5 w-5 text-white fill-white ml-0.5" />
                 </div>
                 <span className="text-[10px] text-white/60 font-medium tracking-wider uppercase">Xem trước</span>
@@ -84,7 +104,7 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
               <img src={previewUrl} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/10 to-transparent group-hover:from-black/60 transition-all duration-500" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <div className="h-12 w-12 rounded-full bg-[#FF5A1F] flex items-center justify-center shadow-sm shadow-[#FF5A1F]/40 scale-90 group-hover:scale-100 transition-transform">
+                <div className="h-12 w-12 rounded-full bg-brand flex items-center justify-center shadow-sm shadow-brand/40 scale-90 group-hover:scale-100 transition-transform">
                   <Play className="h-5 w-5 text-white fill-white ml-0.5" />
                 </div>
                 <span className="text-[10px] text-white/60 font-medium tracking-wider uppercase">Xem trước</span>
@@ -99,16 +119,16 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
               />
               <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] [background-size:16px_16px]" />
               {previewLoading ? (
-                <div className="relative h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
+                <div className="relative h-6 w-6 rounded-full border-2 border-white/10 border-t-brand animate-spin" />
               ) : project.source === 'storyboard' ? (
                 <div className="relative flex flex-wrap gap-1.5 p-3 justify-center">
                   {Array.from({ length: Math.min(storyboardMeta?.scenesCount || 2, 6) }, (_, i) => (
-                    <div key={i} className="w-10 h-7 rounded-md bg-[#FF5A1F]/15 border border-[#FF5A1F]/25" />
+                    <div key={i} className="w-10 h-7 rounded-md bg-brand/15 border border-brand/25" />
                   ))}
                 </div>
               ) : (
-                <div className="relative h-12 w-12 rounded-2xl bg-[#FF5A1F]/10 border border-[#FF5A1F]/20 flex items-center justify-center">
-                  <Clapperboard className="h-6 w-6 text-[#FF5A1F]/70" />
+                <div className="relative h-12 w-12 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                  <Clapperboard className="h-6 w-6 text-brand/70" />
                 </div>
               )}
             </div>
@@ -129,13 +149,13 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
           </div>
 
           {storyboardMeta?.totalDuration && (
-            <div className="absolute bottom-3 right-3 z-10 px-2 py-0.5 rounded-full bg-zinc-950/60 backdrop-blur-sm text-[10px] text-slate-400 border border-white/5">
+            <div className="absolute bottom-3 right-3 z-10 px-2 py-0.5 rounded-full bg-[#16141a]/60 backdrop-blur-sm text-[10px] text-slate-400 border border-white/12">
               {storyboardMeta.totalDuration}s
             </div>
           )}
 
           {IS_ACTIVE.has(project.status) && (
-            <motion.div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FF5A1F] z-10"
+            <motion.div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand z-10"
               animate={{ opacity: [0.3, 0.7, 0.3] }}
               transition={{ duration: 2, repeat: Infinity }} />
           )}
@@ -152,11 +172,11 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
               {storyboardMeta ? (
                 <>
                   <span className="flex items-center gap-1.5">
-                    <Film className="h-3.5 w-3.5 text-slate-600" />
+                    <Film className="h-3.5 w-3.5 text-slate-400" />
                     {storyboardMeta.scenesCount} cảnh
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-slate-600" />
+                    <Sparkles className="h-3.5 w-3.5 text-slate-400" />
                     {storyboardMeta.creditsCost} credits
                   </span>
                 </>
@@ -164,7 +184,7 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
                 <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{daemonMeta.surface}</span>
               ) : null}
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-600">
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
               <Clock className="h-3.5 w-3.5" />
               {updatedLabel}
             </div>

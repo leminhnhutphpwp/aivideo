@@ -80,7 +80,10 @@ class DaemonWebhookController extends Controller
                 $files = $output['files'] ?? [];
                 $outputPath = $files['name'] ?? null;
                 $projectId = $output['projectId'] ?? $renderJob->daemon_project_id;
-                $gpuSeconds = $files['gpu_seconds'] ?? $files['size'] ?? null;
+                // gpu_seconds is analytics/telemetry only (admin widgets + email "duration").
+                // Never fall back to files['size'] — that is the output byte count, not compute
+                // time, and would poison the gpu_seconds metrics. Leave null when absent.
+                $gpuSeconds = $files['gpu_seconds'] ?? null;
 
                 HandleJobCompletion::dispatch($renderJob, [
                     'output_path' => $outputPath,
@@ -153,7 +156,8 @@ class DaemonWebhookController extends Controller
                 $renderer->handleSceneCompletion($scene, [
                     'output_path' => $files['name'] ?? null,
                     'thumbnail_path' => null,
-                    'gpu_seconds' => $files['gpu_seconds'] ?? $files['size'] ?? null,
+                    // gpu_seconds is telemetry only — never fall back to byte size.
+                    'gpu_seconds' => $files['gpu_seconds'] ?? null,
                 ], $output['projectId'] ?? null);
                 $storyboard = $scene->storyboard;
                 if ($storyboard) {
@@ -216,7 +220,8 @@ class DaemonWebhookController extends Controller
                 $files = $output['files'] ?? [];
                 $renderer->handleSingleFlowCompletion($storyboard, [
                     'output_path' => $files['name'] ?? null,
-                    'gpu_seconds' => $files['gpu_seconds'] ?? $files['size'] ?? null,
+                    // gpu_seconds is telemetry only — never fall back to byte size.
+                    'gpu_seconds' => $files['gpu_seconds'] ?? null,
                 ]);
                 StoryboardProgressUpdated::dispatch($storyboard);
                 Log::info('Storyboard single-flow completed', [

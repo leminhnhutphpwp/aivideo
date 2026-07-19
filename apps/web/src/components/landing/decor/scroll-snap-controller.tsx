@@ -13,6 +13,9 @@ const SECTIONS = [
   { id: "gallery", label: "PORTFOLIO" },
   { id: "ecosystem", label: "ECOSYSTEM" },
   { id: "stats", label: "METRICS" },
+  // FAQ sits between stats and portal in page.tsx. It was missing here, so a wheel snap from
+  // "stats" jumped straight to "portal" (THE END), skipping the FAQ entirely.
+  { id: "faq", label: "FAQ" },
   { id: "portal", label: "STUDIO" }
 ];
 
@@ -285,7 +288,7 @@ export function ScrollSnapController() {
             ></span>
 
             {/* Futuristic floating micro-panel label */}
-            <span className="absolute right-7 py-1 px-2.5 rounded-md border border-white/5 bg-zinc-950/85 backdrop-blur-md font-mono text-[9px] font-bold text-slate-400 tracking-widest uppercase opacity-0 translate-x-4 scale-95 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 select-none whitespace-nowrap shadow-sm">
+            <span className="absolute right-7 py-1 px-2.5 rounded-md border border-white/12 bg-[#16141a]/85 backdrop-blur-md font-mono text-[9px] font-bold text-slate-400 tracking-widest uppercase opacity-0 translate-x-4 scale-95 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:scale-100 select-none whitespace-nowrap shadow-sm">
               <span className="text-[#FF5A1F] mr-1.5">{(idx + 1).toString().padStart(2, "0")}</span>
               {sec.label}
             </span>

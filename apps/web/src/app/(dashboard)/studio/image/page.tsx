@@ -148,12 +148,12 @@ export default function ImageStudioPage() {
       <div className="grid grid-cols-12 gap-6">
         {/* Left: Prompt */}
         <div className="col-span-12 lg:col-span-8">
-          <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 space-y-4">
+          <div className="bg-[#16141a] border border-white/12 rounded-2xl p-6 space-y-4">
             <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mô tả</label>
             <textarea value={prompt} onChange={e => setPrompt(e.target.value)}
               placeholder={t('studio.imagePlaceholder')}
               rows={8} maxLength={2000}
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-700 resize-none font-medium leading-relaxed"
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#FF5A1F]/30 transition-all placeholder:text-slate-500 resize-none font-medium leading-relaxed"
             />
             <div className="flex items-center justify-between">
               <EnhancePromptButton
@@ -161,7 +161,7 @@ export default function ImageStudioPage() {
                 context={{ surface: 'image', skill_id: style && style !== 'none' ? style : undefined }}
                 onApply={setPrompt}
               />
-              <span className="text-[10px] text-slate-600">{prompt.length}/2000</span>
+              <span className="text-[10px] text-slate-400">{prompt.length}/2000</span>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ export default function ImageStudioPage() {
 
         {/* Right: Sidebar */}
         <div className="col-span-12 lg:col-span-4 space-y-4">
-          <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5 space-y-4">
+          <div className="bg-[#16141a] border border-white/12 rounded-2xl p-5 space-y-4">
             <h3 className="text-sm font-semibold text-white">Cấu hình chung</h3>
 
             {/* Aspect ratio */}
@@ -191,7 +191,7 @@ export default function ImageStudioPage() {
             {styleOptions.find(o => o.value === style)?.examplePrompt && (
                   <button
                     onClick={() => { setExampleOpen(true); }}
-                    className="flex items-center gap-1 text-[10px] text-slate-600 hover:text-cyan-400 transition-colors -mt-1 cursor-pointer"
+                    className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-cyan-400 transition-colors -mt-1 cursor-pointer"
                   >
                     <Info className="h-3 w-3" />
                     Xem prompt mẫu
@@ -224,17 +224,17 @@ export default function ImageStudioPage() {
         {exampleOpen && styleOptions.find(o => o.value === style)?.examplePrompt && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-[#16141a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
             onClick={() => { setExampleOpen(false); }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="w-full max-w-lg bg-zinc-900 border border-white/[0.08] rounded-2xl shadow-md overflow-hidden"
+              className="w-full max-w-lg bg-[#1f1c25] border border-white/12 rounded-2xl shadow-md overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/12">
                 <div className="flex items-center gap-2">
                   <Info className="h-4 w-4 text-cyan-400" />
                   <span className="text-xs font-semibold text-white">Prompt mẫu · {styleOptions.find(o => o.value === style)!.label}</span>
@@ -267,14 +267,14 @@ export default function ImageStudioPage() {
                   );
                 })()}
               </div>
-              <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.04] bg-white/[0.01]">
+              <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/12 bg-white/[0.01]">
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(styleOptions.find(o => o.value === style)!.examplePrompt || '');
                     addToast('Đã sao chép (Tiếng Anh)', 'success');
                     setExampleOpen(false);
                   }}
-                  className="h-9 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 text-xs font-medium border border-white/[0.08] transition-colors cursor-pointer"
+                  className="h-9 px-3 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 text-xs font-medium border border-white/12 transition-colors cursor-pointer"
                 >
                   Copy EN
                 </button>

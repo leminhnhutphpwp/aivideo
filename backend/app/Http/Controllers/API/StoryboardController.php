@@ -733,6 +733,34 @@ class StoryboardController extends Controller
         abort(404);
     }
 
+    /**
+     * Serve the multi-panel storyboard sheet (the composite T2I image) INLINE for display in the
+     * result hero. Local-first (like download) so it works with no S3. Read-only, owner-gated.
+     */
+    public function multiPanel(Storyboard $storyboard): \Symfony\Component\HttpFoundation\Response
+    {
+        if ($storyboard->user_id !== auth('api')->id()) {
+            abort(403);
+        }
+
+        if (empty($storyboard->multi_panel_image)) {
+            abort(404);
+        }
+
+        $localPath = storage_path('app/' . $storyboard->multi_panel_image);
+        if (file_exists($localPath)) {
+            return response()->file($localPath, ['Cache-Control' => 'private, max-age=3600']);
+        }
+
+        if (\Illuminate\Support\Facades\Storage::exists($storyboard->multi_panel_image)) {
+            $tempPath = tempnam(sys_get_temp_dir(), 'panel_');
+            file_put_contents($tempPath, \Illuminate\Support\Facades\Storage::get($storyboard->multi_panel_image));
+            return response()->file($tempPath)->deleteFileAfterSend(true);
+        }
+
+        abort(404);
+    }
+
     public function addVoiceover(Request $request, Storyboard $storyboard): JsonResponse
     {
         if ($storyboard->user_id !== auth('api')->id()) {

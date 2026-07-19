@@ -1,10 +1,152 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-07-18
+> Last updated: 2026-07-19
 
 ---
 
 ## Current Sprint
+
+### Coupons system + gỡ tặng-credits-khi-đăng-ký/xác-thực — ✅ Done + tested live
+- **Status**: ✅ Code + migrate + test 20/20 + live redeem (2026-07-19). Chưa commit.
+- **Worklog**: `backend/worklogs/2026-07-19-coupons-system-and-remove-signup-credit-gift.md`
+- **Gỡ**: tặng credits cứng ở `verifyEmail` + Google login → mọi user start 0. Copy "nhận credits khi xác thực" đã gỡ.
+- **Coupons**: bảng `coupons` + `coupon_redemptions`; `CouponService` (redeem atomic, welcome auto, discount preview/reserve/complete/void); API `/coupons/redeem` + `/coupons/validate`; admin `CouponResource` (Billing & Credits); UI ô đổi mã (billing) + ô mã giảm giá (gói nạp). 3 loại: tặng credits / giảm % / giảm cố định.
+- **Welcome**: coupon `is_welcome` bật ở admin → tự cấp khi verify/Google (gated 1 lần/user, tắt được).
+- **Verify**: migrate 4 DONE; `CouponServiceTest`+`RegistrationAbuseTest` = 20/20; live redeem +100 rồi chặn lần 2. GeneralSettings resolve OK, landing rows=0.
+
+
+### Phase 2 & 3 — Restore studio: multi-variant + negative/seed + before→after reveal video — ✅ Done + E2E
+- **Status**: ✅ Code + static + **E2E thật** (2026-07-19). Docker khôi phục, stack healthy.
+- **Agent**: @web + @daemon + @backend
+- **Worklog**: `apps/web/worklogs/2026-07-19-phase2-3-restore-quality-and-reveal-video.md`
+- **Phase 2**: multi-variant (1/2/4 ảnh, chọn ảnh ưng nhất) + nâng cao negative_prompt + seed (khoá/ngẫu
+  nhiên). Fix gap: nhánh Qwen-Image `qwencloud.ts` trước bỏ seed/negative → nay gửi trong `parameters`
+  (guarded). `strength` KHÔNG khả dụng trên endpoint qwen-image-edit → không thêm (verified docs).
+- **Phase 3**: nút "Tạo video biến hình" — FLF i2v (ảnh gốc=first, ảnh phục chế=last), dùng model i2v
+  của plan (wan2.7-i2v). Tái dùng project + file, không upload lại.
+- **E2E**: generate i2i thật với seed+negative → `done`, PNG 3MB, `providerError:null`. Backend 19/19 pass,
+  model sync PASS. (Chưa chạy render video reveal thật — tốn credit; contract đã đúng.)
+- **Đang chạy song song**: agent @web viết lại copy trang chủ chuyên nghiệp hơn + tối ưu typography
+  (theo phản hồi owner: "Hồi Sinh Mọi Khung Hình" + nút "Phục chế" nghe kỳ).
+
+### Trang studio "Phục chế" riêng → ❌ ĐÃ GỠ BỎ (theo yêu cầu owner 2026-07-19)
+- **Lý do owner**: logic phục chế đã chạy qua **bộ công cụ i2i có sẵn** (studio Image Editing + 6 skill
+  phục chế). Thêm 1 trang riêng chỉ làm rối.
+- **Đã xoá**: `apps/web/src/app/(dashboard)/studio/restore/page.tsx`,
+  `apps/web/src/components/studio/before-after-slider.tsx`, `apps/web/src/lib/launch-flags.ts`.
+  Revert sạch nav item + flag + redirect ở `sidebar.tsx`, `navigation.ts`, `studio/layout.tsx`,
+  `login/page.tsx`, `auth/callback/page.tsx`, `dashboard/page.tsx` (app về đúng nguyên trạng, theme giữ).
+- **GIỮ LẠI (cải thiện cho bộ có sẵn, không phải "trang riêng")**:
+  - 6 skill phục chế `apps/skills/image-direction/*` — dùng qua studio Image Editing.
+  - **Fix bug provider** `apps/daemon/src/media/providers/qwencloud.ts`: nhánh Qwen-Image trước **bỏ**
+    `negative_prompt` + `seed` → nay gửi đúng. Lợi cho **Image Editing hiện có** (negative prompt giờ mới
+    thực sự tác dụng với qwen-image). Đã E2E render thật = pass.
+  - Validation `seed` (backend) + field `seed` (web client) — plumbing chung, vô hại.
+- **Note**: có thể gỡ nốt seed plumbing nếu muốn pristine; qwencloud fix nên giữ (vá bug thật).
+
+### Phase 4 — Thu gọn nav + reframe landing → ❌ ĐÃ HOÀN TÁC (theo yêu cầu owner 2026-07-19)
+- **Status**: ❌ Reverted. Owner làm rõ ý ban đầu: **giữ nguyên hệ thống/layout cũ**, KHÔNG ẩn tính năng
+  và KHÔNG nhét chữ "phục chế" khắp landing; chỉ **ưu tiên hoàn thiện năng lực phục chế (skills, studio,
+  flows)**.
+- **Đã hoàn tác**: `RESTORE_ONLY_LAUNCH = false` (hiện lại toàn bộ nav, login → /dashboard như cũ, guard
+  studio/layout inert). Landing `git checkout` về nguyên bản (bỏ hết copy phục chế; giữ thiết kế gốc).
+  Dashboard hero + SEO `layout.tsx` + OG image trả về copy video gốc.
+- **Giữ lại (đúng ý owner)**: 6 skill phục chế (Phase 0), studio `/studio/restore` (Phase 1/2/3: icon
+  chuyên nghiệp, multi-variant, negative/seed, video biến hình), fix provider qwencloud + validation seed.
+  Truy cập qua 1 mục "Phục chế" đầu sidebar (nav item giữ, không ẩn gì khác). Theme sáng app giữ nguyên.
+- **Lưu ý**: máy móc flag (launch-flags.ts + import inert ở sidebar/navigation/login/callback/studio-layout)
+  để lại ở trạng thái false — vô hại, đảo được; có thể gỡ hẳn nếu muốn sạch.
+
+### AI Phục chế pivot — studio verified working + UX/theme polish (multi-agent) — In Progress
+- **Status**: 🔄 In Progress (2026-07-19)
+- **Done & code-verified (tsc 0)**:
+  - **Restore studio works E2E**: after fixing the DashScope key (owner supplied a valid one →
+    `qwen-image-edit-plus` i2i = 200 OK), the full flow renders a real restored image + before/after
+    slider. Quality validated on a matching source (fjord → nature-enhance = structure preserved).
+  - **Storyboard result layout** (@web agent): fixed the toolbar-clips-video bug (flex-centering
+    overflow, not z-index) → outer-scroll + `m-auto`; premium redesign (viewport-capped hero,
+    multi-panel side-by-side); fixed "Xem sơ đồ" blank canvas for scene-less modes (`hasScenes` gate).
+  - **Lighten theme** (@web agent): "elevated brighter-dark" palette (base `#16141a` vs `#09090b`,
+    surface scale, brighter borders/text) swept across ~106 web files. Landing + dashboard brighter.
+  - **Voiceover audit + disable**: feature was broken (placeholder TTS key → 401; false `available`).
+    Hidden behind `VOICEOVER_ENABLED=false` (backend intact for re-enable). Out of scope for the pivot.
+- **Blocked/pending**: host Docker daemon wedged mid-session → restarted Docker Desktop; recovering.
+  **Visual verification** of all the above (screenshots) pending backend recovery.
+- **Worklogs**: `apps/web/worklogs/2026-07-19-{restore-vertical-phase0-1,storyboard-result-layout,lighten-theme,disable-voiceover-button}.md`.
+
+
+
+### Product pivot → "AI Phục chế" vertical (nhà · cảnh quan · thiên nhiên) — In Progress
+- **Status**: 🔄 In Progress (2026-07-19) — Phase 0 ✅, Phase 1 ⚠️ (blocked on i2i provider 400)
+- **Agent**: @web + @daemon
+- **Worklog**: `apps/web/worklogs/2026-07-19-restore-vertical-phase0-1.md`
+- **Phase 0 ✅**: 6 restoration image skills live (`apps/skills/image-direction/{phuc-che-nha-co,
+  cai-tao-ngoai-that,tan-trang-noi-that,thiet-ke-san-vuon,nang-cap-thien-nhien,phuc-hoi-anh-cu}`),
+  tuned for structure preservation; daemon loaded 34 image-directions.
+- **Phase 1 ✅ (works end-to-end)**: `/studio/restore` + `before-after-slider.tsx`; i2i renders a
+  real restored image → before/after slider. Root cause of the earlier failure was a bad
+  `DASHSCOPE_API_KEY` in `apps/daemon/.env` (401/403); owner supplied a working key, updated + daemon
+  recreated → `qwen-image-edit-plus` i2i = 200 OK. Hardening kept: `media.ts` `logger.error`s raw
+  provider errors. Separate dev-env issue remains: daemon→backend webhook DNS `ENOTFOUND app`.
+- **Next**: Phase 4 ✅ (nav thu gọn + reframe copy nhận diện — code complete). Còn Phase 2 (quality:
+  multi-variant + negative/seed + fidelity), Phase 3 (video reveal before→after).
+- **Plan**: `/Users/nhut/.claude/plans/` (Phase 0–4 pivot plan).
+
+
+
+### Follow-up: pending_review UI + demo seeder + premium result restyle — Complete
+- **Status**: ✅ Completed (2026-07-19) — Part 1 ✅, Part 2 ✅, Part 3 ✅ (core)
+- **Agent**: @web + @backend
+- **Worklogs**: `apps/web/worklogs/2026-07-19-publish-pending-review-ui.md`,
+  `backend/worklogs/2026-07-19-demo-activity-seeder.md`.
+- **Part 1 (web, ✅)**: publish response `pending_review` + `moderation_status` wired to UI —
+  info toast "đang chờ kiểm duyệt" + amber "Chờ duyệt" badge on Jobs. tsc 0.
+- **Part 2 (backend, ✅)**: `DemoActivitySeeder` — 100 demo users + full simulated activity with
+  real-looking fake media (picsum stills + ffmpeg H.264 clips, local-served). Seeded: 450 jobs
+  (284 public, 19 pending_review), 117 storyboards, 456 assets, 3881 likes, 187 comments, 312 follows.
+  Target `minhnhut147nb@gmail.com` = **legend** (rep 14313, 82 followers). Run:
+  `docker exec aivideo-app-1 php artisan db:seed --class=DemoActivitySeeder`.
+- **Part 3 (web, ✅)**: premium restyle — shared `<MediaViewer>` + `useAuthenticatedMedia` hook
+  (fixes runtime aspect-ratio bug), storyboard **inline player** (was download-only), real
+  storyboard thumbnails on Projects grid, Assets media rendering. Worklog:
+  `apps/web/worklogs/2026-07-19-premium-result-restyle.md`. Visually verified via Playwright
+  (community/projects/storyboard/assets) logged in as target user.
+- **Bonus backend fix**: `AssetController::download()` 500 on local files (missing
+  `BinaryFileResponse` in return type) — broke all local-served media. Fixed + suite 570 green.
+  Worklog: `backend/worklogs/2026-07-19-assetcontroller-local-file-return-type.md`.
+- **Part 3 ext (web, ✅)**: consolidated media viewers onto `<MediaViewer>`, **Jobs page inline
+  previews** (+ fixed `isDone` so Laravel `completed` jobs label/publish/preview correctly),
+  task-card aspect-ratio bug, brand `--color-brand` token sweep on result surfaces. tsc 0; visually
+  verified (Jobs previews + community colors). Worklog:
+  `apps/web/worklogs/2026-07-19-result-polish-mediaviewer-consolidation.md`.
+- **Multi-Panel gallery (web+backend, ✅)**: new `GET /api/storyboards/{uuid}/multi-panel` (inline,
+  owner-gated) + result-hero "Bảng phân cảnh" section for `storyboard_image`. Storyboard tests 122
+  green; visually verified. Worklog: `backend/worklogs/2026-07-19-multi-panel-gallery.md`.
+
+### Improvement plan — unit-economics + go-live + hardening (A1/C2/C1/B3) — Complete
+- **Status**: Completed (2026-07-19)
+- **Agent**: @backend + @daemon
+- **Worklogs**: `backend/worklogs/2026-07-19-economics-billing-hmac-fixes.md`,
+  `backend/worklogs/2026-07-19-moderation-degraded-review-queue.md`,
+  `apps/daemon/worklogs/2026-07-19-hmac-timestamped-signature.md`.
+- **Shipped** (from the approved analysis plan; owner uses SePay → payment untouched):
+  - **A1** — Studio image models $0.075 → `qwen-image-2.0`/`qwen-image-edit-plus` ($0.035/$0.03):
+    flat-fee image margin ~6,25% → ~56–62% (`PlanSeeder.php`). Re-seeded to dev DB.
+  - **C2** — removed `gpu_seconds ?? files['size']` fallback in all 3 webhook handlers
+    (`DaemonWebhookController`) — was polluting the telemetry column with output byte size
+    (analytics-only field, NOT billing).
+  - **C1** — Laravel→daemon signature is now timestamped (replay-resistant):
+    `HMAC("laravel-app.{ts}")` + `X-Timestamp` (`DaemonClient`), verified in `auth.ts` within a
+    300s window; legacy constant scheme kept for rollout, disable via `DAEMON_STRICT_SIGNATURE=1`.
+  - **B3** — degraded image-moderation verdict no longer silently publishes public: new
+    `render_jobs.moderation_status` (migration) → held as `pending_review`, hidden from feed
+    (`scopePublished`), creator payout deferred; new `ModerationQueueResource` (Filament) with
+    approve/reject. `CommunityController::publish()` reads `$verdict['degraded']`.
+- **Verified**: backend full suite **570 passed / 1 skipped / 0 failed**; daemon **309 passed / 4
+  skipped** (+6 auth tests); `verify-media-models.mjs` PASS; migration + A1 confirmed in dev DB.
+- **Open (owner)**: A2 real xah.io cost (multi-panel `cost_hint` TBD), A3 video_editing margin ~22%,
+  A4 Studio pricing, B1 grant super_admin, B2 real provider keys (`CKEY`/`CLOUDFLARE`/`WEBHOOK_SECRET`),
+  B4 deploy. **@web**: publish response adds `pending_review` + `data.moderation_status`.
 
 ### Image moderation fix — was a silent no-op (NSFW never blocked) — Complete
 - **Status**: Completed (2026-07-18)

@@ -72,20 +72,20 @@ export default function TrendingPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <Link href="/community" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/5 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+            <Link href="/community" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/12 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
               <Compass className="h-4 w-4" /> Khám phá
             </Link>
             <Link href="/community/trending" className="px-4 py-2.5 rounded-xl bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/20 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
               <Trophy className="h-4 w-4" /> Bảng xếp hạng
             </Link>
-            <Link href="/community/likes" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/5 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+            <Link href="/community/likes" className="px-4 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/5 text-slate-400 hover:text-white border border-white/12 hover:border-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
               <Heart className="h-4 w-4" /> Đã lưu
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2 bg-zinc-950/80 border border-white/[0.05] rounded-2xl">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2 bg-[#16141a]/80 border border-white/12 rounded-2xl">
         <div className="flex items-center gap-1 w-full sm:w-auto">
           <button onClick={() => setActiveTab('assets')} className={cn("flex-1 sm:flex-initial h-10 px-6 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer", activeTab === 'assets' ? "bg-[#FF5A1F] text-white shadow-[0_4px_12px_rgba(255,90,31,0.2)]" : "text-slate-400 hover:text-white")}>
             <Flame className="h-4 w-4" /> Tác phẩm Hot
@@ -95,9 +95,9 @@ export default function TrendingPage() {
           </button>
         </div>
 
-        <div className="flex items-center gap-1 bg-white/[0.02] border border-white/5 rounded-xl p-1 w-full sm:w-auto">
+        <div className="flex items-center gap-1 bg-white/[0.02] border border-white/12 rounded-xl p-1 w-full sm:w-auto">
           {([{ id: 'day', label: '24h' }, { id: 'week', label: 'Tuần' }, { id: 'month', label: 'Tháng' }] as const).map(p => (
-            <button key={p.id} onClick={() => setPeriod(p.id)} className={cn("flex-1 sm:flex-initial h-8 px-4 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer", period === p.id ? "bg-white/10 text-white border border-white/5" : "text-slate-500 hover:text-slate-300")}>
+            <button key={p.id} onClick={() => setPeriod(p.id)} className={cn("flex-1 sm:flex-initial h-8 px-4 rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer", period === p.id ? "bg-white/10 text-white border border-white/12" : "text-slate-500 hover:text-slate-300")}>
               {p.label}
             </button>
           ))}
@@ -119,7 +119,7 @@ export default function TrendingPage() {
                     {rank === 1 && (<span className="h-10 w-8 bg-gradient-to-b from-amber-400 to-yellow-600 rounded-b-md flex items-center justify-center font-mono font-black text-black text-sm shadow-md">#1</span>)}
                     {rank === 2 && (<span className="h-9 w-7 bg-gradient-to-b from-slate-300 to-slate-500 rounded-b-md flex items-center justify-center font-mono font-black text-black text-xs shadow-md">#2</span>)}
                     {rank === 3 && (<span className="h-9 w-7 bg-gradient-to-b from-amber-700 to-amber-900 rounded-b-md flex items-center justify-center font-mono font-black text-white text-xs shadow-md">#3</span>)}
-                    {rank > 3 && (<span className="h-8 w-6 bg-zinc-950/80 border border-white/10 rounded-b-md flex items-center justify-center font-mono font-extrabold text-slate-500 text-[10px]">#{rank}</span>)}
+                    {rank > 3 && (<span className="h-8 w-6 bg-[#16141a]/80 border border-white/10 rounded-b-md flex items-center justify-center font-mono font-extrabold text-slate-500 text-[10px]">#{rank}</span>)}
                   </div>
                   <CommunityCard asset={asset} onOpenDetails={handleOpenDetails} />
                 </div>
@@ -127,10 +127,10 @@ export default function TrendingPage() {
             })}
           </div>
         ) : (
-          <div className="text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-            <AlertCircle className="h-12 w-12 text-slate-700 mx-auto" />
+          <div className="text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+            <AlertCircle className="h-12 w-12 text-slate-500 mx-auto" />
             <p className="text-slate-500 font-medium">Chưa có tác phẩm thịnh hành</p>
-            <p className="text-xs text-slate-600 max-w-[320px] mx-auto">
+            <p className="text-xs text-slate-400 max-w-[320px] mx-auto">
               Hãy quay lại sau để khám phá những tác phẩm đang được cộng đồng yêu thích nhất nhé.
             </p>
           </div>
@@ -138,7 +138,7 @@ export default function TrendingPage() {
       ) : (
         trendingCreators.length > 0 ? (
           <div className="space-y-4">
-            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-2.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono border-b border-white/[0.04]">
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-2.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono border-b border-white/12">
               <div className="col-span-1 text-center">Hạng</div>
               <div className="col-span-4 text-left">Creator</div>
               <div className="col-span-2 text-center">Cấp độ</div>
@@ -150,7 +150,7 @@ export default function TrendingPage() {
               {trendingCreators.map((creator, index) => {
                 const rank = index + 1;
                 return (
-                  <div key={creator.username} className={cn("grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-6 py-4.5 rounded-2xl bg-zinc-950/80 border border-white/[0.04] hover:border-[#FF5A1F]/20 hover:bg-[#FF5A1F]/[0.01] transition-all", rank === 1 && "border-amber-500/20 bg-amber-500/[0.01] shadow-[0_0_20px_rgba(245,158,11,0.02)]")}>
+                  <div key={creator.username} className={cn("grid grid-cols-1 md:grid-cols-12 items-center gap-4 px-6 py-4.5 rounded-2xl bg-[#16141a]/80 border border-white/12 hover:border-[#FF5A1F]/20 hover:bg-[#FF5A1F]/[0.01] transition-all", rank === 1 && "border-amber-500/20 bg-amber-500/[0.01] shadow-[0_0_20px_rgba(245,158,11,0.02)]")}>
                     <div className="col-span-1 flex items-center justify-center">
                       {rank === 1 && (<span className="h-8 w-8 rounded-lg bg-amber-500 text-black font-mono font-black text-sm flex items-center justify-center shadow-sm">1</span>)}
                       {rank === 2 && (<span className="h-8 w-8 rounded-lg bg-slate-400 text-black font-mono font-black text-sm flex items-center justify-center">2</span>)}
@@ -171,7 +171,7 @@ export default function TrendingPage() {
                     </div>
 
                     <div className="col-span-3 flex flex-col md:items-center text-left md:text-center">
-                      <span className="text-[10px] text-slate-600 font-medium uppercase font-mono md:hidden">Tác phẩm</span>
+                      <span className="text-[10px] text-slate-400 font-medium uppercase font-mono md:hidden">Tác phẩm</span>
                       <span className="text-xs font-bold text-slate-300">{creator.published_count}</span>
                     </div>
 
@@ -186,10 +186,10 @@ export default function TrendingPage() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-32 space-y-4 bg-zinc-950 rounded-2xl border border-white/5">
-            <AlertCircle className="h-12 w-12 text-slate-700 mx-auto" />
+          <div className="text-center py-32 space-y-4 bg-[#16141a] rounded-2xl border border-white/12">
+            <AlertCircle className="h-12 w-12 text-slate-500 mx-auto" />
             <p className="text-slate-500 font-medium">Chưa có creator thịnh hành</p>
-            <p className="text-xs text-slate-600 max-w-[320px] mx-auto">
+            <p className="text-xs text-slate-400 max-w-[320px] mx-auto">
               Hãy quay lại sau để khám phá những nhà sáng tạo đang được cộng đồng yêu thích nhất nhé.
             </p>
           </div>

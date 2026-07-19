@@ -152,7 +152,7 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 lg:h-20 items-center justify-between border-b border-white/5 px-4 md:px-8 lg:px-12" style={{ backgroundColor: 'var(--surface, #000000)', borderColor: 'var(--card-border, rgba(255,255,255,0.05))' }}>
+    <header className="sticky top-0 z-30 flex h-16 lg:h-20 items-center justify-between border-b border-white/12 px-4 md:px-8 lg:px-12" style={{ backgroundColor: 'var(--surface, #000000)', borderColor: 'var(--card-border, rgba(255,255,255,0.05))' }}>
       <div className="flex items-center gap-4">
         <button onClick={toggleMobileMenu} className="lg:hidden h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
           <Menu className="h-5 w-5" />
@@ -162,7 +162,7 @@ export function Topbar() {
             <Search className="h-4 w-4 shrink-0" />
             <input value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} onKeyDown={handleSearchKey}
               placeholder={t('topbar.searchPlaceholder')}
-              className="bg-transparent text-sm outline-none placeholder:text-slate-600 w-full font-medium"
+              className="bg-transparent text-sm outline-none placeholder:text-slate-400 w-full font-medium"
               style={{ color: 'var(--foreground)' }}
             />
           </div>
@@ -170,18 +170,18 @@ export function Topbar() {
           <AnimatePresence>
             {searchOpen && (
               <motion.div initial={{ opacity: 0, y: -4, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.97 }} transition={{ duration: 0.15 }}
-                className="absolute top-full left-0 right-0 mt-2 z-50 bg-zinc-950 border border-white/10 rounded-2xl shadow-md backdrop-blur-2xl overflow-hidden"
+                className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#16141a] border border-white/10 rounded-2xl shadow-md backdrop-blur-2xl overflow-hidden"
               >
                 {filtered.items.length === 0 ? (
                   <div className="p-6 text-center">
-                    <Search className="h-6 w-6 text-slate-700 mx-auto mb-2" />
-                    <p className="text-xs text-slate-600 font-medium">Không tìm thấy kết quả</p>
+                    <Search className="h-6 w-6 text-slate-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-400 font-medium">Không tìm thấy kết quả</p>
                   </div>
                 ) : (
                   <div className="max-h-[360px] overflow-y-auto custom-scrollbar p-1.5">
                     {filtered.categories.map(cat => (
                       <div key={cat}>
-                        <div className="px-3 py-1.5 text-[9px] font-bold text-slate-600 uppercase tracking-wider">{cat}</div>
+                        <div className="px-3 py-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider">{cat}</div>
                         {filtered.items.filter(i => i.category === cat).map((item, i) => {
                           const idx = filtered.items.indexOf(item);
                           return (
@@ -191,7 +191,7 @@ export function Topbar() {
                               <item.icon className="h-4 w-4 shrink-0" />
                               <div className="min-w-0 flex-1">
                                 <div className="text-xs font-semibold">{item.label}</div>
-                                <div className="text-[10px] text-slate-600 truncate">{item.desc}</div>
+                                <div className="text-[10px] text-slate-400 truncate">{item.desc}</div>
                               </div>
                             </button>
                           );
@@ -229,8 +229,8 @@ export function Topbar() {
               </AnimatePresence>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={8} className="w-[calc(100vw-32px)] md:w-[360px] bg-zinc-950 border-white/10 p-0 rounded-2xl shadow-md backdrop-blur-2xl overflow-hidden">
-            <div className="p-4 border-b border-white/5 flex items-center justify-between">
+          <DropdownMenuContent align="end" sideOffset={8} className="w-[calc(100vw-32px)] md:w-[360px] bg-[#16141a] border-white/10 p-0 rounded-2xl shadow-md backdrop-blur-2xl overflow-hidden">
+            <div className="p-4 border-b border-white/12 flex items-center justify-between">
               <h3 className="text-sm font-bold text-white tracking-tight">Thông báo</h3>
               {unreadCount > 0 && (
                 <button onClick={handleMarkAllRead} className="text-[10px] font-bold text-[#FF5A1F] uppercase tracking-wider hover:underline">
@@ -241,8 +241,8 @@ export function Topbar() {
             <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
               {notifications.length === 0 ? (
                 <div className="py-8 text-center">
-                  <Bell className="h-8 w-8 text-slate-700 mx-auto mb-2" />
-                  <p className="text-xs text-slate-600 font-medium">Chưa có thông báo</p>
+                  <Bell className="h-8 w-8 text-slate-500 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400 font-medium">Chưa có thông báo</p>
                 </div>
               ) : (
                 notifications.map((notif, idx) => {
@@ -255,7 +255,7 @@ export function Topbar() {
                         router.push(`/notifications/${notif.uuid}`);
                         setNotifOpen(false);
                       }}
-                      className={`w-full flex items-start gap-3 p-3.5 hover:bg-white/[0.03] transition-all text-left border-b border-white/5 last:border-0 ${!notif.read ? 'bg-white/[0.01]' : ''}`}
+                      className={`w-full flex items-start gap-3 p-3.5 hover:bg-white/[0.03] transition-all text-left border-b border-white/12 last:border-0 ${!notif.read ? 'bg-white/[0.01]' : ''}`}
                     >
                       <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
                         <Icon className="h-4 w-4" />
@@ -265,10 +265,10 @@ export function Topbar() {
                           {notif.title}
                         </p>
                         <div
-                          className="text-[10px] text-slate-600 mt-0.5 line-clamp-2 leading-relaxed"
+                          className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed"
                           dangerouslySetInnerHTML={{ __html: notif.body }}
                         />
-                        <p className="text-[9px] text-slate-700 mt-1">
+                        <p className="text-[9px] text-slate-500 mt-1">
                           {notif.sent_at ? new Date(notif.sent_at).toLocaleString('vi-VN') : ''}
                         </p>
                       </div>
@@ -280,7 +280,7 @@ export function Topbar() {
                 })
               )}
             </div>
-            <Link href="/notifications" className="block p-3 text-center border-t border-white/5 text-[10px] font-bold text-[#FF5A1F] uppercase tracking-widest hover:bg-white/[0.02] transition-all">
+            <Link href="/notifications" className="block p-3 text-center border-t border-white/12 text-[10px] font-bold text-[#FF5A1F] uppercase tracking-widest hover:bg-white/[0.02] transition-all">
               Xem tất cả thông báo
             </Link>
           </DropdownMenuContent>
@@ -327,16 +327,16 @@ export function Topbar() {
                     </div>
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={10} className="w-[300px] max-w-[calc(100vw-24px)] bg-zinc-950 border-white/10 p-0 rounded-2xl shadow-xl shadow-black/50 backdrop-blur-2xl overflow-hidden">
+                <DropdownMenuContent align="end" sideOffset={10} className="w-[300px] max-w-[calc(100vw-24px)] bg-[#16141a] border-white/10 p-0 rounded-2xl shadow-xl shadow-black/50 backdrop-blur-2xl overflow-hidden">
                   {/* Header — thẻ tài khoản */}
                   <div className="font-normal">
-                    <div className="relative overflow-hidden bg-gradient-to-br from-[#FF5A1F]/12 via-[#FF8A5B]/[0.06] to-transparent px-4 pt-4 pb-3.5 border-b border-white/5">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-[#FF5A1F]/12 via-[#FF8A5B]/[0.06] to-transparent px-4 pt-4 pb-3.5 border-b border-white/12">
                       {/* ánh sáng nền tinh tế */}
                       <div className="pointer-events-none absolute -top-10 -right-8 h-28 w-28 rounded-full bg-[#FF5A1F]/20 blur-3xl" />
                       <div className="relative flex items-center gap-3">
                         {/* Avatar viền gradient */}
                         <div className="shrink-0 h-10 w-10 rounded-xl p-[1.5px] bg-gradient-to-br from-[#FF5A1F] to-[#FF8A5B] shadow-md shadow-[#FF5A1F]/20">
-                          <div className="h-full w-full rounded-[9px] overflow-hidden bg-zinc-950 flex items-center justify-center">
+                          <div className="h-full w-full rounded-[9px] overflow-hidden bg-[#16141a] flex items-center justify-center">
                             {user?.avatar_url ? (
                               <img src={user.avatar_url} alt={user?.name || 'User'} className="h-full w-full object-cover" />
                             ) : (
@@ -413,18 +413,18 @@ export function Topbar() {
       <AnimatePresence>
         {searchOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] lg:hidden bg-zinc-950/80 backdrop-blur-md"
+            className="fixed inset-0 z-[100] lg:hidden bg-[#16141a]/80 backdrop-blur-md"
             onClick={() => setSearchOpen(false)}
           >
             <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.15 }}
-              className="bg-zinc-950 border-b border-white/5 p-4"
+              className="bg-[#16141a] border-b border-white/12 p-4"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 h-10 focus-within:border-[#FF5A1F]/30 transition-all">
                 <Search className="h-4 w-4 text-slate-500 shrink-0" />
                 <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={handleSearchKey}
                   placeholder={t('topbar.searchPlaceholder')} autoFocus
-                  className="bg-transparent text-sm outline-none placeholder:text-slate-600 w-full font-medium text-white"
+                  className="bg-transparent text-sm outline-none placeholder:text-slate-400 w-full font-medium text-white"
                 />
                 <button onClick={() => setSearchOpen(false)} className="h-6 w-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-white transition-all cursor-pointer">
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -434,13 +434,13 @@ export function Topbar() {
               <div className="mt-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 {filtered.items.length === 0 ? (
                   <div className="py-6 text-center">
-                    <Search className="h-6 w-6 text-slate-700 mx-auto mb-2" />
-                    <p className="text-xs text-slate-600 font-medium">Không tìm thấy kết quả</p>
+                    <Search className="h-6 w-6 text-slate-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-400 font-medium">Không tìm thấy kết quả</p>
                   </div>
                 ) : (
                   filtered.categories.map(cat => (
                     <div key={cat}>
-                      <div className="px-1 py-2 text-[9px] font-bold text-slate-600 uppercase tracking-wider">{cat}</div>
+                      <div className="px-1 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">{cat}</div>
                       {filtered.items.filter(i => i.category === cat).map((item, i) => {
                         const idx = filtered.items.indexOf(item);
                         return (
@@ -450,7 +450,7 @@ export function Topbar() {
                             <item.icon className="h-4 w-4 shrink-0" />
                             <div className="min-w-0 flex-1">
                               <div className="text-xs font-semibold">{item.label}</div>
-                              <div className="text-[10px] text-slate-600 truncate">{item.desc}</div>
+                              <div className="text-[10px] text-slate-400 truncate">{item.desc}</div>
                             </div>
                           </button>
                         );

@@ -4,11 +4,19 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, FileType } from 'lucide-react';
 import { LARAVEL_URL } from '@/lib/api/client';
+import { MediaViewer, type MediaKind } from '@/components/ui/media-viewer';
 import type { RenderJobRecord } from './types';
 
 function resolveAssetUrl(url: string): string {
   if (url.startsWith('/api/')) return `${LARAVEL_URL}${url}`;
   return url;
+}
+
+function mimeToKind(mime?: string | null): MediaKind | null {
+  if (mime?.startsWith('video/')) return 'video';
+  if (mime?.startsWith('audio/')) return 'audio';
+  if (mime?.startsWith('image/')) return 'image';
+  return null;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -32,7 +40,7 @@ function PromptDisplay({ prompt }: { prompt: string }) {
       )}>{prompt}</p>
       {isLong && (
         <button onClick={() => setExpanded(!expanded)}
-          className="text-[11px] text-[#FF5A1F] hover:text-[#FF8A5B] transition-colors mt-1 font-medium cursor-pointer select-none">
+          className="text-[11px] text-brand hover:text-[#FF8A5B] transition-colors mt-1 font-medium cursor-pointer select-none">
           {expanded ? '▲ Thu gọn' : '▼ Xem đầy đủ'}
         </button>
       )}
@@ -40,78 +48,38 @@ function PromptDisplay({ prompt }: { prompt: string }) {
   );
 }
 
-function MediaPreview({ output_url, mime_type }: { output_url: string; mime_type?: string | null }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const isVideo = mime_type?.startsWith('video/');
-  const isAudio = mime_type?.startsWith('audio/');
-  const isImage = mime_type?.startsWith('image/');
-  const resolvedUrl = resolveAssetUrl(output_url);
+function MediaPreview({ output_url, mime_type, aspectRatio }: { output_url: string; mime_type?: string | null; aspectRatio?: string | null }) {
+  const kind = mimeToKind(mime_type);
 
-  if (error) return null;
-
-  return (
-    <div className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
-      {isVideo ? (
-        <div className="relative" style={{ maxWidth: 320 }}>
-          <video
-            src={resolvedUrl}
-            controls
-            className="w-full aspect-video object-contain"
-            playsInline
-            controlsList="nodownload"
-            onCanPlay={() => setLoading(false)}
-            onError={() => setError(true)}
-          />
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40">
-              <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
-            </div>
-          )}
-        </div>
-      ) : isAudio ? (
-        <div className="px-4 py-5 max-w-[320px]">
-          <audio
-            src={resolvedUrl}
-            controls
-            className="w-full h-10"
-            controlsList="nodownload"
-            onCanPlay={() => setLoading(false)}
-            onError={() => setError(true)}
-          />
-          {loading && (
-            <div className="flex items-center justify-center h-10 mt-2">
-              <div className="h-5 w-5 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
-            </div>
-          )}
-        </div>
-      ) : isImage ? (
-        <div className="max-w-[320px]">
-          <img
-            src={resolvedUrl}
-            alt="Kết quả"
-            className="w-full h-auto object-contain"
-            onLoad={() => setLoading(false)}
-            onError={() => setError(true)}
-          />
-          {loading && (
-            <div className="flex items-center justify-center aspect-[4/3]">
-              <div className="h-6 w-6 rounded-full border-2 border-white/10 border-t-[#FF5A1F] animate-spin" />
-            </div>
-          )}
-        </div>
-      ) : (
+  // Unknown type → keep the simple "open result" link (no inline player).
+  if (!kind) {
+    return (
+      <div className="bg-white/[0.02] border border-white/12 rounded-xl overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3">
           <FileType className="h-4 w-4 text-slate-500" />
-          <a href={resolvedUrl} target="_blank" rel="noopener noreferrer"
-            className="text-xs text-[#FF5A1F] hover:underline cursor-pointer">
+          <a href={resolveAssetUrl(output_url)} target="_blank" rel="noopener noreferrer"
+            className="text-xs text-[color:var(--color-brand,#FF5A1F)] hover:underline cursor-pointer">
             Xem kết quả
           </a>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-[360px] rounded-xl overflow-hidden border border-white/12 bg-white/[0.02]">
+      {/* Shared MediaViewer — fetches the JWT-gated asset as an auth blob (a plain <video src> could not). */}
+      <MediaViewer
+        src={output_url}
+        kind={kind}
+        aspectRatio={kind === 'audio' ? null : (aspectRatio || (kind === 'image' ? '4:3' : '16:9'))}
+        fit={kind === 'image' ? 'contain' : 'contain'}
+        controls
+        rounded={false}
+      />
       {mime_type && (
-        <div className="px-3 py-1.5 border-t border-white/[0.04]">
-          <span className="text-[10px] text-slate-600">{mime_type}</span>
+        <div className="px-3 py-1.5 border-t border-white/12">
+          <span className="text-[10px] text-slate-400">{mime_type}</span>
         </div>
       )}
     </div>
@@ -121,13 +89,13 @@ function MediaPreview({ output_url, mime_type }: { output_url: string; mime_type
 function JobItem({ job }: { job: RenderJobRecord }) {
   const isImage = job.mime_type?.startsWith('image/') || job.capability?.startsWith('t2i') || job.video_type === 'image_generation';
   return (
-    <div className="bg-zinc-950 border border-white/5 rounded-xl overflow-hidden">
+    <div className="bg-[#16141a] border border-white/12 rounded-xl overflow-hidden">
       <div className="p-4 space-y-2.5">
         <div className="flex items-center justify-between">
           <span className={cn("text-[11px] font-bold px-2.5 py-1 rounded-lg", STATUS_COLOR[job.status] || 'text-slate-400 bg-white/5')}>
             {STATUS_LABEL[job.status] || job.status}
           </span>
-          <p className="text-[11px] text-slate-600">
+          <p className="text-[11px] text-slate-400">
             {new Date(job.created_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
           </p>
         </div>
@@ -138,7 +106,7 @@ function JobItem({ job }: { job: RenderJobRecord }) {
           </p>
         )}
         {job.status === 'completed' && job.output_url ? (
-          <MediaPreview output_url={job.output_url} mime_type={job.mime_type} />
+          <MediaPreview output_url={job.output_url} mime_type={job.mime_type} aspectRatio={job.aspect_ratio} />
         ) : job.status === 'completed' && (
           <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400/70 bg-emerald-500/5 px-2 py-0.5 rounded-md">
             <CheckCircle2 className="h-3 w-3" />
@@ -147,13 +115,13 @@ function JobItem({ job }: { job: RenderJobRecord }) {
         )}
         <div className="flex items-center gap-1.5 flex-wrap">
           {!isImage && job.duration_seconds > 0 && (
-            <span className="text-[10px] font-medium text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-md">{job.duration_seconds}s</span>
+            <span className="text-[10px] font-medium text-slate-400 bg-white/[0.03] px-2 py-0.5 rounded-md">{job.duration_seconds}s</span>
           )}
           {job.resolution && (
-            <span className="text-[10px] font-medium text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-md">{job.resolution}</span>
+            <span className="text-[10px] font-medium text-slate-400 bg-white/[0.03] px-2 py-0.5 rounded-md">{job.resolution}</span>
           )}
           {job.aspect_ratio && (
-            <span className="text-[10px] font-medium text-slate-600 bg-white/[0.03] px-2 py-0.5 rounded-md">{job.aspect_ratio}</span>
+            <span className="text-[10px] font-medium text-slate-400 bg-white/[0.03] px-2 py-0.5 rounded-md">{job.aspect_ratio}</span>
           )}
         </div>
       </div>
@@ -167,7 +135,7 @@ export function JobHistory({ jobs }: { jobs: RenderJobRecord[] }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold text-white uppercase tracking-widest">Lịch sử tác vụ</h2>
-        <span className="text-[10px] text-slate-600">{jobs.length} lần</span>
+        <span className="text-[10px] text-slate-400">{jobs.length} lần</span>
       </div>
       <div className="space-y-2">
         {jobs.map((job, idx) => (

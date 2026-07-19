@@ -50,3 +50,76 @@ describe('createAuthMiddleware — HMAC constant-time verification', () => {
     expect(r.nextCalled).toBe(true);
   });
 });
+
+describe('createAuthMiddleware — timestamped (replay-resistant) signature', () => {
+  const secret = 'test-webhook-secret';
+  const userId = 'laravel-app';
+  const nowSec = () => Math.floor(Date.now() / 1000);
+  const sigFor = (ts: number) =>
+    createHmac('sha256', secret).update(`${userId}.${ts}`).digest('hex');
+
+  beforeEach(() => { process.env.WEBHOOK_SECRET = secret; });
+  afterEach(() => {
+    delete process.env.WEBHOOK_SECRET;
+    delete process.env.DAEMON_STRICT_SIGNATURE;
+    delete process.env.DAEMON_SIGNATURE_WINDOW_SECONDS;
+  });
+
+  it('accepts a fresh timestamped signature', () => {
+    const ts = nowSec();
+    const r = runMiddleware({
+      'x-user-id': userId,
+      'x-timestamp': String(ts),
+      'x-daemon-signature': sigFor(ts),
+    });
+    expect(r.nextCalled).toBe(true);
+    expect(r.user?.id).toBe(userId);
+  });
+
+  it('rejects an expired timestamp (outside the replay window)', () => {
+    const ts = nowSec() - 100000; // far outside default 300s window
+    const r = runMiddleware({
+      'x-user-id': userId,
+      'x-timestamp': String(ts),
+      'x-daemon-signature': sigFor(ts),
+    });
+    expect(r.nextCalled).toBe(false);
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('rejects a tampered timestamp (signature no longer matches)', () => {
+    const ts = nowSec();
+    const r = runMiddleware({
+      'x-user-id': userId,
+      'x-timestamp': String(ts + 5), // signed ts, sent ts+5 → mismatch
+      'x-daemon-signature': sigFor(ts),
+    });
+    expect(r.nextCalled).toBe(false);
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('rejects a non-numeric timestamp without falling back to legacy', () => {
+    const legacySig = createHmac('sha256', secret).update(userId).digest('hex');
+    const r = runMiddleware({
+      'x-user-id': userId,
+      'x-timestamp': 'not-a-number',
+      'x-daemon-signature': legacySig,
+    });
+    expect(r.nextCalled).toBe(false);
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('still accepts the legacy constant signature by default (rollout compat)', () => {
+    const legacySig = createHmac('sha256', secret).update(userId).digest('hex');
+    const r = runMiddleware({ 'x-user-id': userId, 'x-daemon-signature': legacySig });
+    expect(r.nextCalled).toBe(true);
+  });
+
+  it('rejects the legacy signature when DAEMON_STRICT_SIGNATURE=1', () => {
+    process.env.DAEMON_STRICT_SIGNATURE = '1';
+    const legacySig = createHmac('sha256', secret).update(userId).digest('hex');
+    const r = runMiddleware({ 'x-user-id': userId, 'x-daemon-signature': legacySig });
+    expect(r.nextCalled).toBe(false);
+    expect(r.statusCode).toBe(401);
+  });
+});

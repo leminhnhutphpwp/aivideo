@@ -37,7 +37,7 @@ export function BillingHero({ credits }: BillingHeroProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-6 items-start">
         {/* Left: Title + desc */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/12">
             <div className="h-1.5 w-1.5 rounded-full bg-[#FF5A1F] animate-pulse" />
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('billing.desc')}</span>
           </div>
@@ -68,11 +68,11 @@ export function BillingHero({ credits }: BillingHeroProps) {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Credits</p>
-                    <p className="text-xs text-slate-600 font-medium">Còn lại</p>
+                    <p className="text-xs text-slate-400 font-medium">Còn lại</p>
                   </div>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center">
-                  <Shield className="h-4 w-4 text-slate-600" />
+                <div className="h-8 w-8 rounded-full bg-white/5 border border-white/12 flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-slate-400" />
                 </div>
               </div>
 
@@ -80,7 +80,7 @@ export function BillingHero({ credits }: BillingHeroProps) {
                 <p className="text-4xl md:text-5xl font-bold text-white tracking-tight">
                   {credits !== null ? <AnimatedCounter target={credits} /> : '...'}
                 </p>
-                <p className="text-xs text-slate-600 font-medium mt-1">credits</p>
+                <p className="text-xs text-slate-400 font-medium mt-1">credits</p>
               </div>
 
               <div className="flex gap-3">

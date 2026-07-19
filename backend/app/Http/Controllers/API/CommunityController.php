@@ -96,8 +96,10 @@ class CommunityController extends Controller
         }
 
         // Output-side image moderation — defense layer for the public feed. Only images are
-        // checked here; video moderation is a separate concern. Fail-open: a degraded/safe
-        // verdict (or an unfetchable image) never blocks a legitimate publish.
+        // checked here; video moderation is a separate concern. A hard `safe:false` blocks the
+        // publish. A `degraded:true` verdict (vision model unavailable/errored, or an unfetchable
+        // image) no longer silently passes as safe — it holds the asset for manual review.
+        $isDegraded = false;
         if (config('services.daemon.image_moderation_enabled', true) && $this->isImageAsset($renderJob)) {
             $imageUrl = $this->daemonFetchableImageUrl($renderJob);
 
@@ -116,22 +118,43 @@ class CommunityController extends Controller
                         'message' => 'Nội dung hình ảnh không phù hợp để đăng công khai.',
                     ], 422);
                 }
+
+                $isDegraded = ($verdict['degraded'] ?? false) === true;
+                if ($isDegraded) {
+                    Log::warning('Publish held for manual review — degraded image moderation', [
+                        'user_id' => $user->id,
+                        'render_job_id' => $renderJob->id,
+                    ]);
+                }
             }
         }
 
+        $moderationStatus = $isDegraded
+            ? RenderJob::MODERATION_PENDING
+            : RenderJob::MODERATION_APPROVED;
+
         $renderJob->publish(
             $request->input('visibility'),
-            $request->input('tags', [])
+            $request->input('tags', []),
+            $moderationStatus
         );
 
         // Learning loop: attribute this publish to the skill the asset was made with.
-        app(\App\Services\SkillStatsService::class)->recordPublish($renderJob->skill_id);
+        // Held (pending-review) assets are not attributed until an admin approves them.
+        if ($moderationStatus === RenderJob::MODERATION_APPROVED) {
+            app(\App\Services\SkillStatsService::class)->recordPublish($renderJob->skill_id);
+        }
 
         return response()->json([
             'success' => true,
+            'pending_review' => $isDegraded,
+            'message' => $isDegraded
+                ? 'Nội dung đã được gửi và đang chờ kiểm duyệt trước khi hiển thị công khai.'
+                : null,
             'data' => [
                 'uuid' => $renderJob->uuid,
                 'visibility' => $renderJob->visibility,
+                'moderation_status' => $renderJob->moderation_status,
                 'creator_payout' => $renderJob->creator_payout,
                 'published_at' => $renderJob->published_at,
             ],

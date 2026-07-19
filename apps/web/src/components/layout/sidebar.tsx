@@ -96,7 +96,7 @@ const SUBMENU_ICONS: Record<string, React.ElementType> = {
 
 export function Sidebar() {
   return (
-    <Suspense fallback={<aside className="hidden lg:flex fixed top-0 left-0 h-full bg-[#030303] border-r border-white/5 z-50 flex-col w-[80px] items-center py-8" />}>
+    <Suspense fallback={<aside className="hidden lg:flex fixed top-0 left-0 h-full bg-[#1f1c25] border-r border-white/12 z-50 flex-col w-[80px] items-center py-8" />}>
       <SidebarContent />
     </Suspense>
   );
@@ -184,7 +184,7 @@ function SidebarContent() {
 
   return (
     <>
-      <aside className="hidden lg:flex fixed top-0 left-0 h-full bg-[#030303] border-r border-white/5 z-50 flex-col w-[88px] items-center py-8">
+      <aside className="hidden lg:flex fixed top-0 left-0 h-full bg-[#1f1c25] border-r border-white/12 z-50 flex-col w-[88px] items-center py-8">
         <div className="mb-10 shrink-0">
           <Link href="/dashboard">
              <img src="/logo-background-white.png" alt="Wavise Studio" className="h-8 w-auto" />
@@ -246,7 +246,7 @@ function SidebarContent() {
               style={{ transformOrigin: 'left center' }}
               onMouseEnter={() => { if (hideTimer.current) clearTimeout(hideTimer.current); }}
               onMouseLeave={hideSubmenu}
-              className="fixed left-[88px] top-0 h-full w-[280px] bg-[#030303] border-r border-white/[0.06] shadow-md shadow-black/70 z-40 flex flex-col pt-10 pointer-events-auto"
+              className="fixed left-[88px] top-0 h-full w-[280px] bg-[#1f1c25] border-r border-white/12 shadow-md shadow-black/70 z-40 flex flex-col pt-10 pointer-events-auto"
             >
               <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-[#FF5A1F]/80 via-[#FF5A1F]/20 to-transparent" />
 
@@ -257,7 +257,7 @@ function SidebarContent() {
                   </div>
                   <div>
                     <span className="text-base font-bold text-white tracking-tight">{item.label}</span>
-                    <p className="text-[11px] text-slate-600 leading-tight">
+                    <p className="text-[11px] text-slate-400 leading-tight">
                       {item.label === t('nav.studio') && t('studio.desc')}
                       {item.label === t('nav.projects') && t('projects.desc')}
                       {item.label === t('nav.library') && t('assets.desc')}
@@ -269,7 +269,7 @@ function SidebarContent() {
               </div>
 
               <div className="px-6 mb-2">
-                <span className="text-[10px] font-semibold text-slate-700 uppercase tracking-[0.15em]">
+                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.15em]">
                   {item.label === t('nav.studio') && t('studio.video')}
                   {item.label === t('nav.projects') && t('projects.production')}
                   {item.label === t('nav.library') && t('assets.type')}
@@ -315,11 +315,11 @@ function SidebarContent() {
                 })}
               </div>
 
-              <div className="px-6 py-5 border-t border-white/[0.04] mt-4">
-                <div className="flex items-center gap-2.5 text-xs text-slate-600">
+              <div className="px-6 py-5 border-t border-white/12 mt-4">
+                <div className="flex items-center gap-2.5 text-xs text-slate-400">
                   <div className="h-2 w-2 rounded-full bg-emerald-500/50 animate-pulse" />
                   <span className="font-medium text-slate-500">{item.submenu.length}</span>
-                  <span className="text-slate-700">
+                  <span className="text-slate-500">
                     {item.label === t('nav.studio') && t('studio.video')}
                     {item.label === t('nav.projects') && t('projects.production')}
                     {item.label === t('nav.library') && t('assets.type')}

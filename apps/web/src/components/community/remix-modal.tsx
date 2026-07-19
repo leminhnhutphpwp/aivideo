@@ -101,7 +101,7 @@ function ReferenceImage({ url, index }: { url: string; index: number }) {
   const blobUrl = useAuthenticatedMedia(resolvedUrl);
 
   return (
-    <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/[0.06] bg-zinc-900">
+    <div className="shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-white/12 bg-[#1f1c25]">
       <img
         src={blobUrl || resolvedUrl || url}
         alt={`Reference ${index + 1}`}
@@ -207,7 +207,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-zinc-950/80 backdrop-blur-md"
+        className="absolute inset-0 bg-[#16141a]/80 backdrop-blur-md"
       />
 
       <motion.div
@@ -215,16 +215,16 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        className="relative z-10 w-full max-w-[1100px] h-[90vh] md:h-[80vh] bg-zinc-950/90 border border-white/[0.08] shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden flex flex-col md:flex-row backdrop-blur-xl"
+        className="relative z-10 w-full max-w-[1100px] h-[90vh] md:h-[80vh] bg-[#16141a]/90 border border-white/12 shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-2xl overflow-hidden flex flex-col md:flex-row backdrop-blur-xl"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 h-10 w-10 rounded-full bg-zinc-950/60 hover:bg-white/10 text-slate-400 hover:text-white border border-white/5 flex items-center justify-center transition-all cursor-pointer"
+          className="absolute top-4 right-4 z-20 h-10 w-10 rounded-full bg-[#16141a]/60 hover:bg-white/10 text-slate-400 hover:text-white border border-white/12 flex items-center justify-center transition-all cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <div className="flex-1 md:flex-[1.3] bg-zinc-950 flex items-center justify-center relative overflow-hidden h-[45%] md:h-full border-b md:border-b-0 md:border-r border-white/[0.06]">
+        <div className="flex-1 md:flex-[1.3] bg-[#16141a] flex items-center justify-center relative overflow-hidden h-[45%] md:h-full border-b md:border-b-0 md:border-r border-white/12">
           {isVideo ? (
             <video
               src={mediaBlobUrl || undefined}
@@ -271,7 +271,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
             </h2>
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] mb-6">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/12 mb-6">
             <div className="flex items-center gap-3">
               <img
                 src={asset.user?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop'}
@@ -307,7 +307,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
                 )}
               </button>
             </div>
-            <div className="w-full bg-[#030303] border border-white/[0.04] rounded-2xl p-4 text-xs font-mono text-slate-300 leading-relaxed text-left min-h-[90px] relative overflow-hidden select-text">
+            <div className="w-full bg-[#16141a] border border-white/12 rounded-2xl p-4 text-xs font-mono text-slate-300 leading-relaxed text-left min-h-[90px] relative overflow-hidden select-text">
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF5A1F]" />
               {asset.prompt}
             </div>
@@ -342,7 +342,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
               <button
                 onClick={handleLikeToggle}
                 className={cn(
-                  "flex-1 h-11 rounded-xl border border-white/5 hover:border-[#FF5A1F]/30 bg-white/[0.01] hover:bg-[#FF5A1F]/[0.02] text-slate-300 hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer font-bold text-xs uppercase tracking-wider",
+                  "flex-1 h-11 rounded-xl border border-white/12 hover:border-[#FF5A1F]/30 bg-white/[0.01] hover:bg-[#FF5A1F]/[0.02] text-slate-300 hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer font-bold text-xs uppercase tracking-wider",
                   isLiked && "border-[#FF5A1F]/30 bg-[#FF5A1F]/[0.04] text-[#FF5A1F]"
                 )}
               >
@@ -353,7 +353,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
               <button
                 onClick={() => setShowComments(!showComments)}
                 className={cn(
-                  "h-11 px-4 rounded-xl border border-white/5 hover:border-white/20 bg-white/[0.01] hover:bg-white/[0.03] flex items-center justify-center gap-1.5 transition-all cursor-pointer",
+                  "h-11 px-4 rounded-xl border border-white/12 hover:border-white/20 bg-white/[0.01] hover:bg-white/[0.03] flex items-center justify-center gap-1.5 transition-all cursor-pointer",
                   showComments ? "border-[#FF5A1F]/30 text-[#FF5A1F]" : "text-slate-400 hover:text-white"
                 )}
               >

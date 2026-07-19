@@ -19,7 +19,7 @@ export function BarChart({ data, height = 160, maxValue }: BarChartProps) {
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#FF5A1F] to-[#FF5A1F]/40 rounded-md" />
           </div>
-          <span className="text-[9px] font-medium text-slate-600 truncate w-full text-center">{d.label}</span>
+          <span className="text-[9px] font-medium text-slate-400 truncate w-full text-center">{d.label}</span>
         </div>
       ))}
     </div>

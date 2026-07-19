@@ -475,6 +475,12 @@ export async function renderQwenCloudImage(ctx: MediaContext, credentials: Provi
       content.push({ image: url });
     }
     content.push({ text: ctx.prompt || 'A beautiful image' });
+    // Qwen-Image (multimodal-generation) accepts negative_prompt + seed under `parameters`
+    // (DashScope Model Studio: seed ∈ [0, 2147483647]). Only send when provided so the
+    // default path stays byte-identical — this is what makes the restore studio's negative
+    // prompt + seed-lock / multi-variant levers actually reach the model.
+    if (ctx.negativePrompt) params.negative_prompt = ctx.negativePrompt;
+    if (ctx.seed !== undefined) params.seed = ctx.seed;
     const body = {
       model,
       input: { messages: [{ role: 'user', content }] },
