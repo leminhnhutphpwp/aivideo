@@ -128,13 +128,13 @@ export async function handleModerateImage(req: any, res: any): Promise<any> {
 
 /** Hardened instruction: force a bare JSON object, forbid prose/markdown/refusal. */
 const IMAGE_MODERATION_INSTRUCTION =
-  'Bạn là bộ lọc kiểm duyệt ảnh cho feed cộng đồng. Nhìn kỹ ẢNH được đính kèm và phân loại nội dung. '
-  + 'Trả về DUY NHẤT một JSON object hợp lệ. TUYỆT ĐỐI KHÔNG lời dẫn, KHÔNG markdown, KHÔNG ```, '
-  + 'KHÔNG lời xin lỗi, KHÔNG từ chối, KHÔNG giải thích ngoài JSON. '
-  + 'Bạn CÓ khả năng xem ảnh — luôn đánh giá ảnh, không được nói rằng bạn không xem được ảnh. '
-  + 'Format chính xác: {"safe":true|false,"reason":"mô tả ngắn gọn bằng tiếng Việt"}. '
-  + 'Đặt safe=false nếu ảnh chứa: khiêu dâm/khỏa thân/gợi dục, bạo lực máu me, nội dung ghê rợn (gore), '
-  + 'lạm dụng trẻ em, hoặc nội dung thù ghét/cực đoan. Ngược lại safe=true.';
+  'You are an image moderation filter for a community feed. Look carefully at the ATTACHED IMAGE and classify its content. '
+  + 'Return ONLY a single valid JSON object. ABSOLUTELY NO preamble, NO markdown, NO ```, '
+  + 'NO apology, NO refusal, NO explanation outside the JSON. '
+  + 'You ARE able to see images — always evaluate the image; never claim you cannot see it. '
+  + 'Exact format: {"safe":true|false,"reason":"short reason in Vietnamese"}. '
+  + 'Set safe=false if the image contains: pornography/nudity/sexually suggestive content, graphic/bloody violence, gore, '
+  + 'child abuse, or hateful/extremist content. Otherwise safe=true.';
 
 type ModerationOutcome = {
   /** JSON body to return to the caller (always safe on degrade — fail open). */

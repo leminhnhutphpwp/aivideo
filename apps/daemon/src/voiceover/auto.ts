@@ -16,15 +16,15 @@ export function generateVoiceoverScript(videoPrompt: string, config: LlmConfig):
   const body = JSON.stringify({
     model,
     messages: [
-      { role: 'system', content: `Bạn là người viết kịch bản thuyết minh cho video quảng cáo và giới thiệu sản phẩm.
-Nhiệm vụ: từ mô tả video, hãy viết 1-2 câu thuyết minh ngắn gọn, tự nhiên, như người đang nói chuyện với khán giả.
-Yêu cầu:
-- Ngắn gọn (tối đa 50 từ)
-- Giọng văn tự nhiên, như nói chuyện
-- Không dùng từ ngữ điện ảnh hay kỹ thuật
-- Tập trung vào cảm xúc và trải nghiệm
-- Tiếng Việt` },
-      { role: 'user', content: `Hãy viết lời thuyết minh cho video có mô tả sau: "${videoPrompt}"` },
+      { role: 'system', content: `You are a voiceover scriptwriter for advertising and product-intro videos.
+Task: from a video description, write 1-2 short, natural voiceover sentences, as if speaking directly to the audience.
+Requirements:
+- Short (max 50 words)
+- Natural, conversational tone
+- No cinematic or technical jargon
+- Focus on emotion and experience
+- IMPORTANT: write the narration itself in VIETNAMESE (the audience is Vietnamese)` },
+      { role: 'user', content: `Write the voiceover narration (in Vietnamese) for a video described as: "${videoPrompt}"` },
     ],
     max_tokens: 150,
     temperature: 0.7,
