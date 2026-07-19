@@ -97,17 +97,16 @@ do_start() {
     
     web)
       print_section "Starting web app"
-      local port=$(get_service_port "web")
-      local dir=$(get_service_dir "web")
-      
-      local status=$(get_process_status "web" "$port")
-      if [[ "$status" == "running"* ]]; then
-        log_warn "Web already $status"
-        return 0
+      docker_start "web"
+      sleep 3
+      local status=$(docker_status "web")
+      if [ "$status" = "running" ]; then
+        log_info "Web container running on port ${WEB_PORT}"
+      else
+        log_warn "Web container status: $status"
+        docker_logs "web" 10 | while read line; do log "  $line"; done
       fi
-      
-      start_process "web" "$dir" "$port" npx next dev -p "$port"
-  ;;
+      ;;
     
     monitoring)
       print_section "Starting monitoring stack"
@@ -137,21 +136,14 @@ do_start() {
       set -e
       
       docker_start
-      log "Docker services starting..."
+      log "Docker services starting (incl. web container)..."
       sleep 5
 
       # Start monitoring
       if [ -f "$MONITORING_COMPOSE" ]; then
         monitoring_compose up -d 2>/dev/null && log_info "Monitoring stack started"
       fi
-      
-      # Start web app on host
-      local port=$WEB_PORT
-      local dir=$(get_service_dir "web")
-      if ! start_process "web" "$dir" "$port" npx next dev -p "$port"; then
-        log_warn "Web failed to start - check logs with: bash scripts/dev.sh logs web"
-      fi
-      
+
       echo ""
       print_line "="
       printf "${BOLD}Services Started${RESET}\n"
@@ -196,19 +188,8 @@ do_stop() {
     
     web)
       print_section "Stopping web app"
-      local port=$(get_service_port "web")
-      local pid=$(get_pid "web" || true)
-      
-      if [ -n "$pid" ]; then
-        kill_process "$pid" && log "killed PID $pid" || true
-      fi
-      
-      if kill_port "$port"; then
-        log_info "Port $port freed"
-      else
-        log_warn "Port $port still in use after stop"
-      fi
-      rm_pid "web"
+      docker_stop "web"
+      log_info "Web container stopped"
       ;;
     
     backend)
@@ -227,12 +208,6 @@ do_stop() {
       print_section "Stopping all services"
       docker_stop
       monitoring_compose down 2>/dev/null || true
-      log "Stopping web app..."
-      local port=$WEB_PORT
-      local pid=$(get_pid "web" || true)
-      [ -n "$pid" ] && kill_process "$pid" || true
-      kill_port "$port" || true
-      rm_pid "web"
       log_info "All services stopped"
       ;;
     
@@ -267,13 +242,6 @@ do_restart() {
         monitoring_compose up -d 2>/dev/null && log_info "Monitoring stack started"
       fi
 
-      # Start web app on host (non-blocking)
-      local port=$WEB_PORT
-      local dir=$(get_service_dir "web")
-      if ! start_process "web" "$dir" "$port" npx next dev -p "$port"; then
-        log_warn "Web failed to start - check logs with: bash scripts/dev.sh logs web"
-      fi
-      
       echo ""
       print_line "="
       printf "${BOLD}Services Restarted${RESET}\n"
@@ -308,7 +276,7 @@ do_status() {
   case "$service" in
     all)
       print_subsection "Docker Services"
-      for svc in daemon app queue reverb mysql redis minio; do
+      for svc in daemon app web queue reverb mysql redis minio; do
         local status=$(docker_status "$svc")
         case "$status" in
           running) printf "  ${GREEN}%-12s${RESET} %s\n" "$svc" "running" ;;
@@ -326,17 +294,9 @@ do_status() {
           *)               printf "  ${YELLOW}%-12s${RESET} %s\n" "$svc" "$mon_status" ;;
         esac
       done
-      
-      print_subsection "Host Services"
-      local web_status=$(get_process_status "web" "$WEB_PORT")
-      if [[ "$web_status" == "running"* ]]; then
-        printf "  ${GREEN}%-12s${RESET} %s\n" "web" "$web_status"
-      else
-        printf "  ${DIM}%-12s${RESET} %s\n" "web" "stopped"
-      fi
       ;;
-    
-    daemon|app|queue|reverb|mysql|redis|minio)
+
+    daemon|app|web|queue|reverb|mysql|redis|minio)
       local status=$(docker_status "$service")
       case "$status" in
         running) log_info "$service is running" ;;
@@ -344,16 +304,7 @@ do_status() {
         *) log "$service: $status" ;;
       esac
       ;;
-    
-    web)
-      local status=$(get_process_status "web" "$WEB_PORT")
-      if [[ "$status" == "running"* ]]; then
-        log_info "web: $status"
-      else
-        log_warn "web: stopped"
-      fi
-      ;;
-    
+
     *)
       log_warn "Unknown service: $service"
       ;;
@@ -370,14 +321,11 @@ do_logs() {
   local lines="${3:-50}"
   
   case "$service" in
-    daemon|app|queue|reverb|mysql|redis|minio)
+    daemon|app|web|queue|reverb|mysql|redis|minio)
       docker_logs "$service" "$lines"
       ;;
     prometheus|grafana)
       monitoring_compose logs --tail="$lines" "$service"
-      ;;
-    web)
-      show_logs "web" "$lines"
       ;;
     all)
       print_subsection "Daemon Logs"
@@ -387,7 +335,7 @@ do_logs() {
       docker_logs "app" "$lines"
       echo ""
       print_subsection "Web Logs"
-      show_logs "web" "$lines"
+      docker_logs "web" "$lines"
       ;;
     *)
       docker_logs "$service" "$lines" 2>/dev/null || show_logs "$service" "$lines"
@@ -551,7 +499,7 @@ case "$CMD" in
     print_subsection "Services"
     printf "  ${CYAN}all       - All services\n"
     printf "  ${CYAN}backend   - Laravel (Docker container)\n"
-    printf "  ${CYAN}web       - Next.js (host process)\n"
+    printf "  ${CYAN}web       - Next.js (Docker container)\n"
     printf "  ${CYAN}daemon    - Express media engine (Docker)\n"
     printf "  ${CYAN}mysql     - MySQL database\n"
     printf "  ${CYAN}redis     - Redis cache\n"
