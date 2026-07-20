@@ -26,6 +26,7 @@ import {
   Compass,
   Trophy,
   Heart,
+  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -77,6 +78,7 @@ const NAV_ITEMS: NavItem[] = [
 
 const BOTTOM_ITEMS: NavItem[] = [
   { icon: CreditCard, label: 'Dịch vụ', href: '/billing' },
+  { icon: Gift, label: 'Ưu đãi', href: '/events' },
   { icon: Globe, label: 'Cộng đồng', href: '/community', submenu: [
     { icon: Compass, label: 'Khám phá', href: '/community' },
     { icon: Trophy, label: 'Bảng xếp hạng', href: '/community/trending' },
@@ -96,7 +98,7 @@ const SUBMENU_ICONS: Record<string, React.ElementType> = {
 
 export function Sidebar() {
   return (
-    <Suspense fallback={<aside className="hidden lg:flex fixed top-0 left-0 h-full bg-[#1f1c25] border-r border-white/12 z-50 flex-col w-[80px] items-center py-8" />}>
+    <Suspense fallback={<aside className="hidden lg:flex fixed top-0 left-0 h-full bg-[#1f1c25] border-r border-white/12 z-50 flex-col w-[88px] items-center py-8" />}>
       <SidebarContent />
     </Suspense>
   );

@@ -19,6 +19,7 @@ import {
   Compass,
   Trophy,
   Heart,
+  Gift,
 } from 'lucide-react';
 import { t } from '@/lib/i18n';
 
@@ -79,6 +80,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
 ];
 
 export const SECONDARY_NAVIGATION = [
+  { title: 'Ưu đãi', href: '/events', icon: Gift },
   { title: t('nav.activityLog'), href: '/activity-logs', icon: ScrollText },
   { title: t('nav.credits'), href: '/credits', icon: BarChart3 },
   { title: t('nav.settings'), href: '/settings', icon: Settings },

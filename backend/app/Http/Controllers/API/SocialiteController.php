@@ -98,8 +98,8 @@ class SocialiteController extends Controller
 
         $user->assignRole('panel_user');
 
-        // Mã chào mừng tự động (nếu admin bật) — user Google đã verified sẵn.
-        app(\App\Services\CouponService::class)->issueWelcome($user);
+        // Tự cấp ưu đãi (event auto_grant, fallback mã welcome) — user Google đã verified sẵn.
+        app(\App\Services\CouponEventService::class)->autoGrant($user);
 
         try {
             app(MailService::class)->sendToUser('welcome', $user, [

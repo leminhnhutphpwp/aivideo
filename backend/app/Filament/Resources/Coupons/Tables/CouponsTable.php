@@ -76,6 +76,9 @@ class CouponsTable
                     ]),
                 TernaryFilter::make('is_active')->label('Kích hoạt'),
                 TernaryFilter::make('is_welcome')->label('Mã chào mừng'),
+                SelectFilter::make('coupon_event_id')
+                    ->relationship('event', 'name')
+                    ->label('Sự kiện'),
             ])
             ->actions([
                 ActionGroup::make([

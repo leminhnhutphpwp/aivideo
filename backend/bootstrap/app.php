@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
             'anti.abuse' => \App\Http\Middleware\AntiAbuseMiddleware::class,
+            'bff.verify' => \App\Http\Middleware\VerifyBffSignature::class,
+            'turnstile' => \App\Http\Middleware\VerifyTurnstile::class,
+            'coupon.guard' => \App\Http\Middleware\CouponAbuseGuard::class,
         ]);
         
         $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);

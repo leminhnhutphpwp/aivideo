@@ -177,6 +177,9 @@ class CouponService
         if (! $coupon) {
             throw new CouponException('Mã không tồn tại.');
         }
+        if ($coupon->user_id !== null && $coupon->user_id !== $user->id) {
+            throw new CouponException('Mã này không thuộc về bạn.');
+        }
         if (! $coupon->is_active) {
             throw new CouponException('Mã đã bị vô hiệu hoá.');
         }

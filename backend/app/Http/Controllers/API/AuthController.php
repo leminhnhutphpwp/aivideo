@@ -595,9 +595,9 @@ class AuthController extends Controller
             'email_verification_code_sent_at' => null,
         ]);
 
-        // Mã chào mừng tự động (nếu admin bật một coupon is_welcome) — thay cho việc tặng
-        // credits cứng khi xác thực trước đây. Gated + kiểm soát qua hệ coupon.
-        app(\App\Services\CouponService::class)->issueWelcome($user);
+        // Tự cấp ưu đãi (event auto_grant, fallback mã welcome) — thay cho việc tặng
+        // credits cứng khi xác thực trước đây. Gated + kiểm soát qua hệ coupon event.
+        app(\App\Services\CouponEventService::class)->autoGrant($user);
 
         return response()->json([
             'success' => true,

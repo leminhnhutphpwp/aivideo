@@ -67,15 +67,64 @@ async function laravelRequest<T>(path: string, options?: RequestInit): Promise<T
     headers['Content-Type'] = 'application/json';
   }
 
+  // Merge any caller-supplied headers (e.g. CF-Turnstile-Response on register).
+  if (options?.headers) Object.assign(headers, options.headers as Record<string, string>);
+  const { headers: _omitHeaders, ...init } = options ?? {};
+
   const url = `${LARAVEL_URL}/api${path}`;
-  const res = await fetch(url, { headers, ...options });
+  const res = await fetch(url, { headers, ...init });
 
   if (res.status === 401 && token && !path.startsWith('/auth/')) {
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       const newToken = getToken();
       if (newToken) headers['Authorization'] = `Bearer ${newToken}`;
-      const retryRes = await fetch(url, { headers, ...options });
+      const retryRes = await fetch(url, { headers, ...init });
+      if (retryRes.ok) return retryRes.json();
+      const retryBody = await retryRes.json().catch(() => ({ message: retryRes.statusText }));
+      throw new ApiError(retryBody.message || retryRes.statusText, retryRes.status, retryBody.errors);
+    }
+    localStorage.removeItem('auth_token');
+    throw new ApiError('Phiên đăng nhập đã hết hạn', 401);
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: res.statusText }));
+    throw new ApiError(body.message || body.error || res.statusText, res.status, body.errors);
+  }
+  if (res.status === 204) return null as T;
+  return res.json();
+}
+
+/**
+ * Same-origin BFF request. Hits the Next.js route handlers under `/api/bff/*`
+ * (NOT Laravel directly) so the server can HMAC-sign + Origin-check + forward.
+ * Mirrors `laravelRequest`'s auth-token attach + `ApiError` throwing.
+ *
+ * Pass `turnstileToken` to forward a Cloudflare Turnstile token as the
+ * `CF-Turnstile-Response` header (the BFF re-forwards it to Laravel).
+ */
+async function bffRequest<T>(
+  path: string,
+  options?: RequestInit & { turnstileToken?: string | null },
+): Promise<T> {
+  const { turnstileToken, ...init } = options ?? {};
+  const token = getToken();
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (!(init.body instanceof FormData)) headers['Content-Type'] = 'application/json';
+  if (turnstileToken) headers['CF-Turnstile-Response'] = turnstileToken;
+
+  // Same origin — no LARAVEL_URL prefix.
+  const url = `/api/bff${path}`;
+  const res = await fetch(url, { headers, ...init });
+
+  if (res.status === 401 && token) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      const newToken = getToken();
+      if (newToken) headers['Authorization'] = `Bearer ${newToken}`;
+      const retryRes = await fetch(url, { headers, ...init });
       if (retryRes.ok) return retryRes.json();
       const retryBody = await retryRes.json().catch(() => ({ message: retryRes.statusText }));
       throw new ApiError(retryBody.message || retryRes.statusText, retryRes.status, retryBody.errors);
@@ -111,6 +160,19 @@ export async function fetchRawFile(projectId: string, fileName: string): Promise
 }
 
 // --- Laravel API ---
+/** Một ưu đãi / sự kiện trả về từ GET /api/events. */
+export interface EventItem {
+  slug: string;
+  name: string;
+  description: string | null;
+  reward_type: 'credits' | 'percent' | 'fixed';
+  reward_value: number;
+  ends_at: string | null;
+  remaining: number | null;
+  already_claimed: boolean;
+  claimed_code: string | null;
+}
+
 export interface EnhancePromptContext {
   surface?: 'video' | 'image';
   skill_id?: string;
@@ -133,11 +195,13 @@ export const laravel = {
       '/auth/login', { method: 'POST', body: JSON.stringify({ email, password, remember }) }
     ).then(r => ({ token: r.data.token, user: r.data.user })),
 
-  register: (email: string, password: string, name: string, passwordConfirmation?: string) =>
+  register: (email: string, password: string, name: string, passwordConfirmation?: string, turnstileToken?: string | null) =>
     laravelRequest<{ success: boolean; data: { user: any; token: string } }>(
       '/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password, name, password_confirmation: passwordConfirmation || password }),
+        // Layer 3 — forward the Turnstile token to Laravel (register goes DIRECT, not via BFF).
+        ...(turnstileToken ? { headers: { 'CF-Turnstile-Response': turnstileToken } } : {}),
       }
     ).then(r => ({ token: r.data.token, user: r.data.user })),
 
@@ -233,15 +297,28 @@ export const laravel = {
       '/credits/purchase', { method: 'POST', body: JSON.stringify({ amount, ...(couponCode ? { coupon_code: couponCode } : {}) }) }
     ),
 
-  /** Nhập mã coupon tặng credits → cộng credits ngay. */
-  redeemCoupon: (code: string) =>
-    laravelRequest<{ success: boolean; message: string; credits_added: number; balance: number }>(
-      '/coupons/redeem', { method: 'POST', body: JSON.stringify({ code }) }
+  /**
+   * Nhập mã coupon tặng credits → cộng credits ngay.
+   * Qua BFF (`/api/bff/coupons/redeem`) để ký HMAC + kiểm Origin + chuyển tiếp Turnstile.
+   */
+  redeemCoupon: (code: string, turnstileToken?: string | null) =>
+    bffRequest<{ success: boolean; message: string; credits_added: number; balance: number }>(
+      '/coupons/redeem', { method: 'POST', body: JSON.stringify({ code }), turnstileToken }
     ),
 
-  /** Preview mã giảm giá cho một số tiền nạp (checkout). */
+  /** Danh sách ưu đãi / sự kiện đang mở cho người dùng hiện tại (qua BFF). */
+  listEvents: () =>
+    bffRequest<{ success: boolean; events: EventItem[] }>('/events'),
+
+  /** Nhận mã ưu đãi của một sự kiện → trả về mã để đổi tại trang billing (qua BFF). */
+  claimEvent: (slug: string, turnstileToken?: string | null) =>
+    bffRequest<{ success: boolean; message: string; code: string; reward_type: string; value: number; expires_at: string | null }>(
+      `/events/${encodeURIComponent(slug)}/claim`, { method: 'POST', turnstileToken }
+    ),
+
+  /** Preview mã giảm giá cho một số tiền nạp (checkout) — qua BFF. */
   validateCoupon: (code: string, amount: number) =>
-    laravelRequest<{ success: boolean; discount_amount: number; final_amount: number }>(
+    bffRequest<{ success: boolean; discount_amount: number; final_amount: number }>(
       '/coupons/validate', { method: 'POST', body: JSON.stringify({ code, amount }) }
     ),
 

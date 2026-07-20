@@ -13,6 +13,7 @@ import { Typewriter } from '@/components/ui/typewriter';
 import { PasswordInput } from '@/components/ui/password-input';
 import { t } from '@/lib/i18n';
 import { AuthLayout, AuthBrand, AuthStats } from '@/components/auth/auth-layout';
+import { TurnstileWidget, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/security/TurnstileWidget';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -25,6 +26,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [googleEnabled, setGoogleEnabled] = useState(false);
   const [bgMedia, setBgMedia] = useState<{ url: string; type: 'video' | 'image' } | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const addToast = useToastStore(s => s.addToast);
 
   useEffect(() => {
@@ -191,15 +194,18 @@ export default function RegisterPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Email không hợp lệ'); return; }
     if (password.length < 8) { setError('Mật khẩu phải có ít nhất 8 ký tự'); return; }
     if (password !== passwordConfirmation) { setError('Mật khẩu xác nhận không khớp'); return; }
+    if (TURNSTILE_ENABLED && !turnstileToken) { setError('Vui lòng xác nhận bạn không phải robot'); return; }
     setError('');
     setLoading(true);
     try {
-      const data = await laravel.register(email, password, name, passwordConfirmation);
+      const data = await laravel.register(email, password, name, passwordConfirmation, turnstileToken);
       setAuth(data.token, data.user);
       showApiResponse({ success: true, message: t('auth.registerSuccess') });
       router.push('/dashboard');
     } catch (err: any) {
       showApiError(err, t('auth.registerFailed'));
+      // Token is single-use — reset so the user can retry.
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -261,6 +267,12 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {TURNSTILE_ENABLED && (
+              <div className="flex justify-center lg:justify-start animate-item-rise" style={{ animationDelay: '110ms' }}>
+                <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} />
+              </div>
+            )}
+
             {error && (
               <div className="flex items-center gap-2 text-[11px] font-bold text-red-400 bg-red-400/10 px-4 py-3 rounded-xl animate-item-rise" style={{ animationDelay: '120ms' }}>
                 <AlertCircle className="h-4 w-4 shrink-0" />
@@ -271,7 +283,7 @@ export default function RegisterPage() {
             <div className="block w-full group animate-item-rise" style={{ animationDelay: '160ms' }}>
               <Button
                 onClick={handleRegister}
-                disabled={!name.trim() || !email.trim() || !password || !passwordConfirmation || loading}
+                disabled={!name.trim() || !email.trim() || !password || !passwordConfirmation || loading || (TURNSTILE_ENABLED && !turnstileToken)}
                 className="w-full h-12 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white font-bold text-sm tracking-tight shadow-[0_10px_20px_rgba(255,90,31,0.15)] transition-all disabled:opacity-50"
               >
                 {loading ? (

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('activitylog:clean')->daily();
 Schedule::command('credits:renew')->daily();
 Schedule::command('credits:auto-renew')->daily();
+Schedule::command('events:grant-birthday')->dailyAt('07:00');
 Schedule::command('jobs:check-timeouts')->everyFiveMinutes();
 Schedule::command('credits:release')->hourly();
 Schedule::job(new \App\Jobs\ReleaseStuckCredits)->hourly();

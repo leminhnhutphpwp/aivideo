@@ -11,6 +11,7 @@ use App\Http\Controllers\API\PromptEnhancementController;
 use App\Http\Controllers\API\PlanController;
 use App\Http\Controllers\API\CreditController;
 use App\Http\Controllers\API\CouponController;
+use App\Http\Controllers\API\CouponEventController;
 use App\Http\Controllers\API\AssetController;
 use App\Http\Controllers\API\ApiKeyController;
 use App\Http\Controllers\API\BroadcastController;
@@ -200,7 +201,7 @@ Route::get('/seo', function () {
 Route::get('/health', [HealthController::class, 'index']);
 Route::get('/metrics', [MetricsController::class, 'prometheus']);
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware(ThrottleApiRequests::class . ':30,1');
-Route::post('/auth/register', [AuthController::class, 'register'])->middleware(['anti.abuse', ThrottleApiRequests::class . ':5,1']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware(['anti.abuse', 'turnstile', ThrottleApiRequests::class . ':5,1']);
 Route::post('/auth/refresh', [AuthController::class, 'refresh'])->middleware(ThrottleApiRequests::class . ':10,1');
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware(ThrottleApiRequests::class . ':10,1');
 Route::post('/auth/verify-reset-code', [AuthController::class, 'verifyResetCode'])->middleware(ThrottleApiRequests::class . ':10,1');
@@ -283,8 +284,18 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/credits/upgrade-history', [CreditController::class, 'upgradeHistory']);
 
     // Coupons: nhập mã tặng credits / preview mã giảm giá. Throttle chặt để chống dò mã.
-    Route::post('/coupons/redeem', [CouponController::class, 'redeem'])->middleware(ThrottleApiRequests::class . ':10,1');
-    Route::post('/coupons/validate', [CouponController::class, 'validateDiscount'])->middleware(ThrottleApiRequests::class . ':20,1');
+    // Bảo mật 4 lớp: throttle → bff.verify (HMAC) → turnstile (anti-bot) → coupon.guard (velocity).
+    Route::post('/coupons/redeem', [CouponController::class, 'redeem'])
+        ->middleware([ThrottleApiRequests::class . ':10,1', 'bff.verify', 'turnstile', 'coupon.guard']);
+    // validate không mint credits → chỉ cần bff.verify (nhẹ hơn).
+    Route::post('/coupons/validate', [CouponController::class, 'validateDiscount'])
+        ->middleware([ThrottleApiRequests::class . ':20,1', 'bff.verify']);
+
+    // Sự kiện ưu đãi: liệt kê / nhận mã riêng (mỗi user 1 mã unique). Throttle chặt chống spam.
+    Route::get('/events', [CouponEventController::class, 'index'])
+        ->middleware([ThrottleApiRequests::class . ':60,1', 'bff.verify']);
+    Route::post('/events/{slug}/claim', [CouponEventController::class, 'claim'])
+        ->middleware([ThrottleApiRequests::class . ':10,1', 'bff.verify', 'turnstile', 'coupon.guard']);
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index']);

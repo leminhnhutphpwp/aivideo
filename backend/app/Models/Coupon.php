@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Coupon extends Model
@@ -11,6 +12,7 @@ class Coupon extends Model
         'code', 'description', 'type', 'value', 'max_discount',
         'min_purchase_amount', 'max_uses', 'used_count', 'max_uses_per_user',
         'is_welcome', 'starts_at', 'expires_at', 'is_active', 'sort_order',
+        'coupon_event_id', 'user_id',
     ];
 
     protected $casts = [
@@ -30,6 +32,16 @@ class Coupon extends Model
     public function setCodeAttribute($value): void
     {
         $this->attributes['code'] = strtoupper(trim((string) $value));
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(CouponEvent::class, 'coupon_event_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function redemptions(): HasMany
