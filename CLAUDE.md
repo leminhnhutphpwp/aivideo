@@ -68,9 +68,9 @@ bash scripts/dev.sh restart backend  # apply Laravel code changes
 bash scripts/dev.sh restart web      # apply Next.js changes
 
 # Backend (ALWAYS inside the container — host MySQL is separate!)
-docker exec backend-app-1 php artisan migrate
-docker exec backend-app-1 php artisan db:seed --class=SomeSeeder
-docker exec backend-app-1 php artisan optimize:clear
+docker exec aivideo-app-1 php artisan migrate
+docker exec aivideo-app-1 php artisan db:seed --class=SomeSeeder
+docker exec aivideo-app-1 php artisan optimize:clear
 
 # Daemon: rebuild on src/ or .env change
 docker compose -f backend/docker-compose.dev.yml up -d --force-recreate daemon
@@ -81,7 +81,7 @@ docker compose -f backend/docker-compose.dev.yml up -d --force-recreate daemon
 ```bash
 cd apps/web    && npx tsc --noEmit        # expect 0 errors
 cd apps/daemon && npx tsc --noEmit        # expect 0 errors
-docker exec backend-app-1 php artisan test --filter="RenderJobPipelineTest|RenderJobTest"   # 19 pass
+docker exec aivideo-app-1 php artisan test --filter="RenderJobPipelineTest|RenderJobTest"   # 19 pass
 node apps/daemon/scripts/verify-media-models.mjs   # model sync
 ```
 
@@ -92,6 +92,7 @@ node apps/daemon/scripts/verify-media-models.mjs   # model sync
 > SecretGuard, admin ReportResource, image WebP derivative, and the multi-dimension
 > security/logic/perf audit fixes (see `backend/worklogs/2026-07-18-*`).
 > If you see a red full-suite again, check this baseline before assuming it's your regression.
+> **Addendum (2026-07-20):** new coupon/event suites added — `--filter="CouponEventServiceTest|CouponServiceTest|RegistrationAbuseTest"` = **32 passed / 90 assertions**.
 
 ## Conventions
 

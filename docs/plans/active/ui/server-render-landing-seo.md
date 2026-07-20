@@ -1,3 +1,5 @@
+> ⚠️ **SUPERSEDED (2026-07-20)** — Landing is now hardcoded in Next.js; the `/api/landing-page` endpoint and Landing Page CMS were removed. This server-render-from-CMS plan no longer applies. Kept for history.
+
 # Server-Render Landing Page Text cho SEO
 
 ## Date

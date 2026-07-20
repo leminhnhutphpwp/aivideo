@@ -111,7 +111,7 @@ When adding a model/provider to daemon (`apps/daemon/src/media/models.ts`), **mu
 **Verify after adding:**
 ```bash
 node apps/daemon/scripts/verify-media-models.mjs
-docker exec backend-app-1 php artisan db:seed --class=PricingSystemSeeder
+docker exec aivideo-app-1 php artisan db:seed --class=PricingSystemSeeder
 ```
 
 ## Writing Worklogs

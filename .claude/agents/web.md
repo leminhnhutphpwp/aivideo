@@ -33,8 +33,9 @@ You are specialized in **Next.js 15 frontend** development for AI Video Platform
 
 ## Commands
 ```bash
-# Dev
-cd apps/web && npm run dev
+# Dev — web runs as a Docker Compose service
+bash scripts/dev.sh start          # → http://localhost:3000
+bash scripts/dev.sh restart web    # apply web code changes
 
 # Typecheck
 cd apps/web && npm run typecheck

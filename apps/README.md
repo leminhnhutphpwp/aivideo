@@ -2,7 +2,7 @@
 
 ```
 apps/
-├── web/          # Next.js 15 frontend (port 3000)
+├── web/          # Next.js 15 frontend (port 3000, Docker)
 ├── daemon/       # Express media engine (port 7456, Docker)
 ├── skills/       # SKILL.md markdown files for prompt enrichment
 ├── scripts/      # Dev manager (dev.sh)
@@ -16,12 +16,11 @@ apps/
 cd web && npm install
 cd daemon && npm install
 
-# Start everything (via Docker)
-cd ../backend
-docker compose -f docker-compose.dev.yml up -d
+# Start everything (via Docker) — web, daemon, backend
+bash scripts/dev.sh start          # → web on http://localhost:3000
 
-# Or start manually (frontend only, daemon runs in Docker)
-cd apps/web && npm run dev        # → http://localhost:3000
+# Web and daemon both run in Docker. Apply web changes:
+bash scripts/dev.sh restart web
 ```
 
 ## Architecture

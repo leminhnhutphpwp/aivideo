@@ -328,7 +328,7 @@ bash scripts/dev.sh start backend
 bash scripts/dev.sh start web
 
 # Run tests
-docker exec backend-app-1 php artisan test
+docker exec aivideo-app-1 php artisan test
 cd apps/web && npm test
 cd apps/daemon && npm test
 
@@ -339,7 +339,7 @@ bash scripts/dev.sh build all
 ## Docker Services
 | Container | Port | Purpose |
 |-----------|------|---------|
-| backend-app-1 | 8000 | Laravel API |
+| aivideo-app-1 | 8000 | Laravel API |
 | backend-daemon-1 | 7456 | Media engine |
 | backend-queue-1 | — | Queue worker |
 | backend-reverb-1 | 8080 | WebSocket |

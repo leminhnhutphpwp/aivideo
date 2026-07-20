@@ -22,7 +22,7 @@ All pending items from the previous backlog have been verified done.
 | Item | Effort | Notes |
 |------|--------|-------|
 | Storyboard Professional Analysis features | 40h | Timeline View, Character Lock, Opening/Closing frames — analysis done in `storyboard-professional-analysis.md` |
-| Backend Tests | — | Run with `docker exec backend-app-1 php artisan test` (container needs to be running) |
+| Backend Tests | — | Run with `docker exec aivideo-app-1 php artisan test` (container needs to be running) |
 | Vite CPU fix (Docker restart) | 5m | `bash scripts/dev.sh restart` if needed |
 
 See `task-status.md` for the complete status.

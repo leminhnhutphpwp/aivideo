@@ -85,7 +85,7 @@ When adding a model/provider to `src/media/models.ts`, **must** update:
 ```bash
 node apps/daemon/scripts/verify-media-models.mjs    # check sync
 npx tsc --noEmit                                     # TS compile
-docker exec backend-app-1 php artisan db:seed --class=PricingSystemSeeder  # seed pricing
+docker exec aivideo-app-1 php artisan db:seed --class=PricingSystemSeeder  # seed pricing
 ```
 
 ## Writing Worklogs

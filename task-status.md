@@ -1,18 +1,45 @@
 # Task Status — AI Video Platform
 
-> Last updated: 2026-07-19
+> Last updated: 2026-07-20
 
 ---
 
 ## Current Sprint
 
-### Coupons system + gỡ tặng-credits-khi-đăng-ký/xác-thực — ✅ Done + tested live
-- **Status**: ✅ Code + migrate + test 20/20 + live redeem (2026-07-19). Chưa commit.
+### Events (chiến dịch) + mã coupon duy nhất theo user + sinh nhật auto — ✅ Done + E2E (2026-07-20)
+- **Status**: ✅ Code + migrate (giữ data cũ) + test 32/32 + E2E thật. **Chưa commit.**
+- **Worklogs**: `backend/worklogs/2026-07-20-events-unique-coupons.md`, `apps/web/worklogs/2026-07-20-events-ui.md`
+- **Mô hình**: admin tạo **Event** (deadline `ends_at`, giới hạn `max_claims`/`per_user_uses`, thưởng credits
+  hoặc mã giảm giá). User bấm "Nhận mã" → hệ thống **mint 1 mã DUY NHẤT gắn `user_id`** → leak vô dụng (chốt
+  ownership trong `assertRedeemable`: "Mã này không thuộc về bạn"). Mã minted vẫn chỉ là 1 dòng `coupons` →
+  redeem qua `CouponService::redeemForCredits`/discount sẵn có, không sửa.
+- **DB**: bảng `coupon_events`; cột `coupons.{coupon_event_id,user_id}` (additive, nullable FK).
+- **`trigger` enum** (thay cờ auto_grant): `manual` (bấm nhận, hiện ở `/events`) · `signup` (tự tặng khi
+  verify email/Google — welcome hợp nhất, fallback `issueWelcome`) · `birthday` (tự tặng đúng ngày sinh,
+  **mỗi năm 1 lần**). signup/birthday ẩn khỏi `/events`.
+- **Command** `events:grant-birthday` (scheduler `dailyAt('07:00')` — prod đã có service `scheduler`): quét
+  user sinh nhật hôm nay (active+verified) → mint + cộng credits; idempotent theo năm (`whereYear`).
+- **API**: `GET /events` + `POST /events/{slug}/claim` (throttle). **Web**: trang `/events` (sidebar "Ưu đãi"),
+  claim → render mã + Copy + link đổi ở `/billing` (tái dùng `CouponRedeemCard`).
+- **Admin**: `CouponEventResource` (Billing & Credits) + filter `coupon_event_id` ở `CouponsTable` xem mã minted.
+- **Verify**: 3 migration DONE (chao-mung→trigger=signup, không mất data); `CouponEventServiceTest|CouponServiceTest|RegistrationAbuseTest` = **32 passed / 90 assertions**; E2E: claim mint mã unique, ownership block, +credits, max_claims, deadline, birthday grant + idempotent năm.
+
+### Coupons system + gỡ tặng-credits-khi-đăng-ký/xác-thực — ✅ Done, committed 500ecaa5
+- **Status**: ✅ Code + migrate + test + live redeem (2026-07-19). **Đã commit + push** (500ecaa5). Mở rộng bởi Events ở trên.
 - **Worklog**: `backend/worklogs/2026-07-19-coupons-system-and-remove-signup-credit-gift.md`
 - **Gỡ**: tặng credits cứng ở `verifyEmail` + Google login → mọi user start 0. Copy "nhận credits khi xác thực" đã gỡ.
 - **Coupons**: bảng `coupons` + `coupon_redemptions`; `CouponService` (redeem atomic, welcome auto, discount preview/reserve/complete/void); API `/coupons/redeem` + `/coupons/validate`; admin `CouponResource` (Billing & Credits); UI ô đổi mã (billing) + ô mã giảm giá (gói nạp). 3 loại: tặng credits / giảm % / giảm cố định.
-- **Welcome**: coupon `is_welcome` bật ở admin → tự cấp khi verify/Google (gated 1 lần/user, tắt được).
-- **Verify**: migrate 4 DONE; `CouponServiceTest`+`RegistrationAbuseTest` = 20/20; live redeem +100 rồi chặn lần 2. GeneralSettings resolve OK, landing rows=0.
+- **Welcome**: nay hợp nhất vào Event `trigger=signup` (fallback về coupon `is_welcome` cũ nếu chưa có event).
+- **Verify**: migrate 4 DONE; `CouponServiceTest`+`RegistrationAbuseTest` = 20/20 (lúc commit); live redeem +100 rồi chặn lần 2.
+
+### Web containerization (Next.js vào Docker) + fix Tailwind source() — ✅ Done + verified (2026-07-20)
+- **Status**: ✅ Container `aivideo-web-1` up, route `/`,`/login`,`/dashboard` = 200. **Chưa commit.**
+- **Worklog**: `apps/web/worklogs/2026-07-20-web-dockerize.md`
+- **Đổi**: web từ host-process → service Docker (`apps/web/Dockerfile.dev`, `.dockerignore`; service `web` +
+  volume `web_node_modules`/`web_next` trong `backend/docker-compose.dev.yml`; `scripts/dev.sh` quản web qua docker).
+  Port `${WEB_PORT:-3000}` (không trùng truyenvietnam 3100).
+- **Fix bug 500 landing**: `@import "tailwindcss" source("../")` — giới hạn Tailwind v4 scan về `src/` (trước
+  scan cả `worklogs/*.md` chứa literal `bg-[url(...)]` → sinh class hỏng → Turbopack 500).
 
 
 ### Phase 2 & 3 — Restore studio: multi-variant + negative/seed + before→after reveal video — ✅ Done + E2E
@@ -459,7 +486,7 @@ Status:      ✅ All pass
 
 ### Backend Tests (backend/)
 ```
-Last Run:    2026-06-22 (Docker: backend-app-1)
+Last Run:    2026-06-22 (Docker: aivideo-app-1)
 Result:      448 passed · 1 skipped · 0 failed (1532 assertions)
 Status:      ✅ All pass
 ```
@@ -474,7 +501,7 @@ Status:      ✅ All pass
 
 **Note**: Prior drift (70 failed) cleared 2026-06-19 — see
 `backend/worklogs/2026-06-19-test-drift-fix-aipromptcompiler.md`.
-Run inside Docker: `docker exec backend-app-1 php artisan test`
+Run inside Docker: `docker exec aivideo-app-1 php artisan test`
 (host PHP lacks `pdo_sqlite`). The 1 skip is intentional (null-user FK case).
 The app container needs `composer install` (vendor is an anon volume) before tests run.
 

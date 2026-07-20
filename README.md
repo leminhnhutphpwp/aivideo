@@ -27,14 +27,11 @@ Next.js (port 3000) ──HTTP──► Laravel (Auth, Credits, Queue, Admin)
 ## Quick Start
 
 ```bash
-# Backend (Docker)
-cd backend
-docker compose -f docker-compose.dev.yml up -d
+# Start everything (Docker) — web, backend, daemon
+bash scripts/dev.sh start                    # → web on localhost:3000
 
-# Frontend
-cd apps/web && npm install && npm run dev   # → localhost:3000
-
-# Daemon (runs in Docker via backend compose)
+# Web now runs as a Docker Compose service (apps/web/Dockerfile.dev).
+# Apply web code changes: bash scripts/dev.sh restart web
 ```
 
 ## Project Structure

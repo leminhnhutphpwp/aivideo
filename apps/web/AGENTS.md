@@ -101,7 +101,9 @@ apps/web/
 ## Quick Start
 
 ```bash
-cd apps/web && npm run dev   # → http://localhost:3000
+# Web runs as a Docker Compose service (apps/web/Dockerfile.dev).
+bash scripts/dev.sh start          # → http://localhost:3000
+bash scripts/dev.sh restart web    # apply web code changes
 ```
 
 ## Writing Worklogs

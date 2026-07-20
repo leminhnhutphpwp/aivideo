@@ -81,7 +81,7 @@ Daemon and Laravel run inside Docker containers via `backend/docker-compose.dev.
 ### Container Layout
 
 ```
-backend-app-1      (Laravel, port 8000)    mounts  backend/ → /var/www
+aivideo-app-1      (Laravel, port 8000)    mounts  backend/ → /var/www
 backend-daemon-1   (Daemon, port internal)  mounts  apps/daemon → /app, apps/skills → /skills
 backend-queue-1    (Laravel queue worker)
 backend-reverb-1   (WebSocket, port 8080)
@@ -109,7 +109,7 @@ docker logs backend-daemon-1 2>&1 | tail -20
 ### Environment Variable Precedence
 
 Docker-compose.yml sets `DAEMON_URL: http://daemon:7456` which takes precedence over `.env` file.
-To check actual value: `docker exec backend-app-1 php artisan tinker --execute="echo config('daemon.base_url') . PHP_EOL;"`
+To check actual value: `docker exec aivideo-app-1 php artisan tinker --execute="echo config('daemon.base_url') . PHP_EOL;"`
 
 ### Debugging Skills API
 

@@ -98,7 +98,7 @@ After ANY agent completes a task, you MUST run this verification pipeline:
 
 1. **@planner review** — call `@planner` to audit logic, edge cases, cross-agent conflicts
 2. **TypeScript/Lint check** — `cd apps/web && npx tsc --noEmit` and `cd apps/daemon && npx tsc --noEmit`
-3. **Backend tests** — `docker exec backend-app-1 php artisan test --filter="RenderJobPipelineTest|RenderJobTest"`
+3. **Backend tests** — `docker exec aivideo-app-1 php artisan test --filter="RenderJobPipelineTest|RenderJobTest"`
 4. **@tester verify** — call `@tester` for E2E verification of the feature
 5. **Write worklog** — update `<scope>/worklogs/<date>-<slug>.md`
 6. **Report to user** — summary of all checks

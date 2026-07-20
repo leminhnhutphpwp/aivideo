@@ -134,7 +134,7 @@ bash scripts/dev.sh start web
 bash scripts/dev.sh build all
 
 # Run tests
-docker exec backend-app-1 php artisan test
+docker exec aivideo-app-1 php artisan test
 cd apps/web && npm test
 cd apps/daemon && npm test
 ```

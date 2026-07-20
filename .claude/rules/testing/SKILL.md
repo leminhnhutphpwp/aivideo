@@ -72,6 +72,7 @@ it('creates a render job', function() {
 - Only run `db:seed --class=SpecificSeeder` when adding NEW seed data.
 - Target tests: `--filter="RenderJobPipelineTest|RenderJobTest"` (19 tests) — green
 - ✅ Full suite (2026-07-18): **504 passed / 1 skipped / 0 failed** — green. Daemon suite green (155 passed / 4 skipped); web 51 passed. Grew from the 450 baseline (2026-06-23) via the 2026-07-17/18 launch-readiness + audit-fix work (real image provider, moderation/quota guards, SecretGuard, audit security/perf fixes — see `backend/worklogs/2026-07-18-*`). Prior drift (70 failed) cleared 2026-06-19. See root `task-status.md` → Test Health before assuming a red suite is your regression.
+- ✅ Addendum (2026-07-20): new coupon/event suites — `--filter="CouponEventServiceTest|CouponServiceTest|RegistrationAbuseTest"` = **32 passed / 90 assertions**.
 
 ## Running Tests
 
@@ -83,8 +84,8 @@ cd apps/daemon && npx tsc --noEmit
 cd apps/web && npx tsc --noEmit
 
 # PHP/Laravel (inside Docker)
-docker exec backend-app-1 php artisan test
-docker exec backend-app-1 php artisan test --filter="RenderJobPipelineTest|RenderJobTest"
+docker exec aivideo-app-1 php artisan test
+docker exec aivideo-app-1 php artisan test --filter="RenderJobPipelineTest|RenderJobTest"
 
 # Model sync verify
 node apps/daemon/scripts/verify-media-models.mjs
