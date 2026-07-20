@@ -175,7 +175,7 @@ node apps/daemon/scripts/verify-media-models.mjs
 
 - **🔴 Zero-downtime bắt buộc**: mọi lần deploy/build KHÔNG được gây downtime — build image trong khi
   container cũ vẫn phục vụ, chỉ swap khi bản mới healthy; không bao giờ `docker compose down`. Quy trình
-  đầy đủ (build-trước-swap-nhanh + blue-green + quy tắc migration expand→contract): **[`docs/deployment/live-deploy.md`](docs/deployment/live-deploy.md)**.
+  đầy đủ (build-trước-swap-nhanh + blue-green + quy tắc migration expand→contract): **[`docs/deployment/README.md`](docs/deployment/README.md)**.
 - Prod dùng `backend/docker-compose.yml` — có service `queue` (Horizon) và `scheduler`
   (`schedule:work`) chạy các lệnh định kỳ (gia hạn credits, quà sinh nhật, đồng bộ R2…).
 - Lưu trữ chuyển sang **Cloudflare R2**; email/queue qua Redis.
