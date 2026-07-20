@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { toCssRatio } from '@/components/ui/media-viewer';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 import type { TaskRecord } from './types';
 
 function fmtBytes(bytes: number): string {
@@ -165,11 +166,10 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
                   src={previewUrl}
                   controls
                   autoPlay={false}
-                  className="w-full h-full object-contain"
                   playsInline
+                  {...noDownloadVideo}
                   controlsList="nodownload noremoteplayback noplaybackrate"
-                  disablePictureInPicture
-                  onContextMenu={e => e.preventDefault()}
+                  className="w-full h-full object-contain"
                 >
                   Trình duyệt không hỗ trợ phát video
                 </video>
@@ -225,7 +225,7 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
         <div className="relative rounded-xl overflow-hidden border border-white/12 bg-[#16141a]/40 shadow-sm shadow-black/20 group" style={{ maxWidth: (() => { const [w, h] = (aspectRatio || '4:3').split(':').map(Number); return w < h ? 320 : 400; })() }}>
           {previewUrl ? (
             <div className="w-full" style={{ aspectRatio: toCssRatio(aspectRatio) ?? '4 / 3' }}>
-              <img src={previewUrl} alt={file.name || 'Preview'} className="w-full h-full object-contain" />
+              <img src={previewUrl} alt={file.name || 'Preview'} {...noDownloadImg} className="w-full h-full object-contain" />
             </div>
           ) : (
             <div className="flex items-center justify-center aspect-[4/3]">

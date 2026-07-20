@@ -8,6 +8,7 @@ import { fetchRawFile } from '@/lib/api/client';
 import type { UnifiedProject } from '@/lib/api/unified-project-types';
 import { STATUS_CONFIG, TYPE_CONFIG } from '@/lib/api/unified-project-types';
 import { cn } from '@/lib/utils';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 
 const IS_ACTIVE = new Set(['analyzing', 'processing']);
 
@@ -90,7 +91,7 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
         <div className="relative aspect-[4/3] bg-[#1f1c25] overflow-hidden">
           {previewUrl && previewMime?.startsWith('video/') ? (
             <>
-              <video src={previewUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" muted preload="metadata" />
+              <video src={previewUrl} muted preload="metadata" {...noDownloadVideo} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/10 to-transparent group-hover:from-black/60 transition-all duration-500" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <div className="h-12 w-12 rounded-full bg-brand flex items-center justify-center shadow-sm shadow-brand/40 scale-90 group-hover:scale-100 transition-transform">
@@ -101,7 +102,7 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
             </>
           ) : previewUrl ? (
             <>
-              <img src={previewUrl} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <img src={previewUrl} alt={project.title} {...noDownloadImg} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/10 to-transparent group-hover:from-black/60 transition-all duration-500" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <div className="h-12 w-12 rounded-full bg-brand flex items-center justify-center shadow-sm shadow-brand/40 scale-90 group-hover:scale-100 transition-transform">

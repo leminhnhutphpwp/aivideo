@@ -5,6 +5,7 @@ import { Clapperboard, Clock, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { fetchRawFile } from '@/lib/api/client';
+import { noDownloadImg } from '@/lib/media-protection';
 import { t } from '@/lib/i18n';
 
 export interface ProjectCardData {
@@ -63,6 +64,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
             <img
               src={previewUrl}
               alt={project.name || ''}
+              {...noDownloadImg}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (

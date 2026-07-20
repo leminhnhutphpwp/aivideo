@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Play, Music, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { resolveAssetUrl, useAuthenticatedMedia } from '@/hooks/use-authenticated-media';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 
 export type MediaKind = 'video' | 'image' | 'audio';
 
@@ -98,8 +99,7 @@ export function MediaViewer({
           autoPlay={autoPlay}
           playsInline
           controls={controls && !hoverPlay}
-          controlsList="nodownload"
-          onContextMenu={(e) => e.preventDefault()}
+          {...noDownloadVideo}
           className={cn('w-full h-full', fitClass)}
         />
       )}
@@ -107,7 +107,7 @@ export function MediaViewer({
       {kind === 'image' && (
         mediaBlob ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={mediaBlob} alt="" className={cn('w-full h-full', fitClass)} onContextMenu={(e) => e.preventDefault()} />
+          <img src={mediaBlob} alt="" {...noDownloadImg} className={cn('w-full h-full', fitClass)} />
         ) : (
           <ImageIcon className="h-10 w-10 text-white/10" />
         )
