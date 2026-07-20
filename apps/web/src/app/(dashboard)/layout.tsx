@@ -68,7 +68,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
     <>
       <Sidebar />
       <MobileSidebar />
-      <div className="flex flex-col transition-all duration-500 lg:pl-[80px] min-w-0 w-full" style={{ backgroundColor: 'var(--surface)', color: 'var(--foreground)' }}>
+      <div className="flex flex-col transition-all duration-500 lg:pl-[88px] min-w-0 w-full" style={{ backgroundColor: 'var(--surface)', color: 'var(--foreground)' }}>
         <Topbar />
         <main className="p-4 md:p-6 lg:p-6 max-w-[1600px] mx-auto w-full min-w-0">
           <EmailVerifyAlert />
