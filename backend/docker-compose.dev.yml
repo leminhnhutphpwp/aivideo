@@ -215,6 +215,10 @@ services:
       # File-change detection for HMR over macOS bind mounts (webpack fallback path).
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
+      # BFF route handlers run server-side INSIDE this container, so the browser's
+      # localhost:8000 (NEXT_PUBLIC_LARAVEL_URL) can't reach Laravel from here — use the
+      # in-network service name. Browser still uses NEXT_PUBLIC_LARAVEL_URL for direct calls.
+      LARAVEL_INTERNAL_URL: http://app:8000
     # NEXT_PUBLIC_* are read from the bind-mounted apps/web/.env — the browser runs on the
     # host, so its localhost:8000 (Laravel) / localhost:8080 (Reverb) URLs resolve correctly.
     command: sh -c "[ ! -d node_modules/next ] && npm install; exec npm run dev -- -H 0.0.0.0"

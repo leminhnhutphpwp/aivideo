@@ -1,4 +1,8 @@
-@import "tailwindcss";
+/* source("../") scopes Tailwind's automatic class detection to ./src only.
+   Without it, v4 crawls the whole app dir and picks up stray arbitrary-value
+   strings inside markdown (e.g. worklogs mentioning `bg-[url(...)]`), generating
+   broken `url(...)` rules that make Turbopack fail with a 500 on the page. */
+@import "tailwindcss" source("../");
 
 
 @theme {
