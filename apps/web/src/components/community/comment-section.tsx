@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Send, Trash2 } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { laravel } from '@/lib/api/client';
 import { Comment } from '@/lib/api/community-types';
@@ -19,6 +19,7 @@ export function CommentSection({ assetUuid, isOpen }: CommentSectionProps) {
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [totalComments, setTotalComments] = useState(0);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -32,6 +33,7 @@ export function CommentSection({ assetUuid, isOpen }: CommentSectionProps) {
   }, [isOpen, assetUuid]);
 
   const loadComments = async (reset = false) => {
+    setIsFetching(true);
     try {
       const offset = reset ? 0 : comments.length;
       const result = await laravel.communityComments(assetUuid, 20, offset);
@@ -45,6 +47,8 @@ export function CommentSection({ assetUuid, isOpen }: CommentSectionProps) {
     } catch (error) {
       console.error('Failed to load comments:', error);
       addToast('Không thể tải bình luận. Vui lòng thử lại sau.', 'error');
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -136,23 +140,44 @@ export function CommentSection({ assetUuid, isOpen }: CommentSectionProps) {
 
       {/* Comments list */}
       <div className="space-y-4 max-h-[300px] overflow-y-auto">
-        {comments.map((comment) => (
-          <CommentItem
-            key={comment.id}
-            comment={comment}
-            onReply={setReplyTo}
-            onDelete={handleDelete}
-            currentUserUuid={currentUser?.uuid}
-          />
-        ))}
+        {isFetching && comments.length === 0 ? (
+          <div className="flex items-center justify-center gap-2 py-8 text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin text-[#FF5A1F]" />
+            <span className="text-xs">Đang tải bình luận...</span>
+          </div>
+        ) : comments.length === 0 ? (
+          <div className="py-8 text-center text-xs text-slate-500">
+            Chưa có bình luận nào. Hãy là người đầu tiên bình luận!
+          </div>
+        ) : (
+          <>
+            {comments.map((comment) => (
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                onReply={setReplyTo}
+                onDelete={handleDelete}
+                currentUserUuid={currentUser?.uuid}
+              />
+            ))}
 
-        {hasMore && (
-          <button
-            onClick={() => loadComments(false)}
-            className="w-full py-2 text-xs font-bold text-slate-500 hover:text-[#FF5A1F] uppercase tracking-wider transition-colors cursor-pointer"
-          >
-            Xem thêm bình luận...
-          </button>
+            {hasMore && (
+              <button
+                onClick={() => loadComments(false)}
+                disabled={isFetching}
+                className="w-full py-2 text-xs font-bold text-slate-500 hover:text-[#FF5A1F] uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {isFetching ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Đang tải...
+                  </>
+                ) : (
+                  'Xem thêm bình luận...'
+                )}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

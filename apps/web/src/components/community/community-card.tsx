@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AssetCard } from '@/lib/api/community-types';
 import { CreatorLevelBadge } from './creator-level-badge';
 import { useToastStore } from '@/stores/toast-store';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 
 const LARAVEL_URL = process.env.NEXT_PUBLIC_LARAVEL_URL || 'http://localhost:8000';
 
@@ -183,6 +184,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
             muted
             loop
             playsInline
+            {...noDownloadVideo}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -194,6 +196,7 @@ export function CommunityCard({ asset, onOpenDetails, onLikeChange }: CommunityC
               isHovered ? "scale-[1.05]" : "scale-100"
             )}
             loading="lazy"
+            {...noDownloadImg}
           />
         )}
 
