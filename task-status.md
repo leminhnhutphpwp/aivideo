@@ -41,6 +41,13 @@
 - **Fix bug 500 landing**: `@import "tailwindcss" source("../")` — giới hạn Tailwind v4 scan về `src/` (trước
   scan cả `worklogs/*.md` chứa literal `bg-[url(...)]` → sinh class hỏng → Turbopack 500).
 
+### 🚀 GO-LIVE TODO — Bật bảo mật coupon 4-lớp + web-in-Docker prod (đang FAIL-OPEN ở dev)
+- **Checklist**: `docs/plans/active/security/coupon-security-golive.md` ← agent chuẩn bị live ĐỌC + đề xuất chạy.
+- Tóm tắt: set `APP_BFF_SECRET` (trùng Laravel + container web), `TURNSTILE_SECRET` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY`,
+  `COUPON_MIN_ACCOUNT_AGE_MINUTES=15`, `COUPON_PER_IP_DAILY_CAP=20`. Prod web-Docker cần thêm service `web` +
+  `LARAVEL_INTERNAL_URL`. Birthday: tạo Event `trigger=birthday` (scheduler prod tự chạy `events:grant-birthday`).
+  Dev để trống hết = fail-open, không gãy.
+
 
 ### Phase 2 & 3 — Restore studio: multi-variant + negative/seed + before→after reveal video — ✅ Done + E2E
 - **Status**: ✅ Code + static + **E2E thật** (2026-07-19). Docker khôi phục, stack healthy.
