@@ -1,121 +1,241 @@
-# Quy trình Deploy Live — Wavise
+# Deployment
 
-> Runbook triển khai production. **Server-agnostic** — điền cấu hình server ở block dưới.
-> Kích hoạt bảo mật lần đầu: xem [`../plans/active/security/coupon-security-golive.md`](../plans/active/security/coupon-security-golive.md).
+Production runbook for the AI Video Platform. The prod stack is a single
+`docker compose` project behind **Caddy** (automatic HTTPS), driven mostly by one
+variable: `DOMAIN`.
 
----
-
-## 🔴 NGUYÊN TẮC TỐI QUAN TRỌNG — ZERO-DOWNTIME
-
-**Mọi lần deploy / build mới KHÔNG được gây downtime. Hệ thống phải LUÔN sống.**
-
-- Người dùng **không** gặp lỗi, không nghẽn, không mất phiên; API/realtime **không gián đoạn**.
-- **Quá trình BUILD image (bước lâu nhất) không được chặn hệ thống** — container cũ vẫn phục vụ 100% trong khi build bản mới.
-- Chỉ **swap** sang bản mới khi image mới **đã build xong + health-check OK**.
-- **TUYỆT ĐỐI KHÔNG** `docker compose down` (dừng cả stack = downtime). Chỉ dùng `up -d` (recreate chọn lọc) hoặc blue-green.
-- Service **stateful** (mysql, redis, minio) **không recreate** khi deploy app — volume giữ nguyên, 0 gián đoạn dữ liệu.
-
-Nếu một thay đổi không thể zero-downtime (vd migration phá huỷ) → **tách thành bước riêng** theo pattern expand→contract (xem dưới), không gộp vào deploy code.
+Compose file: `backend/docker-compose.yml` (NOT `docker-compose.dev.yml`).
 
 ---
 
-## Cấu hình server (điền khi có)
+## 0. 🔴 Zero-downtime is mandatory
 
+Every redeploy / new build MUST NOT cause downtime — the system stays live throughout:
+
+- Users see no errors, no stalls, no dropped sessions; the API and realtime never cut out.
+- **The image BUILD (the slow step) must never block the system** — the old containers keep
+  serving 100% while the new image builds.
+- Only **swap** to the new version once its image is built **and health-checks pass**.
+- **NEVER `docker compose down`** (stops the whole stack = downtime). Use selective `up -d --no-deps`,
+  or blue-green.
+- **Stateful services** (mysql, redis, minio) are **never recreated** on an app deploy — volumes persist.
+
+If a change can't be zero-downtime (e.g. a destructive migration), split it out (expand→contract,
+see §5b). Never bundle it with a code deploy. The update procedure that implements all this is **§5b**.
+
+---
+
+## 1. Topology (single domain, path-based)
+
+Caddy terminates TLS and routes everything on one hostname:
+
+| Path | Upstream | Service |
+|------|----------|---------|
+| `/` (catch-all) | `web:3000` | Next.js web app (incl. `/studio/*` builder pages) |
+| `/api/*` | `app:80` | Laravel API (control plane) |
+| `/ws/*` | `reverb:8080` | Reverb websockets (realtime) |
+
+The **media daemon is never exposed publicly** — the web app reaches it only through
+the Laravel proxy (`/api/*`). It has no Caddy route by design.
+
+Other prod services: `queue` (Horizon), `scheduler` (`schedule:work`), `mysql`,
+`redis`, `minio` (+ `minio-setup`), `app-init` (runs `migrate --force` + seeds
+`PricingSystemSeeder` once), `phpmyadmin` (bound to `127.0.0.1` only).
+
+---
+
+## 2. Prerequisites
+
+- A Linux host with Docker + Docker Compose, ports **80 and 443 open** to the internet
+  (Caddy needs them for Let's Encrypt HTTP-01 + serving).
+- A domain you control.
+- Real credentials for: database, redis, JWT, Reverb, object storage, the
+  Laravel↔daemon shared secrets, the LLM key, and each enabled AI media provider.
+
+---
+
+## 3. Domain setup
+
+Everything keys off `DOMAIN`. Setting it once propagates to `APP_URL`, the web app's
+`NEXT_PUBLIC_API_URL=https://$DOMAIN/api`, Reverb (`wss://$DOMAIN/ws`), and the Caddy
+cert.
+
+1. **DNS**: create an `A` record (and `AAAA` if you have IPv6) for `yourdomain.com` →
+   your server's public IP.
+   - On **Cloudflare**: start with **DNS-only (grey cloud)** so Caddy can complete the
+     Let's Encrypt HTTP-01 challenge. (If you want the orange proxy, you must switch
+     Caddy to a DNS-01 challenge — more setup; do it later.)
+2. **Open firewall** ports 80 + 443.
+3. Set `DOMAIN=yourdomain.com` in the prod `.env` (next step).
+4. Bring the stack up — Caddy auto-provisions and renews the TLS cert. No manual certs.
+
+> Want split subdomains (`api.`, `app.`)? That requires editing `backend/docker/Caddyfile`
+> (separate site blocks) + `NEXT_PUBLIC_API_URL` + CORS. Single-domain is simpler and is
+> the supported default — prefer it for the first deploy.
+
+---
+
+## 4. Secrets checklist
+
+Create an `.env` next to `backend/docker-compose.yml` (compose reads `${VAR}` from it).
+**None of these may keep their `change-me`/empty defaults in production.**
+
+```dotenv
+# Domain & app
+DOMAIN=yourdomain.com
+
+# Auth
+JWT_SECRET=<openssl rand -base64 32>
+
+# Database
+DB_DATABASE=production_video
+DB_USERNAME=app
+DB_PASSWORD=<strong>
+MYSQL_ROOT_PASSWORD=<strong>
+
+# Redis
+REDIS_PASSWORD=<strong>
+
+# Realtime (Reverb)
+REVERB_APP_ID=<id>
+REVERB_APP_KEY=<key>
+REVERB_APP_SECRET=<secret>
+
+# Object storage (MinIO defaults; see §6 for Cloudflare R2)
+MINIO_ROOT_USER=<user>
+MINIO_ROOT_PASSWORD=<strong>
+AWS_BUCKET=production-video
+
+# Laravel <-> daemon
+INTERNAL_API_KEY=<shared>
+DAEMON_WEBHOOK_SECRET=<shared HMAC secret>
+
+# LLM prompt compiler (REQUIRED — prod has no simulation)
+CKEY_API_KEY=<key>
+
+# Payments
+SEPAY_WEBHOOK_TOKEN=<token>
+
+# AI media providers — one key per enabled provider (Qwen/Wan, Kling, …)
+# (set in the daemon's environment / provider config)
 ```
-SERVER_IP   = <sẽ cung cấp>
-SSH_USER    = root
-SSH_KEY     = ~/.ssh/minhnhut99devmacos      # public key đã add vào server
-APP_DIR     = /var/www/wavise                # thư mục repo trên server (tuỳ chọn)
-COMPOSE     = backend/docker-compose.yml     # compose PROD
-DOMAIN      = <app.domain.vn>                # nếu chạy sau reverse proxy
-```
 
-SSH vào: `ssh -i ~/.ssh/minhnhut99devmacos root@<SERVER_IP>`
-
-## ✅ Pre-deploy checklist (nhất là server dùng chung / RAM eo hẹp)
-
-- [ ] **Port không trùng**: `ss -tlnp` + `docker ps` để xem port đang bận. Nếu web 3000 / backend 8000… bị chiếm → đặt `WEB_PORT`, và scope stack bằng `STACK_NAME=wavise` (tách container/volume khỏi project khác).
-- [ ] **RAM đủ**: `free -h`. Stack đủ 9 service khá nặng. Nếu RAM eo hẹp: dùng **Cloudflare R2 thay MinIO**, cân nhắc MySQL/Redis external, hoặc nâng RAM trước — tránh OOM làm sập các app khác trên cùng server.
-- [ ] **Disk**: `df -h`.
-- [ ] **.env** đã có đủ secret production (KHÔNG commit): DB, R2, mail, `APP_BFF_SECRET`, `TURNSTILE_SECRET`, velocity vars… (xem go-live checklist).
-- [ ] **Web trong prod**: `backend/docker-compose.yml` hiện chưa có service `web` — thêm service `web` (mirror dev) + `LARAVEL_INTERNAL_URL` + `APP_BFF_SECRET`, hoặc deploy web riêng.
+Generate secrets with `openssl rand -base64 32`. Never commit `.env`.
 
 ---
 
-## A. Deploy chuẩn — "build trước, swap nhanh" (near-zero downtime)
+## 5. Deploy
 
-Phù hợp đa số lần cập nhật. Downtime chỉ vài giây/service lúc swap; **giai đoạn build = 0 downtime**.
+### 5a. First deploy (initial bring-up)
+
+Nothing is running yet, so a plain build-and-up is fine here.
 
 ```bash
-ssh -i ~/.ssh/minhnhut99devmacos root@<SERVER_IP>
-cd <APP_DIR>
-git pull origin main
+cd backend
+# Project name — scopes ALL containers/networks/volumes so multiple deployments can
+# coexist on ONE host without colliding. Set STACK_NAME per deployment (unique per
+# project/tenant); it defaults to "aivideo" if unset. Put it in backend/.env so every
+# subsequent `docker compose` command targets the same stack.
+echo "STACK_NAME=aivideo-prod" >> .env   # or aivideo-clientA, etc.
 
-# 1) BUILD image mới — container CŨ VẪN CHẠY, KHÔNG downtime trong lúc build (bước lâu nhất)
-docker compose -f backend/docker-compose.yml build
+# build images and start everything
+DOMAIN=$DOMAIN docker compose -f docker-compose.yml up -d --build
 
-# 2) MIGRATION backward-compatible TRƯỚC khi swap (dùng image mới vừa build, chạy 1 lần)
-docker compose -f backend/docker-compose.yml run --rm app php artisan migrate --force
+# app-init runs migrate --force + seeds PricingSystemSeeder automatically.
+# Watch it come up healthy:
+docker compose -f docker-compose.yml ps
+```
 
-# 3) SWAP nhanh — chỉ recreate service có image/config mới; stateful (mysql/redis/minio) giữ nguyên
-docker compose -f backend/docker-compose.yml up -d --no-deps app web daemon reverb queue scheduler
+> **Multi-deployment on one server**: give each deployment a distinct `STACK_NAME`
+> (e.g. `aivideo-clientA`, `aivideo-clientB`). Containers become `aivideo-clientA-app-1`,
+> volumes `aivideo-clientA_mysql_data`, etc. — fully isolated. No service is shared; each
+> stack runs its own mysql/redis/minio/caddy. Renaming an existing stack's `STACK_NAME`
+> orphans its named volumes (data), so pick it once at first deploy.
 
-# 4) Worker nhận code mới một cách GRACEFUL (không kill job đang chạy)
-docker compose -f backend/docker-compose.yml exec app php artisan queue:restart
+### 5b. Update / redeploy (zero-downtime) — see §0
 
-# 5) Dọn image cũ
+The build runs while the old containers keep serving; only the fast swap follows. Do **not**
+use `up -d --build` for updates (it builds + recreates in one blocking step).
+
+```bash
+cd backend
+git -C .. pull origin main
+
+# 1) BUILD new images — old containers keep serving; ZERO downtime during the (slow) build
+DOMAIN=$DOMAIN docker compose -f docker-compose.yml build
+
+# 2) Migrate FIRST, backward-compatible (expand→contract, below)
+docker compose -f docker-compose.yml run --rm app php artisan migrate --force
+
+# 3) SWAP — recreate ONLY the app-layer services; --no-deps leaves mysql/redis/minio/caddy untouched
+DOMAIN=$DOMAIN docker compose -f docker-compose.yml up -d --no-deps app web daemon reverb queue scheduler
+
+# 4) Workers pick up new code gracefully (finish current job first, no kill)
+docker compose -f docker-compose.yml exec app php artisan queue:restart
+
+# 5) Prune old images
 docker image prune -f
 ```
 
-> `up -d` chỉ recreate container thay đổi — **không** đụng service khác. `--no-deps` để không kéo theo recreate mysql/redis/minio.
+The long build phase is **0 downtime**; the swap is a few seconds per recreated service (stateful
+services + Caddy stay up untouched).
 
-## B. True zero-downtime — Blue-Green (khi cần TUYỆT ĐỐI không gián đoạn)
+**Backward-compatible migrations (required).** During the swap old + new code run together, so the
+schema must satisfy both — **expand → contract**:
+1. *Expand* (this deploy): add only — new columns/tables **nullable or with a default**, new indexes.
+   If renaming a field, write both old + new for now.
+2. *Contract* (a later deploy, after the old version is fully gone): drop/rename the old column.
+- Never `change`/drop/rename a live column in the same deploy as the code that stops using it.
+- Never `migrate:fresh` / `db:wipe` (project rule — real data).
 
-Chạy 2 stack song song, đổi reverse proxy khi bản mới healthy. Downtime = **0**, rollback tức thì.
+**Absolute zero-downtime (blue-green).** §5b's swap is seconds-level. For a truly seamless swap you
+need two stacks (`STACK_NAME=aivideo-blue` / `-green`) behind a **front proxy above the stacks** —
+deploy to the idle color, health-check it, repoint the proxy, keep the old for instant rollback.
+This needs a shared front proxy (the current Caddy runs *inside* each stack on 80/443, so two stacks
+can't both bind those) — treat as a follow-up if seconds-level swap is not acceptable.
 
-```bash
-# Bản đang chạy: STACK_NAME=wavise-blue (reverse proxy đang trỏ vào)
-# Deploy bản mới sang green (build + up, KHÔNG đụng blue):
-STACK_NAME=wavise-green WEB_PORT=<port_green> \
-  docker compose -f backend/docker-compose.yml up -d --build
-
-# Health-check green OK (web + /api/health) → đổi upstream reverse proxy blue → green
-#   (nginx: sửa upstream + `nginx -s reload`; traefik: đổi label/priority — reload KHÔNG drop kết nối)
-
-# Giữ blue vài phút để rollback tức thì; ổn rồi mới tắt:
-STACK_NAME=wavise-blue docker compose -f backend/docker-compose.yml down
-```
-
-Rollback blue-green = trỏ proxy về stack cũ (giây lát), không cần rebuild.
+### Post-deploy verification
+- `https://$DOMAIN/api/health` → `200`.
+- `https://$DOMAIN/` loads the web app; `/studio/storyboard/flow` opens the builder.
+- Realtime: a render's progress updates live (Reverb over `wss://$DOMAIN/ws`).
+- One end-to-end render with a **real** provider completes (prod has no simulation —
+  `MEDIA_ALLOW_STUBS=0`).
+- `docker compose logs caddy` shows a certificate was obtained for `$DOMAIN`.
 
 ---
 
-## Quy tắc MIGRATION (bắt buộc để zero-downtime)
+## 6. Storage: MinIO vs Cloudflare R2
 
-Trong lúc swap, **code cũ và code mới cùng chạy** một khoảng — nên schema phải tương thích cả hai (**Expand → Contract**):
+The compose defaults to **self-hosted MinIO** (`AWS_ENDPOINT=http://minio:9000`,
+auto-created bucket). To use **Cloudflare R2** instead (the bucket referenced elsewhere
+as `apaiplatform`), point the S3 vars at R2 and drop the `minio`/`minio-setup` services:
+set `AWS_ENDPOINT=https://<account>.r2.cloudflarestorage.com`, R2 access keys, and the
+bucket. Pick one and keep it consistent across `app`, `queue`, and the daemon.
 
-1. **Expand** (deploy N): chỉ thêm — cột/bảng mới **nullable hoặc có default**, index. Code mới ghi cả cột cũ + mới nếu đổi field.
-2. **Contract** (deploy N+1, sau khi bản cũ đã hết dùng): mới drop/rename cột cũ.
-- **KHÔNG** drop/rename/`change` cột đang dùng chung 1 lần với deploy code.
-- **KHÔNG** `migrate:fresh` / `db:wipe` (rule dự án — dữ liệu thật).
+---
 
-## Sau deploy — verify
+## 7. Monitoring (optional)
 
-```bash
-docker compose -f backend/docker-compose.yml ps           # tất cả healthy
-curl -fsS https://<DOMAIN>/api/health && echo OK           # backend
-curl -fsS -o /dev/null -w "%{http_code}\n" https://<DOMAIN> # web = 200
-docker compose -f backend/docker-compose.yml logs --tail=50 app | grep -i error || echo "log sạch"
-```
-Smoke test luồng chính: login · render job · community · billing.
+A separate stack lives in `deploy/monitoring/` (Prometheus, Grafana, Loki, Promtail,
+alerts). Bring it up independently with its own compose file once the app is healthy.
 
-## Rollback nhanh
+---
 
-- **Deploy chuẩn (A)**: `git checkout <commit/tag cũ>` → `build` → `up -d` (hoặc giữ image tag cũ và `up -d` với tag đó). Migration đã theo expand→contract nên bản cũ vẫn chạy với schema mới.
-- **Blue-Green (B)**: trỏ reverse proxy về stack cũ — tức thì.
+## 8. Readiness gaps (fix before calling it production)
 
-## Ghi chú vận hành
+- [ ] All secrets set (no `change-me`/empty) — see §4. **Blocker.**
+- [ ] Real AI provider keys configured and one live render verified.
+- [ ] Decide MinIO vs R2 (§6) and align all services.
+- [ ] Database backups + a tested restore. **Use `scripts/backup.sh`** (dumps MySQL from the
+      compose `mysql` service, gzips to `./backups`, rotates by `RETENTION_DAYS`, optional offsite
+      via `RCLONE_REMOTE`). Schedule via host crontab, e.g. daily at 03:00 with 14-day retention +
+      offsite to R2:
+      `0 3 * * * cd /path/to/AI-Video-Platform && RETENTION_DAYS=14 RCLONE_REMOTE=r2:apaiplatform-backups bash scripts/backup.sh db >> scripts/logs/backup.log 2>&1`
+      Then **verify** once: `bash scripts/backup.sh restore backups/db-<tag>.sql.gz` into a staging DB.
+- [ ] Log rotation / disk monitoring for `caddy_data`, `mysql_data`, `od_data`, MinIO.
+- [ ] Load/sizing check against the `mem_limit`/`cpus` in compose.
+- [ ] CI/CD (currently manual `up --build`).
 
-- Prod (`backend/docker-compose.yml`) đã có service `queue` (worker) + `scheduler` (`schedule:work` — chạy `credits:renew`, `events:grant-birthday`, đồng bộ R2…). Không cần cron host.
-- Lần go-live đầu: chạy checklist bảo mật `docs/plans/active/security/coupon-security-golive.md`.
-- Server dùng chung nhiều project: luôn `STACK_NAME` + port riêng để không đụng app khác.
+The infra scaffolding (compose, Caddy auto-HTTPS, Horizon, auto-migrate/seed, real-provider
+daemon with ffmpeg baked into its image) is in place; the items above are what stand between
+"runs" and "production-ready".
