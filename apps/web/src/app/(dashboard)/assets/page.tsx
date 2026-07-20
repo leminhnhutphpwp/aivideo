@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useToastStore } from '@/stores/toast-store';
 import { useConfirmStore } from '@/stores/confirm-store';
 import { UploadDialog } from '@/components/ui/upload-dialog';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 import { t } from '@/lib/i18n';
 
 const LARAVEL_URL = process.env.NEXT_PUBLIC_LARAVEL_URL || 'http://localhost:8000';
@@ -465,14 +466,16 @@ function AssetCard({ asset, onDelete, onDownload }: { asset: Asset; onDelete: (a
         {blobUrl ? (
           isVideo ? (
             <video src={blobUrl} autoPlay muted loop playsInline
+              {...noDownloadVideo}
               className="object-cover w-full h-full opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-1000"
             />
           ) : (
             // Plain <img> (not next/image) — reliably renders auth-fetched blob URLs.
             // eslint-disable-next-line @next/next/no-img-element
             <img src={blobUrl} alt={asset.name}
-              className="object-cover w-full h-full opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-1000"
               referrerPolicy="no-referrer"
+              {...noDownloadImg}
+              className="object-cover w-full h-full opacity-70 group-hover:opacity-90 group-hover:scale-110 transition-all duration-1000"
             />
           )
         ) : (

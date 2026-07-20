@@ -16,7 +16,7 @@ interface PublishModalProps {
   onConfirm: (visibility: 'sharing' | 'public', tags: string[]) => void;
 }
 
-export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentVisibility, currentTags, onConfirm }: PublishModalProps) {
+export function PublishModal({ isOpen, onClose, assetName, currentVisibility, currentTags, onConfirm }: PublishModalProps) {
   const [visibility, setVisibility] = useState<'private' | 'sharing' | 'public'>(currentVisibility || 'private');
   const [tags, setTags] = useState<string[]>(currentTags || []);
   const [tagInput, setTagInput] = useState('');
@@ -60,8 +60,6 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
     }
     onClose();
   };
-
-  const estimatedPayout = Math.floor(creditsCost * 0.25);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 select-none">
@@ -154,8 +152,7 @@ export function PublishModal({ isOpen, onClose, assetName, creditsCost, currentV
               <div className="flex-1 min-w-0 pr-8">
                 <p className="text-sm font-bold text-slate-200">Sàn Thương Mại (Public)</p>
                 <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                  Đăng lên sàn để Admin xét duyệt mua lại tác phẩm. Nếu được duyệt, bạn sẽ nhận được phần thưởng{' '}
-                  <strong className="text-amber-400 font-extrabold">+{estimatedPayout} Credits</strong> (25% lượng gốc).
+                  Đăng lên sàn để Admin xét duyệt mua lại tác phẩm. Nếu được duyệt, bạn sẽ nhận được phần thưởng tương xứng.
                 </p>
               </div>
             </div>

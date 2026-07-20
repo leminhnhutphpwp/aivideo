@@ -23,6 +23,7 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { fetchUnifiedProjects } from '@/lib/api/unified-projects';
 import type { UnifiedProject } from '@/lib/api/unified-project-types';
 import { useRealtimeJobs, type JobEvent } from '@/hooks/use-realtime-jobs';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 
 function AnimatedCounter({ target, duration = 1500 }: { target: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -274,7 +275,7 @@ export default function DashboardPage() {
       <section className="relative">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="relative rounded-2xl overflow-hidden min-h-[260px] md:min-h-[320px]">
           {heroVideoUrl ? (
-            <video className="absolute inset-0 w-full h-full object-cover" src={heroVideoUrl} autoPlay muted loop playsInline />
+            <video src={heroVideoUrl} autoPlay muted loop playsInline {...noDownloadVideo} className="absolute inset-0 w-full h-full object-cover" />
           ) : (
             <>
               <div className="absolute inset-0 bg-gradient-to-br from-[#FF5A1F]/20 via-[#1a0f0a] to-[#0a0a12]" />
@@ -379,19 +380,21 @@ export default function DashboardPage() {
                       {showcaseBlobs[item.asset_id || item.id] ? (
                         item.media_type === 'image' ? (
                           <img
-                            className="absolute inset-0 w-full h-full object-cover"
                             src={showcaseBlobs[item.asset_id || item.id]}
                             alt={item.title}
                             loading="lazy"
+                            {...noDownloadImg}
+                            className="absolute inset-0 w-full h-full object-cover"
                           />
                         ) : (
                           <video
-                            className="absolute inset-0 w-full h-full object-cover"
                             src={showcaseBlobs[item.asset_id || item.id]}
                             autoPlay
                             muted
                             loop
                             playsInline
+                            {...noDownloadVideo}
+                            className="absolute inset-0 w-full h-full object-cover"
                           />
                         )
                       ) : (

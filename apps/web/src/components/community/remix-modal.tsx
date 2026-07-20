@@ -12,6 +12,7 @@ import { ShareButtons } from './share-buttons';
 import { laravel, LARAVEL_URL } from '@/lib/api/client';
 import { useToastStore } from '@/stores/toast-store';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
+import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 
 function resolveAssetUrl(url: string | null): string | null {
   if (!url) return null;
@@ -232,12 +233,14 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
               autoPlay
               controls
               loop
+              {...noDownloadVideo}
               className="w-full h-full object-contain"
             />
           ) : imageSrc ? (
             <img
               src={imageSrc}
               alt={asset.title}
+              {...noDownloadImg}
               className="w-full h-full object-contain"
             />
           ) : (
@@ -332,8 +335,6 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
                   <span>{asset.duration_seconds ?? '--'}s</span>
                 </>
               )}
-              <span className="w-px h-3 bg-white/10" />
-              <span className="text-[#FF5A1F] font-bold">{asset.credits_cost} credits</span>
             </div>
           </div>
 

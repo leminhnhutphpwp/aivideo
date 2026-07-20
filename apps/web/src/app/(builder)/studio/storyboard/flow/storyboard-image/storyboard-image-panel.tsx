@@ -8,6 +8,7 @@ import {
   Camera, Palette, Smile, Sun, Mic, ChevronDown, Music, Info, Wand2, Lock,
 } from 'lucide-react';
 import { LARAVEL_URL } from '@/lib/api/client';
+import { noDownloadImg } from '@/lib/media-protection';
 import { RichSelect } from '@/components/studio/rich-select';
 import {
   CAMERA_OPTIONS, STYLE_OPTIONS, MOOD_OPTIONS, LIGHTING_OPTIONS,
@@ -184,6 +185,7 @@ export function StoryboardImagePanel({
               <img
                 src={displayUrl || multiPanelImageUrl}
                 alt="Multi-panel"
+                {...noDownloadImg}
                 className="w-full h-28 object-contain"
               />
               <button
