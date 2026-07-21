@@ -17,14 +17,17 @@ export const useDaemonStore = create<DaemonState>((set) => ({
   },
 }));
 
-let lastCheck = 0;
 const CHECK_INTERVAL_MS = 30_000;
+// Module-level guard so repeated mounts share ONE polling interval.
+let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 export function initDaemonCheck() {
-  const now = Date.now();
-  if (now - lastCheck < CHECK_INTERVAL_MS) return;
-  lastCheck = now;
-  const state = useDaemonStore.getState();
-  if (state.ok === true) return;
-  state.check();
+  // Kick an immediate check so callers get a fresh status on first mount.
+  useDaemonStore.getState().check();
+  if (pollTimer) return;
+  // Poll regardless of current `ok` so an online→offline transition (or the
+  // reverse) is always detected — never short-circuit once online.
+  pollTimer = setInterval(() => {
+    useDaemonStore.getState().check();
+  }, CHECK_INTERVAL_MS);
 }

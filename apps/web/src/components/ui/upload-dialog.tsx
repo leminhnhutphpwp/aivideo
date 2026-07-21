@@ -56,12 +56,22 @@ export function UploadDialog({ open, onClose, onUpload }: UploadDialogProps) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Keep a live ref to files so unmount cleanup can revoke previews without re-subscribing.
+  const filesRef = useRef<FileEntry[]>([]);
+  filesRef.current = files;
+
   const resetAndClose = useCallback(() => {
     if (uploading) return;
+    files.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
     setFiles([]);
     setDragOver(false);
     onClose();
-  }, [uploading, onClose]);
+  }, [uploading, onClose, files]);
+
+  // Revoke any remaining object URLs if the dialog unmounts mid-selection.
+  useEffect(() => () => {
+    filesRef.current.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
+  }, []);
 
   useEffect(() => {
     if (!open) return;

@@ -105,4 +105,28 @@ class HandleJobCompletion implements ShouldQueue
             ]);
         }
     }
+
+    /**
+     * Default queue tries=1: if handle() throws (e.g. downloadFile fails) the job
+     * would otherwise strand in 'processing' with credits still reserved. Release
+     * the reservation and mark failed so the user isn't stuck. releaseReserved is
+     * idempotent (only refunds type='reserved'); if credits were already captured
+     * (reserved→usage) it refunds 0 — no double-release. Guard on isTerminal() so
+     * we never overwrite a job that actually completed.
+     */
+    public function failed(\Throwable $e): void
+    {
+        try {
+            if ($this->renderJob->fresh()?->isTerminal()) {
+                return;
+            }
+            app(CreditService::class)->releaseReserved($this->renderJob);
+            $this->renderJob->markAsFailed('Hệ thống AI tạm thời không khả dụng. Vui lòng thử lại sau.');
+        } catch (\Throwable $inner) {
+            Log::error('HandleJobCompletion::failed cleanup error', [
+                'job_uuid' => $this->renderJob->uuid,
+                'error' => $inner->getMessage(),
+            ]);
+        }
+    }
 }

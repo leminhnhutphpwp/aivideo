@@ -709,9 +709,10 @@ class CommunityController extends Controller
     {
         $likeCount = $job->likes_count ?? Like::where('render_job_id', $job->id)->count();
 
-        // Resolve output_path to a proper URL via the linked Asset (eager-loaded collection — no N+1)
+        // Resolve output_path to a proper URL via the linked Asset (eager-loaded collection — no N+1).
+        // Never fall back to the raw $job->output_path — it is a private storage key, not a servable URL.
         $asset = $job->assets->first();
-        $outputUrl = $asset?->url ?? $job->output_path;
+        $outputUrl = $asset?->url;
         $thumbnailUrl = $job->thumbnail_path;
         if (!$thumbnailUrl && $outputUrl) {
             $thumbnailUrl = $outputUrl;
@@ -733,7 +734,10 @@ class CommunityController extends Controller
             $refAssetMap ??= $this->buildReferenceAssetMap([$job]);
             foreach ($job->reference_images as $refPath) {
                 $refAsset = $refAssetMap[$refPath] ?? null;
-                $referenceImageUrls[] = $refAsset?->url ?? $refPath;
+                // Only expose the authenticated Asset URL; never leak the raw storage key as a fallback.
+                if ($refAsset?->url) {
+                    $referenceImageUrls[] = $refAsset->url;
+                }
             }
         }
 

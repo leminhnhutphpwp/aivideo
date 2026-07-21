@@ -46,12 +46,3 @@ export function useRealtimeJobs(options: UseRealtimeJobsOptions) {
     return () => { unsub?.(); };
   }, [userUuid]);
 }
-
-let lastCheck = 0;
-const CHECK_INTERVAL_MS = 30_000;
-
-export function initRealtimeCheck() {
-  const now = Date.now();
-  if (now - lastCheck < CHECK_INTERVAL_MS) return;
-  lastCheck = now;
-}

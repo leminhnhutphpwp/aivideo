@@ -952,7 +952,9 @@ class CommunityFeatureTest extends TestCase
         $this->assertEquals($job->uuid, $item['uuid']);
         $this->assertEquals('Neon Dawn', $item['title']);
         $this->assertEquals('Cyberpunk city at dawn', $item['prompt']);
-        $this->assertEquals('/output/cyberpunk.mp4', $item['output_path']);
+        // output_path resolves via the linked Asset only; with no Asset seeded it is null
+        // (the raw private storage key is never leaked — project rule).
+        $this->assertNull($item['output_path']);
         $this->assertEquals('/thumb/cyberpunk.jpg', $item['thumbnail_path']);
         $this->assertEquals('16:9', $item['aspect_ratio']);
         $this->assertEquals('1080p', $item['resolution']);
@@ -1012,11 +1014,11 @@ class CommunityFeatureTest extends TestCase
         $res = $this->getJson('/api/v1/community/assets')->assertOk();
         $item = $res->json('data.items.0');
 
-        // Known paths resolve to the Asset URL; unknown path falls back to the raw path.
-        $this->assertCount(3, $item['reference_images']);
+        // Known paths resolve to the authenticated Asset URL; an unknown path is SKIPPED
+        // (never leaked as a raw storage key — project rule), so only 2 of 3 resolve.
+        $this->assertCount(2, $item['reference_images']);
         $this->assertEquals($ref1->url, $item['reference_images'][0]);
         $this->assertEquals($ref2->url, $item['reference_images'][1]);
-        $this->assertEquals('refs/missing.png', $item['reference_images'][2]);
     }
 
     /** @test */

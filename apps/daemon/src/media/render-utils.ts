@@ -417,6 +417,7 @@ export async function bytesFromOpenAICompatibleData(data: any, providerTag: stri
       throw new Error(`${providerTag} media fetch ${mediaResp.status}`);
     }
     const arr = await mediaResp.arrayBuffer();
+    if (arr.byteLength === 0) throw new Error(`${providerTag} media fetch returned zero bytes`);
     return Buffer.from(arr);
   }
   throw new Error(`${providerTag} response had neither b64_json nor url`);

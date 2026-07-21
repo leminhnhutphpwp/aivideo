@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { laravel } from '@/lib/api/client';
+import { laravel, tryRefreshToken } from '@/lib/api/client';
 import { resetEcho } from '@/lib/echo';
 
 interface Plan {
@@ -79,17 +79,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   refreshToken: async () => {
-    try {
-      const newToken = await laravel.refresh();
-      localStorage.setItem('auth_token', newToken);
-      // No resetEcho() needed: the Echo auth header is a getter that reads the
-      // current token per /api/broadcasting/auth request, so the live socket
-      // keeps its channel subscriptions and picks up the rotated token.
-      set({ token: newToken });
-      return true;
-    } catch {
-      return false;
-    }
+    // Route through client.ts's single de-duplicated refresh so the 50-min
+    // timer refresh and a reactive 401 refresh can never race and blacklist
+    // each other's token (which would 401 the loser → spurious logout).
+    // `tryRefreshToken()` persists the rotated token to localStorage on success.
+    const ok = await tryRefreshToken();
+    if (!ok) return false;
+    const newToken = localStorage.getItem('auth_token');
+    if (!newToken) return false;
+    // No resetEcho() needed: the Echo auth header is a getter that reads the
+    // current token per /api/broadcasting/auth request, so the live socket
+    // keeps its channel subscriptions and picks up the rotated token.
+    set({ token: newToken });
+    return true;
   },
 
   hydrate: () => {
@@ -100,9 +102,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           const user = await laravel.me();
           set({ token, user, loading: false });
         } catch {
+          // `me()` may have pruned an expired-but-refreshable token from storage
+          // (getToken removes it once past `exp`). Restore the captured raw token
+          // so the shared refresh — which reads the raw stored token — can still
+          // exchange it within tymon's refresh-TTL instead of forcing a logout.
+          localStorage.setItem('auth_token', token);
           try {
-            const newToken = await laravel.refresh();
-            localStorage.setItem('auth_token', newToken);
+            const ok = await tryRefreshToken();
+            if (!ok) throw new Error('refresh_failed');
+            const newToken = localStorage.getItem('auth_token');
             const user = await laravel.me();
             set({ token: newToken, user, loading: false });
           } catch {

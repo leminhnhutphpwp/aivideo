@@ -39,20 +39,32 @@ export function useSyncRefs({
     );
   }, [sceneRefPreviews, setNodes]);
 
-  // Patch node data with callbacks on mount
+  // Patch node data with callbacks whenever the node set changes. Nodes hydrated async
+  // (e.g. loading an existing storyboard) are created WITHOUT onDelete/onDuplicate/onAddChild,
+  // so their Xóa / Nhân bản / Thêm con buttons would be dead. We only patch nodes that are
+  // missing the callbacks — so this re-runs safely on `nodes` changes without an update loop
+  // (already-patched runs return the same reference and React bails out). The callbacks are
+  // stable wrappers that read the latest handlers from actionsRef.
   useEffect(() => {
-    setNodes((nds: Node[]) =>
-      nds.map((n) => ({
-        ...n,
-        data: {
-          ...n.data,
-          onDelete: actionsRef.current.del,
-          onDuplicate: actionsRef.current.dup,
-          onAddChild: actionsRef.current.add,
-        },
-      })),
-    );
-  }, []);
+    setNodes((nds: Node[]) => {
+      if (nds.length === 0) return nds;
+      let changed = false;
+      const next = nds.map((n) => {
+        if (n.data?.onDelete && n.data?.onDuplicate && n.data?.onAddChild) return n;
+        changed = true;
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            onDelete: (id: string) => actionsRef.current.del(id),
+            onDuplicate: (id: string) => actionsRef.current.dup(id),
+            onAddChild: (id: string | null) => actionsRef.current.add(id),
+          },
+        };
+      });
+      return changed ? next : nds;
+    });
+  }, [nodes, setNodes]);
 
   return { actionsRef };
 }

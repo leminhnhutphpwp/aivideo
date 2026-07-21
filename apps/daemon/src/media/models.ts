@@ -66,7 +66,7 @@ export function findMediaModel(id: string): MediaModel | null {
     ...IMAGE_MODELS, ...VIDEO_MODELS,
     ...AUDIO_MODELS_BY_KIND.music, ...AUDIO_MODELS_BY_KIND.speech, ...AUDIO_MODELS_BY_KIND.sfx,
   ];
-  return all.find(m => m.id === id || m.label === id) || null;
+  return all.find(m => m.id === id) || null;
 }
 
 export function findProvider(id: string): MediaProvider | null {
@@ -77,8 +77,8 @@ export function modelsForSurface(surface: MediaSurface, audioKind?: AudioKind): 
   if (surface === 'image') return IMAGE_MODELS;
   if (surface === 'video') return VIDEO_MODELS;
   if (surface === 'audio') {
-    const k = audioKind || 'music';
-    return AUDIO_MODELS_BY_KIND[k] || AUDIO_MODELS_BY_KIND.music;
+    const k = audioKind || 'speech';
+    return AUDIO_MODELS_BY_KIND[k] || AUDIO_MODELS_BY_KIND.speech;
   }
   return [];
 }
