@@ -92,7 +92,11 @@ class SocialiteTest extends TestCase
                 ->value('email_verified_at'),
             'email_verified_at is null in DB'
         );
-        $this->assertEquals(100, $user->credits);
+        // Welcome credits are coupon/event-driven, not granted on account creation
+        // (SocialiteController creates the user at 0 credits; autoGrant only grants when an
+        // active welcome coupon / signup event exists). No welcome coupon is seeded here, so
+        // the user stays at 0 — mirrors RegistrationAbuseTest::verify_email_marks_verified_without_auto_credits.
+        $this->assertEquals(0, $user->credits);
     }
 
     public function test_callback_logs_in_existing_google_user(): void
