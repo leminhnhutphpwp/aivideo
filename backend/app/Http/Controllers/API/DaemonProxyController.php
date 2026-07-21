@@ -1048,6 +1048,20 @@ class DaemonProxyController extends Controller
         ]);
         if ($validationError) return $validationError;
 
+        // Moderate the preview text (sent to TTS) like StoryboardController::addVoiceover and
+        // every other user-authored text path. Never surface the matched term to the user.
+        $text = (string) $request->input('text', '');
+        if ($text !== '' && $this->contentFilter->containsProhibitedContent($text)) {
+            Log::warning('TTS preview text blocked by content filter', [
+                'user_id' => $request->user()?->id,
+                'term' => $this->contentFilter->getProhibitedTerm($text),
+            ]);
+            return response()->json([
+                'error' => 'unsafe_content',
+                'message' => 'Nội dung mô tả vi phạm tiêu chuẩn an toàn của nền tảng. Vui lòng chỉnh sửa và thử lại.',
+            ], 422);
+        }
+
         return $this->proxy('POST', 'media/tts-preview', $request);
     }
 }

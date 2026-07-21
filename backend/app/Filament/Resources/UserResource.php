@@ -232,7 +232,7 @@ class UserResource extends Resource
                                 ]);
                             } else {
                                 app(MailService::class)->sendToUser('account_unlocked', $record, [
-                                    'login_url' => url('/login'),
+                                    'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
                                 ]);
                             }
                         }),
@@ -261,7 +261,7 @@ class UserResource extends Resource
                             $diff = $newCredits - $record->credits;
 
                             if ($diff > 0) {
-                                $creditService->addCredits($record, $diff, "Admin điều chỉnh gói: {$oldPlan->name} -> {$record->plan->name}");
+                                $creditService->addCredits($record, $diff, "Admin điều chỉnh gói: {$oldPlan?->name} -> {$record->plan?->name}");
                             } elseif ($diff < 0) {
                                 $record->decrement('credits', abs($diff));
                             }
@@ -345,7 +345,7 @@ class UserResource extends Resource
                             $records->each(function (User $user) {
                                 $user->update(['is_active' => true]);
                                 app(MailService::class)->sendToUser('account_unlocked', $user, [
-                                    'login_url' => url('/login'),
+                                    'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
                                 ]);
                             });
                         }),

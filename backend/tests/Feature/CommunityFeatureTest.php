@@ -1039,6 +1039,11 @@ class CommunityFeatureTest extends TestCase
             $job->publish('public');
         }
 
+        // Warm request-scoped caches (e.g. the IP-whitelist cache in ThrottleApiRequests)
+        // so BOTH measured requests are in steady state — otherwise the first request pays a
+        // one-time cache-miss DB query and the two counts differ spuriously (not an N+1).
+        $this->getJson('/api/v1/community/assets')->assertOk();
+
         // Measure ONLY the feed request (creation queries excluded).
         \Illuminate\Support\Facades\DB::flushQueryLog();
         \Illuminate\Support\Facades\DB::enableQueryLog();

@@ -38,7 +38,7 @@ class RenderJobResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->colors([
+                    ->color(fn (string $state): string => match ($state) {
                         'created' => 'warning',
                         'queued' => 'gray',
                         'validating' => 'info',
@@ -48,7 +48,8 @@ class RenderJobResource extends Resource
                         'failed' => 'danger',
                         'cancelled' => 'danger',
                         'dead' => 'danger',
-                    ])
+                        default => 'gray',
+                    })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'created' => 'Đã tạo',
                         'queued' => 'Đang chờ',

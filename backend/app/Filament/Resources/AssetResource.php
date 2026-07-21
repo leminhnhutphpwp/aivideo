@@ -342,9 +342,10 @@ class AssetResource extends Resource
         }
 
         try {
+            $previousLocation = $asset->storage_location;
             $r2->delete($asset->path);
             $asset->update(['storage_location' => 'minio']);
-            Notification::make()->title('Đã xoá khỏi R2' . ($asset->storage_location === 'r2' ? ', file đã kéo về MinIO' : ''))->success()->send();
+            Notification::make()->title('Đã xoá khỏi R2' . ($previousLocation === 'r2' ? ', file đã kéo về MinIO' : ''))->success()->send();
         } catch (\Exception $e) {
             Notification::make()->title('Lỗi: ' . $e->getMessage())->danger()->send();
         }

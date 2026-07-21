@@ -32,10 +32,12 @@ class CheckExpiredSubscriptions implements ShouldQueue
             ->get();
 
         foreach ($inGrace as $user) {
-            $daysSinceExpiry = now()->diffInDays($user->plan_expires_at, false);
+            // Carbon 3: diff là số có dấu. plan_expires_at đã ở quá khứ nên cần trị
+            // tuyệt đối để có "số ngày kể từ khi hết hạn" luôn dương.
+            $daysSinceExpiry = (int) $user->plan_expires_at->diffInDays(now(), true);
 
             // Send reminder at day 3 of grace period
-            if ((int) $daysSinceExpiry === self::GRACE_REMINDER_DAYS) {
+            if ($daysSinceExpiry === self::GRACE_REMINDER_DAYS) {
                 $this->sendReminderEmail($user);
             }
         }
@@ -61,7 +63,7 @@ class CheckExpiredSubscriptions implements ShouldQueue
 
             app(\App\Services\MailService::class)->sendToUser('plan_expired', $user, [
                 'old_plan' => $oldPlanName,
-                'login_url' => url('/login'),
+                'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
             ]);
 
             $count++;
@@ -78,7 +80,7 @@ class CheckExpiredSubscriptions implements ShouldQueue
             'plan_name' => $user->plan?->name ?? 'Unknown',
             'expiry_date' => $user->plan_expires_at?->format('d/m/Y') ?? 'N/A',
             'grace_end' => $user->plan_expires_at?->addDays(self::GRACE_DAYS)->format('d/m/Y') ?? 'N/A',
-            'login_url' => url('/login'),
+            'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
         ]);
     }
 }

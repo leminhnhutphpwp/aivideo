@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RegistrationLogResource\Pages;
 use App\Models\RegistrationLog;
 use Filament\Actions;
+use Filament\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -92,12 +94,13 @@ class RegistrationLogResource extends Resource
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([
-                    Actions\Action::make('block_selected_ips')
+                    BulkAction::make('block_selected_ips')
                         ->label('Chặn IP đã chọn')
                         ->icon('heroicon-o-no-symbol')
                         ->color('danger')
-                        ->action(fn (array $records) => 
-                            collect($records)->pluck('ip_address')->unique()->each(fn ($ip) =>
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) =>
+                            $records->pluck('ip_address')->unique()->each(fn ($ip) =>
                                 app(\App\Services\AntiAbuse\AntiAbuseService::class)->blockIp($ip)
                             )
                         ),

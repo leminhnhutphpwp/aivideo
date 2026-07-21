@@ -6,6 +6,15 @@
 
 ## ✅ Recently Completed
 
+### Multi-agent bug sweep ĐỢT 3 — ~37 lỗi fixed (2026-07-21) — ✅ Done, branch `fix/bug-sweep-round3`
+- **Cách làm**: 5 agent phân tích (Filament admin · email/notifications · web notifications/onboarding · landing/SEO/legal · moderation/ratelimit) → 5 agent fix → final sweep.
+- **Verify**: web tsc 0 · **backend full suite 602 passed** (2 fail: SocialiteTest = **pre-existing**, cũng fail trên main; CommunityFeatureTest query-count = regression whitelist-cache của tôi → đã fix bằng warmup request).
+- **HIGH**: notifications list click 404 (`id`→`uuid`) · **Carbon 3 sign bug** (reset/verify code & subscription grace **không bao giờ expire**) · ManualCreditNotification channel `database` crash → mail-only · SEO canonical trỏ hết homepage · legal pages placeholder đang index → noindex + gỡ sitemap (chờ data thật).
+- **MED**: Filament badge màu (`->colors()` ngược) · bulk block-IP hỏng · `/ai/enhance-prompt` + `ttsPreview` thiếu moderation · leak lỗi daemon host/port · email link APP_URL→FRONTEND_URL · topbar unread badge stale → shared store · SendNotificationJob dup email (chunk) · nav "Âm thanh" dead.
+- **LOW**: Filament nav badge "0" · cho phép trừ credits (số âm) · ErrorSanitizer regex over-match ("500 credits") + case-insensitive · whitelist cache 5′ · footer hover · CTA login-aware · body notif sanitize · dead code (10 component + NotificationBell) · forgotPassword soft-deleted · SendMailJob retry/backoff.
+- **⚠️ Cần owner quyết**: (1) trang pháp lý — cấp email/SĐT/MST/tên cty/ngày hiệu lực thật để bật lại index; (2) **welcome credits**: Google/email signup hiện tạo user 0 credits, welcome chỉ đến khi có coupon `is_welcome`/signup-event trong DB — SocialiteTest kỳ vọng 100 vô điều kiện (test cũ pre-Events). Cần xác nhận: welcome mặc định 100, hay chỉ khi admin cấu hình campaign?
+- **Worklogs**: `backend/worklogs/2026-07-21-{filament-resource,carbon-expiry-notification-mail,ai-proxy-sanitizer-throttle}-*.md`, `apps/web/worklogs/2026-07-21-{notifications,legal-seo-nav-footer}-*.md`.
+
 ### Multi-agent bug sweep ĐỢT 2 — ~36 lỗi fixed (2026-07-21) — ✅ Done, branch `fix/bug-sweep-2026-07-21`
 - **Cách làm**: 5 agent phân tích sâu (auth/settings · image/audio studio · realtime/Reverb · payments · daemon lifecycle) → 6 agent fix song song → final sweep.
 - **Verify**: web tsc 0 · daemon tsc 0 · migration UNIQUE reference_code (0 dup) · daemon healthy + cột `webhook_delivered` · **backend test 298 passed / 1150 assertions**.

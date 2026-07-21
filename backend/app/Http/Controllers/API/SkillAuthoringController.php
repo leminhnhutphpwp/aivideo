@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Services\SkillAuthoringService;
+use App\Support\ErrorSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -39,7 +40,7 @@ class SkillAuthoringController extends Controller
 
             return response()->json(['success' => true, 'data' => $draft], 201);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 422);
+            return response()->json(['success' => false, 'error' => ErrorSanitizer::publicMessage($e->getMessage())], 422);
         }
     }
 

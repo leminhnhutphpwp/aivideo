@@ -318,7 +318,7 @@ class AuthController extends Controller
         $user->assignRole('panel_user');
 
         app(MailService::class)->sendToUser('welcome', $user, [
-            'login_url' => url('/login'),
+            'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
         ]);
 
         app(MailService::class)->sendToUser('email_verify', $user, ['code' => $code]);
@@ -406,7 +406,7 @@ class AuthController extends Controller
     public function forgotPassword(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'string', 'email', 'exists:users'],
+            'email' => ['required', 'string', 'email', \Illuminate\Validation\Rule::exists('users')->whereNull('deleted_at')],
         ]);
 
         if ($validator->fails()) {
@@ -466,7 +466,8 @@ class AuthController extends Controller
             ], 400);
         }
 
-        if (now()->diffInMinutes($record->created_at) > 10) {
+        // Carbon 3: signed diff — dùng so sánh tuyệt đối để mã cũ >10 phút bị hết hạn.
+        if (\Illuminate\Support\Carbon::parse($record->created_at)->lt(now()->subMinutes(10))) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             return response()->json([
                 'success' => false,
@@ -507,7 +508,8 @@ class AuthController extends Controller
             ], 400);
         }
 
-        if (now()->diffInMinutes($record->created_at) > 10) {
+        // Carbon 3: signed diff — dùng so sánh tuyệt đối để mã cũ >10 phút bị hết hạn.
+        if (\Illuminate\Support\Carbon::parse($record->created_at)->lt(now()->subMinutes(10))) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             return response()->json([
                 'success' => false,
@@ -582,7 +584,8 @@ class AuthController extends Controller
             ], 400);
         }
 
-        if (!$user->email_verification_code_sent_at || now()->diffInMinutes($user->email_verification_code_sent_at) > 10) {
+        // Carbon 3: signed diff — dùng so sánh tuyệt đối để mã cũ >10 phút bị hết hạn.
+        if (!$user->email_verification_code_sent_at || $user->email_verification_code_sent_at->lt(now()->subMinutes(10))) {
             return response()->json([
                 'success' => false,
                 'message' => 'Mã xác thực đã hết hạn',
