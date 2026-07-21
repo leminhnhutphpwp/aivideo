@@ -141,6 +141,12 @@ class StoryboardController extends Controller
             'style_guide' => 'nullable|array',
             'render_mode' => 'nullable|string|in:multi_scene,single_flow,storyboard_image',
             'total_duration' => 'nullable|integer|min:3|max:120',
+            'compiled_prompt' => 'nullable|string',
+            'camera_movement' => 'nullable|string',
+            'style' => 'nullable|string',
+            'mood' => 'nullable|string',
+            'lighting' => 'nullable|string',
+            'narration' => 'nullable|string',
             'driving_audio' => 'nullable|string',
             'first_frame_image' => 'nullable|string',
             'last_frame_image' => 'nullable|string',
@@ -162,6 +168,7 @@ class StoryboardController extends Controller
             'scenes.*.reference_image' => 'nullable|string',
             'scenes.*.last_frame_image' => 'nullable|string',
             'scenes.*.narration' => 'nullable|string',
+            'scenes.*.seed' => 'nullable|integer',
             'scenes.*.aspect_ratio' => 'required|string|in:16:9,9:16,1:1,4:3',
             'scenes.*.resolution' => 'required|string|in:720p,1080p',
             'references' => 'nullable|array',
@@ -192,6 +199,11 @@ class StoryboardController extends Controller
         if (! $isPremium) {
             if ($request->filled('voice_mood') || $request->filled('voice') || $request->filled('background_music')) {
                 return response()->json(['message' => 'Gói của bạn không hỗ trợ giọng đọc. Vui lòng nâng cấp lên Pro.'], 403);
+            }
+            // Top-level narration (persisted for single_flow/storyboard_image) must be gated too —
+            // free users default to single_flow, so without this they'd bypass the premium check.
+            if ($request->filled('narration')) {
+                return response()->json(['message' => 'Gói của bạn không hỗ trợ thuyết minh (narration). Vui lòng nâng cấp lên Pro.'], 403);
             }
             if ($request->filled('references')) {
                 return response()->json(['message' => 'Gói của bạn không hỗ trợ tham chiếu (references). Vui lòng nâng cấp lên Pro.'], 403);
@@ -393,6 +405,24 @@ class StoryboardController extends Controller
 
         if ($resp = $this->guardContent($request)) {
             return $resp;
+        }
+
+        // Mirror store()'s narration gate — update() also persists narration (top-level for
+        // single_flow/storyboard_image, per-scene for multi_scene). Without this a free user
+        // could bypass the "không hỗ trợ thuyết minh" restriction by editing a draft.
+        $user = $request->user();
+        $plan = $user->plan;
+        $isPremium = $plan && ! $plan->isFree();
+
+        if (! $isPremium) {
+            if ($request->filled('narration')) {
+                return response()->json(['message' => 'Gói của bạn không hỗ trợ thuyết minh (narration). Vui lòng nâng cấp lên Pro.'], 403);
+            }
+            foreach ($request->scenes ?? [] as $sceneData) {
+                if (! empty($sceneData['narration'])) {
+                    return response()->json(['message' => 'Gói của bạn không hỗ trợ thuyết minh (narration). Vui lòng nâng cấp lên Pro.'], 403);
+                }
+            }
         }
 
         DB::beginTransaction();
@@ -640,6 +670,12 @@ class StoryboardController extends Controller
                 $compiledPrompt = $this->aiPromptCompiler->compile($storyboard);
                 $storyboard->update(['compiled_prompt' => $compiledPrompt]);
             } catch (\Throwable $e) {
+                // Mirror the main render catch: retry() reserves credits before delegating here,
+                // so a compile failure must release them and mark failed — otherwise the
+                // storyboard is left 'draft' with credits held and render_attempts un-incremented.
+                $storyboard->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
+                $this->creditService->releaseStoryboardReserved($storyboard);
+
                 return $this->systemError('Failed to auto-compile prompt before rendering', $e, ['storyboard_id' => $storyboard->id]);
             }
         }
@@ -798,6 +834,21 @@ class StoryboardController extends Controller
             return response()->json(['message' => 'Không tìm thấy file video gốc'], 404);
         }
 
+        // Moderate the voiceover text (sent to TTS) like every other user-authored text path.
+        if ($this->contentFilter->containsProhibitedContent($voiceoverText)) {
+            Log::warning('Voiceover text blocked by filter', [
+                'user_id' => auth('api')->id(),
+                'storyboard_id' => $storyboard->id,
+                'term' => $this->contentFilter->getProhibitedTerm($voiceoverText),
+            ]);
+
+            return response()->json([
+                'message' => 'Nội dung mô tả vi phạm tiêu chuẩn an toàn của nền tảng. Vui lòng chỉnh sửa và thử lại.',
+            ], 422);
+        }
+
+        $projectId = null;
+
         try {
             $projectId = $this->daemonClient->createProject(
                 "voiceover-{$storyboard->uuid}-".Str::uuid(),
@@ -860,6 +911,19 @@ class StoryboardController extends Controller
             ]);
         } catch (\Throwable $e) {
             return $this->systemError('Failed to add voiceover', $e, ['storyboard_id' => $storyboard->id]);
+        } finally {
+            // Always clean up the temporary daemon project (runs even when the try returns),
+            // otherwise voiceover projects accumulate as orphans. Best-effort — never surface.
+            if ($projectId) {
+                try {
+                    $this->daemonClient->deleteProject($projectId);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to delete voiceover daemon project', [
+                        'project_id' => $projectId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         }
     }
 

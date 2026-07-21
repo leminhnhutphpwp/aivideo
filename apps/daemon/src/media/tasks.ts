@@ -82,6 +82,7 @@ export function migrateMediaTasks(db: Database.Database): void {
       status TEXT NOT NULL CHECK (status IN ('queued','running','done','failed','interrupted')),
       surface TEXT, model TEXT, progress_json TEXT NOT NULL DEFAULT '[]',
       file_json TEXT, error_json TEXT, metadata_json TEXT,
+      webhook_delivered INTEGER NOT NULL DEFAULT 0,
       started_at INTEGER NOT NULL, ended_at INTEGER,
       created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
       FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
@@ -90,6 +91,12 @@ export function migrateMediaTasks(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_media_tasks_status ON media_tasks(status, updated_at DESC);
   `);
   try { db.exec('ALTER TABLE media_tasks ADD COLUMN metadata_json TEXT'); } catch {/* migration */}
+  try { db.exec('ALTER TABLE media_tasks ADD COLUMN webhook_delivered INTEGER NOT NULL DEFAULT 0'); } catch {/* migration */}
+}
+
+/** Mark a task's terminal webhook as delivered so boot reconciliation won't replay it. */
+export function markMediaTaskWebhookDelivered(db: Database.Database, id: string): void {
+  db.prepare(`UPDATE media_tasks SET webhook_delivered = 1 WHERE id = ?`).run(id);
 }
 
 export function insertMediaTask(db: Database.Database, input: MediaTaskInsert): MediaTaskRow {
@@ -144,7 +151,7 @@ export function reconcileMediaTasksOnBoot(db: Database.Database, options: { term
   const tx = db.transaction(() => {
     const pendingIds = db.prepare(`SELECT id FROM media_tasks WHERE status IN ('queued','running')`).all() as { id: string }[];
     const interrupted = db.prepare(`UPDATE media_tasks SET status='interrupted', error_json=?, ended_at=COALESCE(ended_at,?), updated_at=? WHERE status IN ('queued','running')`).run(JSON.stringify(interruptedError), now, now).changes;
-    const terminalIds = db.prepare(`SELECT id FROM media_tasks WHERE status IN ('done','failed') AND COALESCE(ended_at,updated_at) >= ?`).all(cutoff) as { id: string }[];
+    const terminalIds = db.prepare(`SELECT id FROM media_tasks WHERE status IN ('done','failed') AND COALESCE(webhook_delivered,0) = 0 AND COALESCE(ended_at,updated_at) >= ?`).all(cutoff) as { id: string }[];
     const deleted = db.prepare(`DELETE FROM media_tasks WHERE status IN ('done','failed','interrupted') AND COALESCE(ended_at,updated_at) < ?`).run(cutoff).changes;
     return { interrupted, deleted, pendingIds: pendingIds.map(r => r.id), terminalIds: terminalIds.map(r => r.id) };
   });

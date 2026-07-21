@@ -1,5 +1,23 @@
+# Dev image for the media daemon (execution plane).
+# ffmpeg + the native build toolchain + node_modules are baked at BUILD time (Debian/glibc,
+# matching the prod Dockerfile) so container (re)creates NEVER reinstall them at runtime.
+# This fixes the apk-stall that used to leave the daemon `unhealthy` on every recreate.
 FROM node:24-slim
-RUN apt-get update -qq && apt-get install -y -qq ffmpeg && rm -rf /var/lib/apt/lists/*
+
+ENV DEBIAN_FRONTEND=noninteractive
+# ffmpeg = media pipeline; python3/make/g++ = compile better-sqlite3 (^12 has no prebuilt).
+RUN apt-get update -qq \
+    && apt-get install -y -qq --no-install-recommends \
+       ffmpeg python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
+
+# Install deps here — at build time there is NO container mem_limit, so the native
+# better-sqlite3 compile can't OOM. The runtime anon volume at /app/node_modules seeds
+# from this baked copy, so the container starts node directly (no runtime npm install).
+COPY package.json package-lock.json ./
+RUN npm ci
+
 EXPOSE 7456
 CMD ["npm", "run", "dev"]

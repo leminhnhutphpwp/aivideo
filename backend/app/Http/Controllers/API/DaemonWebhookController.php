@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Events\JobProgress;
 use App\Events\StoryboardProgressUpdated;
 use App\Jobs\HandleJobCompletion;
 use App\Jobs\HandleJobFailure;
@@ -71,6 +72,11 @@ class DaemonWebhookController extends Controller
 
         // Handle progress-only (non-terminal) webhooks
         if ($status === 'running') {
+            $progressList = (isset($data['progress']) && is_array($data['progress'])) ? $data['progress'] : [];
+            $latest = !empty($progressList) ? (string) end($progressList) : null;
+
+            broadcast(new JobProgress($renderJob, $latest, 'running'));
+
             return response()->json(['message' => 'Progress recorded']);
         }
 

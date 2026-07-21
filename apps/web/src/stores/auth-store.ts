@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { laravel } from '@/lib/api/client';
+import { resetEcho } from '@/lib/echo';
 
 interface Plan {
   slug: string;
@@ -45,8 +46,12 @@ interface AuthState {
   loading: boolean;
   setAuth: (token: string, user: User) => void;
   setUser: (user: User) => void;
+  /** Update just the credit balance (e.g. from the `.credits.updated` realtime event). */
+  setCredits: (credits: number) => void;
   logout: () => void;
-  hydrate: () => void;
+  /** Hydrates auth from storage and wires a cross-tab `storage` listener.
+   * Returns a disposer that removes the listener (call in effect cleanup). */
+  hydrate: () => (() => void) | void;
   refreshToken: () => Promise<boolean>;
 }
 
@@ -62,8 +67,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setUser: (user) => set({ user }),
 
+  setCredits: (credits) =>
+    set((s) => (s.user ? { user: { ...s.user, credits } } : {})),
+
   logout: () => {
     localStorage.removeItem('auth_token');
+    // Tear down the realtime socket so the next login builds a fresh one bound
+    // to the new user/token (the singleton would otherwise stay on the old user).
+    resetEcho();
     set({ token: null, user: null, loading: false });
   },
 
@@ -71,6 +82,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const newToken = await laravel.refresh();
       localStorage.setItem('auth_token', newToken);
+      // No resetEcho() needed: the Echo auth header is a getter that reads the
+      // current token per /api/broadcasting/auth request, so the live socket
+      // keeps its channel subscriptions and picks up the rotated token.
       set({ token: newToken });
       return true;
     } catch {
@@ -108,6 +122,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const newToken = e.newValue;
 
         if (newToken && !currentToken) {
+          // Logged in on another tab — hydrate the session here too.
           (async () => {
             try {
               const user = await laravel.me();
@@ -117,10 +132,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
           })();
         } else if (!newToken && currentToken) {
+          // Logged out on another tab.
           set({ token: null, user: null, loading: false });
+        } else if (newToken && newToken !== currentToken) {
+          // Token rotated on another tab (refresh) — adopt the new token.
+          set({ token: newToken });
         }
       };
       window.addEventListener('storage', handler);
+      return () => window.removeEventListener('storage', handler);
     }
   },
 }));

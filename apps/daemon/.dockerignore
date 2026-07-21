@@ -1,0 +1,12 @@
+# Keep the build context tiny — source is bind-mounted at runtime, and node_modules
+# is (re)built inside the image. Only package.json + package-lock.json are COPYied.
+node_modules
+dist
+build
+data
+*.sqlite
+*.sqlite3
+*.log
+.git
+.env
+.env.*

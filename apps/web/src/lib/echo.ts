@@ -33,13 +33,29 @@ export function getEcho(): Echo<'reverb'> | null {
     authEndpoint: `${laravelUrl}/api/broadcasting/auth`,
     auth: {
       headers: {
-        Authorization: `Bearer ${getToken()}`,
+        // Getter so every /api/broadcasting/auth request reads the CURRENT
+        // token — survives the ~50-min refresh without tearing down the socket.
+        get Authorization() {
+          return `Bearer ${getToken()}`;
+        },
         Accept: 'application/json',
       },
     },
   });
 
   return echoInstance;
+}
+
+/**
+ * Disconnect and drop the singleton so the next `getEcho()` rebuilds a fresh
+ * socket. Call on logout (drops the previous user's connection + channel
+ * subscriptions); the header getter above already covers token refresh.
+ */
+export function resetEcho(): void {
+  if (echoInstance) {
+    echoInstance.disconnect();
+    echoInstance = null;
+  }
 }
 
 export function subscribeStoryboard(
@@ -66,6 +82,10 @@ export function subscribeUserJobs(userUuid: string, callbacks: {
   onCompleted?: (data: any) => void;
   onFailed?: (data: any) => void;
   onQueued?: (data: any) => void;
+  /** `.credits.updated` payload: `{ balance: number }`. */
+  onCredits?: (data: { balance: number }) => void;
+  /** `.job.cancelled` payload: RenderJob props (e.g. `{ renderJob: { uuid, ... } }`). */
+  onCancelled?: (data: any) => void;
 }): (() => void) | null {
   const echo = getEcho();
   if (!echo) return null;
@@ -76,12 +96,16 @@ export function subscribeUserJobs(userUuid: string, callbacks: {
   if (callbacks.onProgress) channel.listen('.job.progress', callbacks.onProgress);
   if (callbacks.onCompleted) channel.listen('.job.completed', callbacks.onCompleted);
   if (callbacks.onFailed) channel.listen('.job.failed', callbacks.onFailed);
+  if (callbacks.onCancelled) channel.listen('.job.cancelled', callbacks.onCancelled);
+  if (callbacks.onCredits) channel.listen('.credits.updated', callbacks.onCredits);
 
   return () => {
     if (callbacks.onQueued) channel.stopListening('.job.queued');
     if (callbacks.onProgress) channel.stopListening('.job.progress');
     if (callbacks.onCompleted) channel.stopListening('.job.completed');
     if (callbacks.onFailed) channel.stopListening('.job.failed');
+    if (callbacks.onCancelled) channel.stopListening('.job.cancelled');
+    if (callbacks.onCredits) channel.stopListening('.credits.updated');
     echo.leave(`user.${userUuid}`);
   };
 }

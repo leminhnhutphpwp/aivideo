@@ -8,6 +8,7 @@ import { RemixModal } from '@/components/community/remix-modal';
 import { Compass, Trophy, Heart, ArrowLeft, Users, Flame, Award, ShieldCheck, UserPlus, UserMinus } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'motion/react';
 import { AssetCard, UserProfile } from '@/lib/api/community-types';
 import { laravel } from '@/lib/api/client';
 
@@ -187,9 +188,11 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
         )}
       </div>
 
-      {isDetailsOpen && activeAsset && (
-        <RemixModal asset={activeAsset} isOpen={isDetailsOpen} onClose={handleCloseDetails} />
-      )}
+      <AnimatePresence>
+        {isDetailsOpen && activeAsset && (
+          <RemixModal key={activeAsset.uuid} asset={activeAsset} isOpen={isDetailsOpen} onClose={handleCloseDetails} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

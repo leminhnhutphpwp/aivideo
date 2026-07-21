@@ -67,8 +67,13 @@ class CreditService
         $totalRefund = 0;
 
         DB::transaction(function () use ($job, &$totalRefund) {
+            // Lock the reserved rows so overlapping release paths (timeout sweep,
+            // stuck-credit release, failure webhook, retry) can't double-refund.
+            // A concurrent call blocks here, then re-reads type='refunded' → empty
+            // set → refunds 0. The WHERE type='reserved' is the re-check.
             $txns = CreditTransaction::where('render_job_id', $job->id)
                 ->where('type', 'reserved')
+                ->lockForUpdate()
                 ->get();
 
             foreach ($txns as $txn) {
@@ -120,8 +125,11 @@ class CreditService
         $totalRefund = 0;
 
         DB::transaction(function () use ($storyboard, &$totalRefund) {
+            // Lock reserved rows so overlapping release paths can't double-refund.
+            // Concurrent call blocks, then re-reads type='refunded' → empty → 0.
             $txns = CreditTransaction::where('storyboard_id', $storyboard->id)
                 ->where('type', 'reserved')
+                ->lockForUpdate()
                 ->get();
 
             foreach ($txns as $txn) {

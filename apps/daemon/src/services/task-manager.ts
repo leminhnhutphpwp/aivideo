@@ -24,6 +24,19 @@ export type LiveMediaTask = {
 
 const liveTasks = new Map<string, LiveMediaTask>();
 
+const TERMINAL_STATUSES = new Set(['done', 'failed', 'interrupted']);
+// Grace period before a terminal task is dropped from the in-memory map. Long enough
+// for in-flight long-poll/GET consumers to still read it; the terminal state is already
+// persisted to SQLite and served from there afterwards.
+const LIVE_TASK_EVICT_MS = 60000;
+
+// Optional db-bound hook, wired at boot, invoked when a TERMINAL webhook is delivered so
+// the "webhook_delivered" flag can be persisted (prevents boot re-fire of old callbacks).
+let onWebhookDelivered: ((taskId: string) => void) | null = null;
+export function setWebhookDeliveredHandler(fn: (taskId: string) => void): void {
+  onWebhookDelivered = fn;
+}
+
 export function isInternalHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
   if (normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '0.0.0.0' || normalized === '[::1]') return true;
@@ -34,7 +47,7 @@ export function isInternalHost(hostname: string): boolean {
   return false;
 }
 
-function sendHttpRequest(url: string, body: string, headers: Record<string, string>, timeoutMs: number): Promise<{ ok: boolean; message: string }> {
+function sendHttpRequest(url: string, body: string, headers: Record<string, string>, timeoutMs: number): Promise<{ ok: boolean; retryable: boolean; message: string }> {
   return new Promise((resolve) => {
     const requester = url.startsWith('https:') ? httpsRequest : httpRequest;
     const req = requester(url, { method: 'POST', headers, timeout: timeoutMs });
@@ -42,15 +55,20 @@ function sendHttpRequest(url: string, body: string, headers: Record<string, stri
       let data = '';
       res.on('data', (chunk: Buffer) => { data += chunk.toString(); });
       res.on('end', () => {
-        resolve({ ok: res.statusCode !== undefined && res.statusCode < 500, message: `HTTP ${res.statusCode}` });
+        const status = res.statusCode ?? 0;
+        // 2xx/3xx = delivered. 4xx = rejected (bad HMAC / validation) — a
+        // permanent failure, retrying won't help. 5xx / network = retryable.
+        const ok = status >= 200 && status < 400;
+        const retryable = status >= 500 || status === 0;
+        resolve({ ok, retryable, message: `HTTP ${res.statusCode}` });
       });
     });
     req.on('error', (e: Error) => {
-      resolve({ ok: false, message: e.message });
+      resolve({ ok: false, retryable: true, message: e.message });
     });
     req.on('timeout', () => {
       req.destroy();
-      resolve({ ok: false, message: 'timeout' });
+      resolve({ ok: false, retryable: true, message: 'timeout' });
     });
     req.write(body);
     req.end();
@@ -64,6 +82,16 @@ function fireWebhookWithRetry(task: LiveMediaTask, callbackUrl: string, body: st
   sendHttpRequest(callbackUrl, body, headers, 15000).then((result) => {
     if (result.ok) {
       logger.info('WEBHOOK', `Webhook sent for task ${task.id}`, { url: callbackUrl });
+      // Persist delivery for terminal webhooks only, so boot reconciliation won't replay
+      // them. Progress ('running') webhooks are transient and must not set the flag.
+      if (onWebhookDelivered && TERMINAL_STATUSES.has(task.status)) {
+        try { onWebhookDelivered(task.id); } catch {/* best-effort */}
+      }
+      return;
+    }
+    // 4xx (rejected HMAC / validation) — permanent failure, do NOT retry.
+    if (!result.retryable) {
+      logger.error('WEBHOOK', `Webhook rejected for task ${task.id} (non-retryable)`, { url: callbackUrl, error: result.message });
       return;
     }
     const attemptCount = MAX_RETRIES - retries + 1;
@@ -78,6 +106,8 @@ function fireWebhookWithRetry(task: LiveMediaTask, callbackUrl: string, body: st
 }
 
 export function fireWebhook(task: LiveMediaTask): void {
+  // Terminal state — drop the progress-throttle entry so the map doesn't leak.
+  lastProgressWebhook.delete(task.id);
   const callbackUrl = task.metadata?.callbackUrl;
   if (!callbackUrl) return;
 
@@ -230,6 +260,15 @@ export function appendTaskProgress(task: LiveMediaTask, line: string): void {
 export function notifyTaskWaiters(task: LiveMediaTask): void {
   for (const w of task.waiters) w();
   task.waiters.clear();
+  // Evict terminal tasks from the in-memory map to prevent unbounded growth. Deferred so
+  // late long-poll/GET consumers can still read the entry; state is already persisted.
+  if (TERMINAL_STATUSES.has(task.status)) {
+    const timer = setTimeout(() => {
+      const current = liveTasks.get(task.id);
+      if (current && TERMINAL_STATUSES.has(current.status)) liveTasks.delete(task.id);
+    }, LIVE_TASK_EVICT_MS);
+    timer.unref?.();
+  }
 }
 
 export function getLiveMediaTask(taskId: string): LiveMediaTask | undefined {

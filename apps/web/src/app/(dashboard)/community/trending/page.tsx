@@ -7,6 +7,7 @@ import { RemixModal } from '@/components/community/remix-modal';
 import { Compass, Trophy, Heart, Flame, Star, ArrowUpRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'motion/react';
 import { AssetCard, CreatorSummary } from '@/lib/api/community-types';
 import { laravel } from '@/lib/api/client';
 
@@ -196,9 +197,11 @@ export default function TrendingPage() {
         )
       )}
 
-      {isDetailsOpen && activeAsset && (
-        <RemixModal asset={activeAsset} isOpen={isDetailsOpen} onClose={handleCloseDetails} />
-      )}
+      <AnimatePresence>
+        {isDetailsOpen && activeAsset && (
+          <RemixModal key={activeAsset.uuid} asset={activeAsset} isOpen={isDetailsOpen} onClose={handleCloseDetails} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

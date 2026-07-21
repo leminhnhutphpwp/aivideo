@@ -14,8 +14,9 @@ class JobProgress implements ShouldBroadcast
 
     public function __construct(
         public RenderJob $renderJob,
-        public int $progress,
-        public string $stage
+        public ?string $progress = null,
+        public string $status = 'running',
+        public ?string $stage = null,
     ) {}
 
     public function broadcastOn(): Channel
@@ -32,8 +33,9 @@ class JobProgress implements ShouldBroadcast
     {
         return [
             'job_id' => $this->renderJob->uuid,
-            'progress' => $this->progress,
+            'status' => $this->status,
             'stage' => $this->stage,
+            'progress' => $this->progress,
         ];
     }
 }

@@ -4,6 +4,26 @@
 
 ---
 
+## ✅ Recently Completed
+
+### Multi-agent bug sweep ĐỢT 2 — ~36 lỗi fixed (2026-07-21) — ✅ Done, branch `fix/bug-sweep-2026-07-21`
+- **Cách làm**: 5 agent phân tích sâu (auth/settings · image/audio studio · realtime/Reverb · payments · daemon lifecycle) → 6 agent fix song song → final sweep.
+- **Verify**: web tsc 0 · daemon tsc 0 · migration UNIQUE reference_code (0 dup) · daemon healthy + cột `webhook_delivered` · **backend test 298 passed / 1150 assertions**.
+- **HIGH**: private-channel auth bypass (`channels.php` trả mảng luôn truthy) · đổi/reset mật khẩu hỏng 100% (sai field/không gửi code) · **SePay double-credit race** (thêm UNIQUE + lockForUpdate) · JobProgress không broadcast (đã wire) · daemon cancel race (double webhook).
+- **MED**: hardcoded creds thật trong login · double-refund race (lockForUpdate) · Echo giữ JWT cũ (header getter + resetEcho) · giá sai user premium (effect deps) · audio voice guard · MAX_IMAGES · 2 blob leak · liveTasks leak · boot webhook replay 24h · ffmpeg merge timeout.
+- **LOW**: tolerance 5%→1% · MAX_PENDING atomic · log env · listener credits/cancelled · VoiceSelector · qwen/openai provider · settings toggle · OAuth token cleanup…
+- **Worklogs**: `backend/worklogs/2026-07-21-{channel-auth-and-jobprogress-realtime,sepay-credit-money-path-race-fixes}.md`, `apps/web/worklogs/2026-07-21-{auth-settings,realtime-stale-jwt,studio}-*.md`, `apps/daemon/worklogs/2026-07-21-media-engine-bugfixes.md`.
+- **Ghi chú**: audio studio chưa có price-preview (để TODO, product decision); `jobs`/`projects[id]` pages có thể thêm `onCancelled` (plumbing sẵn).
+
+### Multi-agent bug sweep — 34 lỗi vặt fixed (2026-07-21) — ✅ Done, branch `fix/bug-sweep-2026-07-21`
+- **Cách làm**: 5 agent phân tích (read-only) → manager tổng hợp 34 findings → user duyệt "fix tất cả" → 6 agent fix song song theo cụm → final sweep.
+- **Kết quả verify**: web `tsc` 0 lỗi · daemon `tsc` 0 lỗi · backend test 51+33+59+28 passed · webhook endpoint trả 2xx/5xx/4xx khớp logic retry mới của daemon.
+- **Nổi bật**: Like gọi API 2-3 lần (race) · route `/credits` 404 → `/billing` · daemon `safeJoin` path-traversal · webhook coi 4xx=đã-gửi (nuốt lỗi HMAC) · R2V nhãn "First frame" sai (→ "Last frame") · voice reindex mất voice · `window.LARAVEL_URL` undefined (prod showcase trắng) · coupon race 500+orphan · top-level `narration` lách gate premium · auto-compile rò credit.
+- **Worklogs**: `apps/web/worklogs/2026-07-21-{studio-video,nav-billing-authstore,dashboard-page,community-like-and-modal}-*.md`, `apps/daemon/worklogs/2026-07-21-media-daemon-bugfixes.md`, `backend/worklogs/2026-07-21-controller-bugfixes-coupon-storyboard.md`.
+- Cũng trong ngày: remix routing (query bị redirect nuốt), ẩn credits trên project đã tạo (card + flow), `productionBrowserSourceMaps:false`, resource limit 4 stack Docker + bake ffmpeg vào daemon dev image.
+
+---
+
 ## Current Sprint
 
 ### Events (chiến dịch) + mã coupon duy nhất theo user + sinh nhật auto — ✅ Done + E2E (2026-07-20)

@@ -26,7 +26,6 @@ function ResetPasswordPage() {
   const emailFromUrl = searchParams.get('email') || '';
   const [email, setEmail] = useState(emailFromUrl);
   const [code, setCode] = useState('');
-  const [resetToken, setResetToken] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [step, setStep] = useState<'code' | 'reset'>('code');
@@ -42,8 +41,7 @@ function ResetPasswordPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await laravel.verifyResetCode(email, code);
-      setResetToken(res.token);
+      await laravel.verifyResetCode(email, code);
       setStep('reset');
     } catch (err: any) {
       showApiError(err, t('auth.resetCodeInvalid'));
@@ -53,11 +51,11 @@ function ResetPasswordPage() {
   };
 
   const handleResetPassword = async () => {
-    if (!password || password.length < 4) return;
+    if (!password || password.length < 8) return;
     if (password !== passwordConfirmation) return;
     setLoading(true);
     try {
-      await laravel.resetPassword(email, resetToken, password, passwordConfirmation);
+      await laravel.resetPassword(email, code, password, passwordConfirmation);
       showApiResponse({ success: true, message: t('auth.resetSuccess') });
       router.push('/');
     } catch (err: any) {
@@ -176,7 +174,7 @@ function ResetPasswordPage() {
             </div>
             <div className="block w-full animate-item-rise" style={{ animationDelay: '160ms' }}>
               <Button onClick={handleResetPassword}
-                disabled={!password || password.length < 4 || password !== passwordConfirmation || loading}
+                disabled={!password || password.length < 8 || password !== passwordConfirmation || loading}
                 className="w-full h-12 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white font-bold text-sm tracking-tight shadow-[0_10px_20px_rgba(255,90,31,0.15)] transition-all disabled:opacity-50"
               >
                 {loading ? (

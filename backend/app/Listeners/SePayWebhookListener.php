@@ -61,7 +61,14 @@ class SePayWebhookListener
         // Verify amount (allow 1% tolerance for bank fees)
         $minExpected = (int) ($upgrade->amount * 0.99);
         $maxExpected = (int) ($upgrade->amount * 1.01);
-        if ($data->transferAmount < $minExpected || $data->transferAmount > $maxExpected) return false;
+        if ($data->transferAmount < $minExpected || $data->transferAmount > $maxExpected) {
+            \Illuminate\Support\Facades\Log::warning('SePay plan upgrade amount mismatch', [
+                'transfer_code' => $transferCode,
+                'expected' => $upgrade->amount,
+                'received' => $data->transferAmount,
+            ]);
+            return false;
+        }
 
         $user = $upgrade->user;
 
@@ -119,9 +126,11 @@ class SePayWebhookListener
 
         if (!$pending) return;
 
-        // Verify amount matches (allow 5% tolerance for bank fees)
-        $minExpected = (int) ($pending->amount * 0.95);
-        $maxExpected = (int) ($pending->amount * 1.05);
+        // Verify amount matches (allow 1% tolerance for bank fees — matches the
+        // plan-upgrade path; 5% previously let a transfer up to 5% short grant
+        // full credits). Reversible business tweak.
+        $minExpected = (int) ($pending->amount * 0.99);
+        $maxExpected = (int) ($pending->amount * 1.01);
         if ($data->transferAmount < $minExpected || $data->transferAmount > $maxExpected) {
             \Illuminate\Support\Facades\Log::warning('SePay credit purchase amount mismatch', [
                 'transfer_code' => $transferCode,
@@ -133,20 +142,35 @@ class SePayWebhookListener
 
         $user = $pending->user;
 
-        // Mark as paid and add credits
-        DB::transaction(function () use ($pending, $user, $data) {
-            $pending->update([
+        // Mark as paid and add credits atomically. Lock the pending row and
+        // re-assert status==='pending' AFTER acquiring the lock so concurrent
+        // SePay retries can't both credit — the loser sees status='paid' and
+        // skips. The UNIQUE index on reference_code is the final backstop.
+        $credited = DB::transaction(function () use ($pending, $user, $data) {
+            $locked = PendingCreditPurchase::whereKey($pending->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked || $locked->status !== 'pending') {
+                return false; // already paid by a concurrent webhook — no double credit
+            }
+
+            $locked->update([
                 'status' => 'paid',
                 'reference_code' => $data->referenceCode,
             ]);
 
             $this->creditService->addCredits(
                 $user,
-                $pending->credits,
-                "SEPay nạp {$data->transferAmount}đ - {$pending->transfer_code} - {$data->gateway} - {$data->referenceCode}",
+                $locked->credits,
+                "SEPay nạp {$data->transferAmount}đ - {$locked->transfer_code} - {$data->gateway} - {$data->referenceCode}",
                 $data->referenceCode
             );
+
+            return true;
         });
+
+        if (!$credited) return;
 
         // Chốt lượt coupon giảm giá (nếu đơn có áp mã).
         app(\App\Services\CouponService::class)->completeForPurchase($pending);

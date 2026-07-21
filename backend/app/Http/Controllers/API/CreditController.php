@@ -8,11 +8,13 @@ use App\Models\CreditTransaction;
 use App\Models\PendingCreditPurchase;
 use App\Models\Plan;
 use App\Models\PlanUpgrade;
+use App\Models\User;
 use App\Services\CouponService;
 use App\Services\CreditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CreditController extends Controller
@@ -61,17 +63,6 @@ class CreditController extends Controller
 
         $user = $request->user();
 
-        $pendingCount = PendingCreditPurchase::where('user_id', $user->id)
-            ->where('status', PendingCreditPurchase::STATUS_PENDING)
-            ->count();
-
-        if ($pendingCount >= self::MAX_PENDING_PURCHASES) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bạn đang có ' . $pendingCount . ' yêu cầu nạp credits chờ xử lý. Vui lòng đợi admin duyệt trước khi tạo yêu cầu mới.',
-            ], 429);
-        }
-
         // Match amount with a DB package or use exchange_rate fallback. Credits luôn theo giá GỐC —
         // coupon chỉ giảm số tiền phải trả, không đổi số credits nhận được.
         $originalAmount = (int) $request->amount;
@@ -102,17 +93,53 @@ class CreditController extends Controller
         // Tạo mã giao dịch ngắn: DH + 8 ký tự ngẫu nhiên
         $transferCode = $this->generateTransferCode('DH');
 
-        $pending = PendingCreditPurchase::create([
-            'user_id' => $user->id,
-            'transfer_code' => $transferCode,
-            'amount' => $payableAmount, // số tiền webhook SePay đối chiếu (đã giảm)
-            'credits' => $credits,
-        ]);
+        // Tạo pending + giữ chỗ coupon trong CÙNG một transaction. reserveForPurchase() chạy
+        // assertRedeemable() dưới lockForUpdate và có thể ném CouponException nếu một request
+        // song song vừa dùng hết slot cuối trong khoảng preview→reserve. Bọc transaction để
+        // pending row được rollback (không thành đơn mồ côi), và trả 422 thay vì 500.
+        //
+        // MAX_PENDING_PURCHASES được kiểm tra BÊN TRONG transaction, sau khi khoá dòng user
+        // (lockForUpdate) để N request song song của cùng user bị tuần tự hoá — không thể vượt
+        // trần bằng cách đọc count() ngoài khoá.
+        try {
+            $result = DB::transaction(function () use ($user, $transferCode, $payableAmount, $credits, $appliedCoupon, $discount) {
+                // Khoá dòng user để tuần tự hoá các yêu cầu nạp đồng thời của cùng user.
+                User::whereKey($user->id)->lockForUpdate()->first();
 
-        // Giữ chỗ lượt coupon (nhả lại nếu đơn hết hạn/huỷ).
-        if ($appliedCoupon) {
-            $this->couponService->reserveForPurchase($appliedCoupon, $user, $pending, $discount);
+                $pendingCount = PendingCreditPurchase::where('user_id', $user->id)
+                    ->where('status', PendingCreditPurchase::STATUS_PENDING)
+                    ->count();
+
+                if ($pendingCount >= self::MAX_PENDING_PURCHASES) {
+                    return ['over_cap' => $pendingCount];
+                }
+
+                $pending = PendingCreditPurchase::create([
+                    'user_id' => $user->id,
+                    'transfer_code' => $transferCode,
+                    'amount' => $payableAmount, // số tiền webhook SePay đối chiếu (đã giảm)
+                    'credits' => $credits,
+                ]);
+
+                // Giữ chỗ lượt coupon (nhả lại nếu đơn hết hạn/huỷ).
+                if ($appliedCoupon) {
+                    $this->couponService->reserveForPurchase($appliedCoupon, $user, $pending, $discount);
+                }
+
+                return ['pending' => $pending];
+            });
+        } catch (CouponException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
+
+        if (isset($result['over_cap'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn đang có ' . $result['over_cap'] . ' yêu cầu nạp credits chờ xử lý. Vui lòng đợi admin duyệt trước khi tạo yêu cầu mới.',
+            ], 429);
+        }
+
+        $pending = $result['pending'];
 
         $bankInfo = config('sepay.bank_info', [
             'bank' => 'MB Bank',

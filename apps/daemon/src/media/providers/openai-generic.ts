@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import type { MediaContext, ProviderConfig, RenderResult, ProgressFn } from '../types.js';
+import { truncate } from '../render-utils.js';
 
 /** Whether to speak DashScope's dialect (a nested `parameters` object) instead of the
  *  flat OpenAI images schema. Enable for OpenAI-compatible proxies backed by Alibaba
@@ -100,7 +101,7 @@ export async function renderOpenAIGenericImage(ctx: MediaContext, credentials: P
 
   if (!resp.ok) {
     const text = await resp.text();
-    throw new Error(`OpenAI Generic Image Error: ${resp.status} ${text}`);
+    throw new Error(`OpenAI Generic Image Error: ${resp.status} ${truncate(text, 240)}`);
   }
 
   const data = await resp.json() as any;

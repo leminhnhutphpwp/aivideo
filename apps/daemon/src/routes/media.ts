@@ -597,6 +597,10 @@ Rules:
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.85, maxOutputTokens: 8192 } }),
         });
+        if (!r.ok) {
+          logger.error('MEDIA', 'Skill author LLM upstream error', { provider: llm.providerId, status: r.status });
+          return res.status(502).json({ error: 'AI provider unavailable' });
+        }
         const d: any = await r.json();
         text = d?.candidates?.[0]?.content?.parts?.[0]?.text;
       } else {
@@ -605,6 +609,10 @@ Rules:
           headers: { 'Authorization': `Bearer ${llm.apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: llm.model, messages: [{ role: 'user', content: prompt }], temperature: 0.85, max_tokens: 8192 }),
         });
+        if (!r.ok) {
+          logger.error('MEDIA', 'Skill author LLM upstream error', { provider: llm.providerId, status: r.status });
+          return res.status(502).json({ error: 'AI provider unavailable' });
+        }
         const d: any = await r.json();
         text = d?.choices?.[0]?.message?.content;
       }
@@ -710,6 +718,10 @@ Respond with ONLY this JSON, no markdown:
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: instruction }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 4096 } }),
         });
+        if (!r.ok) {
+          logger.error('MEDIA', 'Enhance prompt LLM upstream error', { provider: llm.providerId, status: r.status });
+          return res.status(502).json({ error: 'AI provider unavailable' });
+        }
         const d: any = await r.json();
         text = d?.candidates?.[0]?.content?.parts?.[0]?.text;
       } else {
@@ -718,6 +730,10 @@ Respond with ONLY this JSON, no markdown:
           headers: { 'Authorization': `Bearer ${llm.apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ model: llm.model, messages: [{ role: 'user', content: instruction }], temperature: 0.7, max_tokens: 4096 }),
         });
+        if (!r.ok) {
+          logger.error('MEDIA', 'Enhance prompt LLM upstream error', { provider: llm.providerId, status: r.status });
+          return res.status(502).json({ error: 'AI provider unavailable' });
+        }
         const d: any = await r.json();
         text = d?.choices?.[0]?.message?.content;
       }
@@ -1002,6 +1018,10 @@ Respond with ONLY this JSON, no markdown:
         onProgress: (line: string) => { appendTaskProgress(task, line); fireProgressWebhook(task); },
       })
         .then(async (meta: any) => {
+          // Cancel race: if the task was already moved to a terminal state (e.g. cancelled
+          // → 'interrupted') while generateMedia was still in flight, do NOT overwrite it,
+          // persist, or fire a second terminal webhook.
+          if (task.status === 'done' || task.status === 'failed' || task.status === 'interrupted') return;
           // Voiceover is best-effort — failure should not mark the main task as failed
           try {
             let voiceoverText = req.body?.voiceover ? String(req.body.voiceover).trim() : '';
@@ -1080,6 +1100,9 @@ Respond with ONLY this JSON, no markdown:
           notifyTaskWaiters(task);
         })
         .catch((err: any) => {
+          // Cancel race: same guard as the success path — a task cancelled mid-flight is
+          // already terminal, so don't overwrite it or fire a duplicate terminal webhook.
+          if (task.status === 'done' || task.status === 'failed' || task.status === 'interrupted') return;
           task.status = 'failed';
           const errorCode = err.code || extractProviderErrorCode(err.message);
           // Log the RAW provider error — it is stored on the task but sanitized before it reaches
@@ -1257,6 +1280,10 @@ Respond ONLY with valid JSON array. No markdown:
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 8192 } }),
         });
+        if (!r.ok) {
+          logger.error('MEDIA', 'AI draft LLM upstream error', { provider: llm.providerId, status: r.status });
+          return res.status(502).json({ error: 'AI provider unavailable' });
+        }
         const d: any = await r.json();
         text = d?.candidates?.[0]?.content?.parts?.[0]?.text;
       } else {
@@ -1265,6 +1292,10 @@ Respond ONLY with valid JSON array. No markdown:
           headers: { 'Authorization': `Bearer ${llm.apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 8192 }),
         });
+        if (!r.ok) {
+          logger.error('MEDIA', 'AI draft LLM upstream error', { provider: llm.providerId, status: r.status });
+          return res.status(502).json({ error: 'AI provider unavailable' });
+        }
         const d: any = await r.json();
         text = d?.choices?.[0]?.message?.content;
       }

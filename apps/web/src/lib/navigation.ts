@@ -61,8 +61,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     icon: Briefcase,
     children: [
       { title: t('projects.all'), href: '/projects', icon: FolderOpen },
-      { title: t('studio.video'), href: '/projects', icon: Video },
-      { title: t('studio.audio'), href: '/projects', icon: Music },
+      { title: t('studio.video'), href: '/projects?type=video', icon: Video },
+      { title: t('studio.audio'), href: '/projects?type=audio', icon: Music },
     ],
   },
   { title: t('nav.processing'), href: '/jobs', icon: History },
@@ -82,6 +82,6 @@ export const NAVIGATION_ITEMS: NavItem[] = [
 export const SECONDARY_NAVIGATION = [
   { title: 'Ưu đãi', href: '/events', icon: Gift },
   { title: t('nav.activityLog'), href: '/activity-logs', icon: ScrollText },
-  { title: t('nav.credits'), href: '/credits', icon: BarChart3 },
+  { title: t('nav.credits'), href: '/billing', icon: BarChart3 },
   { title: t('nav.settings'), href: '/settings', icon: Settings },
 ];

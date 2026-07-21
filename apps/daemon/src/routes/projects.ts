@@ -25,8 +25,13 @@ export function createProjectRoutes(db: Database.Database, PROJECTS_DIR: string)
     updatedAt: row.updated_at,
     ...(row.pending_prompt ? { pendingPrompt: row.pending_prompt } : {}),
     ...(row.custom_instructions ? { customInstructions: row.custom_instructions } : {}),
-    ...(row.metadata_json ? { metadata: JSON.parse(row.metadata_json) } : {}),
+    ...(row.metadata_json ? { metadata: safeParseJson(row.metadata_json, null) } : {}),
   });
+
+  function safeParseJson(raw: unknown, fallback: any): any {
+    if (typeof raw !== 'string') return fallback;
+    try { return JSON.parse(raw); } catch { return fallback; }
+  }
 
   function projectDirFor(id: string): string {
     if (!/^[A-Za-z0-9._-]+$/.test(id)) throw new Error('invalid project id');
@@ -39,27 +44,29 @@ export function createProjectRoutes(db: Database.Database, PROJECTS_DIR: string)
 
   function safeJoin(base: string, sub: string): string {
     const p = path.resolve(base, sub);
-    if (!p.startsWith(path.resolve(base))) throw new Error('path traversal');
+    const b = path.resolve(base);
+    if (p !== b && !p.startsWith(b + path.sep)) throw new Error('path traversal');
     return p;
   }
+
+  const MIME: Record<string, string> = {
+    '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
+    '.mjs': 'application/javascript; charset=utf-8', '.ts': 'text/typescript; charset=utf-8',
+    '.tsx': 'text/typescript; charset=utf-8', '.json': 'application/json; charset=utf-8',
+    '.md': 'text/markdown; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
+    '.pdf': 'application/pdf',
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
+    '.mp4': 'video/mp4', '.mov': 'video/quicktime', '.webm': 'video/webm',
+    '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.m4a': 'audio/mp4',
+    '.zip': 'application/zip', '.gz': 'application/gzip',
+  };
 
   function fileEntry(name: string, dir: string) {
     const fp = safeJoin(dir, name);
     const st = statSync(fp);
     const ext = path.extname(name).toLowerCase();
-    const MIME: Record<string, string> = {
-      '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset=utf-8',
-      '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
-      '.mjs': 'application/javascript; charset=utf-8', '.ts': 'text/typescript; charset=utf-8',
-      '.tsx': 'text/typescript; charset=utf-8', '.json': 'application/json; charset=utf-8',
-      '.md': 'text/markdown; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
-      '.pdf': 'application/pdf',
-      '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-      '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
-      '.mp4': 'video/mp4', '.mov': 'video/quicktime', '.webm': 'video/webm',
-      '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.m4a': 'audio/mp4',
-      '.zip': 'application/zip', '.gz': 'application/gzip',
-    };
     const K: Record<string, string> = {
       '.html': 'html', '.htm': 'html',
       '.svg': 'sketch', '.sketch.json': 'sketch',
@@ -141,8 +148,9 @@ export function createProjectRoutes(db: Database.Database, PROJECTS_DIR: string)
     if (!name) name = 'Untitled';
     const userId = req.headers['x-user-id'] as string | undefined;
     const conversationId = randomUUID();
-    db.prepare('INSERT OR IGNORE INTO projects (id,user_id,name,surface,skill_id,design_system_id,pending_prompt,metadata_json,custom_instructions,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+    const insertResult = db.prepare('INSERT OR IGNORE INTO projects (id,user_id,name,surface,skill_id,design_system_id,pending_prompt,metadata_json,custom_instructions,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
       .run(id, userId ?? null, name, req.body?.surface ?? null, req.body?.skillId ?? null, req.body?.designSystemId ?? null, req.body?.pendingPrompt ?? null, req.body?.metadata ? JSON.stringify(req.body.metadata) : null, req.body?.customInstructions ?? null, now, now);
+    const created = insertResult.changes > 0;
     const exists = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
     const row = exists as any;
     if (!row.conversationId && !db.prepare('SELECT id FROM conversations WHERE project_id = ?').get(id)) {
@@ -151,7 +159,7 @@ export function createProjectRoutes(db: Database.Database, PROJECTS_DIR: string)
     }
     const conv = db.prepare('SELECT id FROM conversations WHERE project_id = ?').get(id) as any;
     const convId = conv?.id ?? conversationId;
-    res.status(row ? 200 : 201).json({ project: mapProject(row), conversationId: convId });
+    res.status(created ? 201 : 200).json({ project: mapProject(row), conversationId: convId });
   });
 
   router.get('/:id', (req, res) => {
@@ -174,7 +182,7 @@ export function createProjectRoutes(db: Database.Database, PROJECTS_DIR: string)
     if (userId && row.user_id && row.user_id !== userId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
-    const mergedMetadata = req.body?.metadata === null ? null : (req.body?.metadata ?? (row.metadata_json ? JSON.parse(row.metadata_json) : null));
+    const mergedMetadata = req.body?.metadata === null ? null : (req.body?.metadata ?? (row.metadata_json ? safeParseJson(row.metadata_json, {}) : null));
     const now = Date.now();
     db.prepare('UPDATE projects SET name=?, surface=?, skill_id=?, design_system_id=?, pending_prompt=?, metadata_json=?, custom_instructions=?, updated_at=? WHERE id=?')
       .run(req.body?.name ?? row.name, req.body?.surface ?? row.surface, req.body?.skillId ?? row.skill_id, req.body?.designSystemId ?? row.design_system_id, req.body?.pendingPrompt ?? row.pending_prompt, mergedMetadata ? JSON.stringify(mergedMetadata) : null, req.body?.customInstructions ?? row.custom_instructions, now, req.params.id);
@@ -293,8 +301,7 @@ export function createProjectRoutes(db: Database.Database, PROJECTS_DIR: string)
     }
     if (!existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
     const ext = path.extname(filePath).toLowerCase();
-    const mimeTypes: Record<string, string> = { '.mp4': 'video/mp4', '.webm': 'video/webm', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg' };
-    res.type(mimeTypes[ext] || 'application/octet-stream');
+    res.type(MIME[ext] || 'application/octet-stream');
     res.sendFile(filePath);
   });
 

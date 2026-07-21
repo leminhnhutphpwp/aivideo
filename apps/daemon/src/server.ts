@@ -4,10 +4,10 @@ import path from 'node:path';
 import fs from 'node:fs';
 import Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
-import { migrateMediaTasks, reconcileMediaTasksOnBoot } from './media/tasks.js';
+import { migrateMediaTasks, reconcileMediaTasksOnBoot, markMediaTaskWebhookDelivered } from './media/tasks.js';
 import { logger } from './utils/index.js';
 import { createAuthMiddleware, hashPassword, verifyPassword, createSession, getSession, shouldRequireAuth } from './services/auth.js';
-import { createPersistMediaTask, getTaskCounts, getLiveTasks, fireWebhookFromRow } from './services/task-manager.js';
+import { createPersistMediaTask, getTaskCounts, getLiveTasks, fireWebhookFromRow, setWebhookDeliveredHandler } from './services/task-manager.js';
 import { createProjectRoutes, createTemplateRoutes, SKIP_FILES } from './routes/projects.js';
 import { createMediaRoutes } from './routes/media.js';
 import { createMetricsRouter } from './routes/metrics.js';
@@ -173,6 +173,10 @@ export async function startServer({
   try { db.exec('ALTER TABLE projects ADD COLUMN user_id TEXT'); } catch {/* migration */}
 
   migrateMediaTasks(db);
+
+  // Persist the "webhook delivered" flag when a terminal webhook is acknowledged, so boot
+  // reconciliation below only re-fires callbacks that were never delivered.
+  setWebhookDeliveredHandler((taskId) => markMediaTaskWebhookDelivered(db, taskId));
 
   const bootResult = reconcileMediaTasksOnBoot(db, { terminalTtlMs: 86400000 });
   if (bootResult.interrupted > 0 || bootResult.deleted > 0) {

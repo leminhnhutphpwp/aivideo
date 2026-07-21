@@ -19,6 +19,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    # Dev resource caps — prevent the boot-time "thundering herd" (all compilers
+    # grabbing every core at once → 500%+ CPU spike). Ceilings only; idle usage is far lower.
+    mem_limit: 768m
+    cpus: 1.5
     ports:
       - "8000:8000"
     env_file: .env.docker
@@ -67,8 +71,12 @@ services:
   # DAEMON (Media Engine)
   # ====================
   daemon:
-    image: node:24-alpine
+    build:
+      context: ../apps/daemon
+      dockerfile: Dockerfile.dev
     working_dir: /app
+    mem_limit: 512m
+    cpus: 1.5
     stop_grace_period: 5m
     env_file:
       - .env.docker
@@ -83,16 +91,14 @@ services:
       # size/watermark/thinking_mode reach the provider. thinking_mode stays
       # per-request (do NOT set OPENAI_IMAGE_THINKING_MODE here).
       - OPENAI_IMAGE_DASHSCOPE_PARAMS=1
-    # node_modules is an anon volume (below) so the host's macOS-built native
-    # deps (better-sqlite3) never leak into Alpine; we (re)install inside the
-    # container, pulling the build toolchain only when a fresh install is needed.
+    # ffmpeg + node_modules are baked into the image (Dockerfile.dev). The anon volume
+    # at /app/node_modules seeds from that baked copy, so the container starts node
+    # directly — no runtime ffmpeg/npm install (that used to stall on apk over the network,
+    # leaving the daemon unhealthy on every recreate). Fallback `npm ci` only fires if the
+    # volume is ever wiped without a rebuild. After changing deps: rebuild + --renew-anon-volumes.
     command: >
       sh -c "
-        apk add --no-cache ffmpeg >/dev/null 2>&1;
-        if [ ! -d node_modules/better-sqlite3/build ]; then
-          apk add --no-cache python3 make g++ &&
-          npm install;
-        fi;
+        [ -d node_modules/better-sqlite3/build ] || npm ci;
         exec node --import tsx ./src/index.ts
       "
     volumes:
@@ -115,6 +121,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    mem_limit: 384m
+    cpus: 0.5
     ports:
       - "8080:8080"
     env_file: .env.docker
@@ -149,6 +157,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    mem_limit: 512m
+    cpus: 1.0
     env_file: .env.docker
     environment:
       DB_HOST: mysql
@@ -185,6 +195,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    mem_limit: 512m
+    cpus: 1.0
     ports:
       - "5173:5173"
     volumes:
@@ -208,6 +220,9 @@ services:
     build:
       context: ../apps/web
       dockerfile: Dockerfile.dev
+    # Next.js dev compile is the heaviest — give it the most, but still capped.
+    mem_limit: 1536m
+    cpus: 2.0
     ports:
       - "${WEB_PORT:-3000}:3000"
     environment:
@@ -234,6 +249,8 @@ services:
 
   mysql:
     image: mysql:8.0
+    mem_limit: 768m
+    cpus: 1.0
     ports:
       - "3307:3306"
     env_file: .env.docker
@@ -254,6 +271,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    mem_limit: 256m
+    cpus: 0.5
     ports:
       - "6380:6379"
     volumes:
@@ -268,6 +287,8 @@ services:
 
   minio:
     image: minio/minio:latest
+    mem_limit: 512m
+    cpus: 0.5
     ports:
       - "9000:9000"
       - "9001:9001"

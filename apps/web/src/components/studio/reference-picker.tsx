@@ -56,6 +56,14 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addToast = useToastStore(s => s.addToast);
+  // Object URLs created for library asset previews — tracked so they can be revoked on
+  // reload / close / unmount (loadAssets re-runs on every open and never freed them).
+  const assetUrlsRef = useRef<string[]>([]);
+
+  const revokeAssetPreviews = () => {
+    assetUrlsRef.current.forEach(u => URL.revokeObjectURL(u));
+    assetUrlsRef.current = [];
+  };
 
   // Generate + cleanup object URLs for image and video previews
   useEffect(() => {
@@ -90,6 +98,8 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
 
   const loadAssets = async () => {
     setLoading(true);
+    // Free previews from the previous load before creating a fresh batch.
+    revokeAssetPreviews();
     try {
       const res = await laravel.assets();
       const list = res?.data?.items || res?.data || [];
@@ -123,6 +133,7 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
           if (r.ok) {
             const blob = await r.blob();
             asset.previewUrl = URL.createObjectURL(blob);
+            assetUrlsRef.current.push(asset.previewUrl);
           }
         } catch { /* skip failed previews */ }
       }
@@ -216,6 +227,12 @@ export function ReferencePicker({ open, onClose, onSelect, acceptTypes, maxSizeM
       document.body.style.overflow = 'unset';
     };
   }, [open]);
+
+  // Revoke library preview blobs when the picker closes, and on unmount.
+  useEffect(() => {
+    if (!open) revokeAssetPreviews();
+  }, [open]);
+  useEffect(() => () => revokeAssetPreviews(), []);
 
   if (!mounted) return null;
 

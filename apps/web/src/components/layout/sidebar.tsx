@@ -60,7 +60,7 @@ const NAV_ITEMS: NavItem[] = [
     { icon: Crosshair, label: 'Reference-to-Video', href: '/studio/video/reference-to-video' },
     { icon: Scissors, label: 'Video Editing', href: '/studio/video/video-edit' },
     { icon: Smile, label: 'Character Animation', href: '/studio/video/character-animation' },
-    { icon: Clapperboard, label: 'Storyboard', href: '/projects?type=storyboard' },
+    { icon: Clapperboard, label: 'Storyboard', href: '/studio/storyboard' },
     { icon: Image, label: 'Text-to-Image', href: '/studio/image' },
     { icon: Image, label: 'Image Editing', href: '/studio/image-editing' },
   ]},

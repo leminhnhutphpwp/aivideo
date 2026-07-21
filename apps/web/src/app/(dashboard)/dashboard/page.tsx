@@ -2,17 +2,17 @@
 
 import { useState, useEffect, useRef } from 'react';
 import {
-  Play, Film, Zap, ArrowUpRight, ChevronRight,
+  Film, Zap, ArrowUpRight, ChevronRight,
   Wand2, Library, Clock, Crown, Sparkles, FolderOpen, FolderPlus,
-  History, Type, Image, Music, X,
-  Clapperboard, Crosshair, Activity, Cpu,
+  History, Image, Music,
+  Activity, Cpu,
   TrendingUp, Rocket, MonitorPlay, Ratio, Square, Smartphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { daemon, laravel } from '@/lib/api/client';
+import { daemon, laravel, LARAVEL_URL } from '@/lib/api/client';
 import { useDaemonStore, initDaemonCheck } from '@/stores/daemon-store';
 import { useToastStore } from '@/stores/toast-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -63,36 +63,6 @@ function buildActivityDescription(activity: any): string {
   return activity?.description || 'Hoạt động';
 }
 
-const STUDIO_FEATURES = [
-  { id: 'text-to-video', label: 'Text-to-Video', desc: 'Biến ý tưởng thành video từ mô tả văn bản', icon: Type, href: '/studio/text-to-video', bg: 'bg-white/[0.06]', text: 'text-white', tag: 'Phổ biến' },
-  { id: 'image-to-video', label: 'Image-to-Video', desc: 'Chuyển ảnh tĩnh thành video sống động', icon: Image, href: '/studio/image-to-video', bg: 'bg-white/[0.06]', text: 'text-slate-300' },
-  { id: 'reference-to-video', label: 'Reference-to-Video', desc: 'Tạo video dựa trên ảnh tham chiếu', icon: Crosshair, href: '/studio/reference-to-video', bg: 'bg-white/[0.06]', text: 'text-slate-300' },
-  { id: 'character-animation', label: 'Character Animation', desc: 'Tạo animation nhân vật từ ảnh tĩnh', icon: Sparkles, href: '/studio/video/character-animation', bg: 'bg-white/[0.06]', text: 'text-slate-300' },
-  { id: 'storyboard', label: 'Storyboard', desc: 'Lên kịch bản phân cảnh chuyên nghiệp', icon: Clapperboard, href: '/studio/storyboard', bg: 'bg-white/[0.06]', text: 'text-slate-300' },
-  { id: 'audio', label: 'Audio & Voiceover', desc: 'Tạo âm thanh, nhạc nền và giọng đọc AI', icon: Music, href: '/studio/audio', bg: 'bg-white/[0.06]', text: 'text-slate-300' },
-];
-
-const TYPING_LINES = ['Một rừng hoa anh đào dưới ánh hoàng hôn...', 'Nhân vật anime chiến đấu dưới cơn mưa', 'Cảnh hoảng hôn trên thành phố neon', 'Flythrough camera giữa những tòa nhà tương lai'];
-
-function TypingEffect() {
-  const [lineIndex, setLineIndex] = useState(0);
-  const [displayText, setDisplayText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  useEffect(() => {
-    const line = TYPING_LINES[lineIndex];
-    let timeout: ReturnType<typeof setTimeout>;
-    if (!isDeleting) {
-      if (displayText.length < line.length) { timeout = setTimeout(() => setDisplayText(line.slice(0, displayText.length + 1)), 40 + Math.random() * 40); }
-      else { timeout = setTimeout(() => setIsDeleting(true), 2000); }
-    } else {
-      if (displayText.length > 0) { timeout = setTimeout(() => setDisplayText(line.slice(0, displayText.length - 1)), 20); }
-      else { setIsDeleting(false); setLineIndex(prev => (prev + 1) % TYPING_LINES.length); }
-    }
-    return () => clearTimeout(timeout);
-  }, [displayText, isDeleting, lineIndex]);
-  return <span className="text-slate-400">{displayText}<span className="animate-pulse text-[#FF5A1F]">|</span></span>;
-}
-
 type AspectRatio = '16:9' | '9:16' | '1:1' | '4:3';
 
 interface ShowcaseItem {
@@ -137,7 +107,6 @@ export default function DashboardPage() {
   const [assetsSummary, setAssetsSummary] = useState({ video: 0, image: 0, audio: 0 });
   const [liveJobs, setLiveJobs] = useState<any[]>([]);
   const [hoveredShowcase, setHoveredShowcase] = useState<string | null>(null);
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [showcaseItems, setShowcaseItems] = useState<ShowcaseItem[]>([]);
   const [showcaseBlobs, setShowcaseBlobs] = useState<Record<string, string>>({});
   const [heroVideoUrl, setHeroVideoUrl] = useState<string | null>(null);
@@ -149,21 +118,11 @@ export default function DashboardPage() {
   const user = useAuthStore(s => s.user);
   const planName = (user as any)?.plan?.name || 'Free';
 
-  // Prevent background scrolling when video modal is open
-  useEffect(() => {
-    if (playingVideo) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [playingVideo]);
-
   useEffect(() => {
     setMounted(true);
     initDaemonCheck();
+    // Track blob URLs created in this effect so we can revoke them on cleanup.
+    const createdObjectUrls: string[] = [];
     const interval = setInterval(() => fetchUnifiedProjects().then(setProjects).catch(() => { }), 30000);
     fetchUnifiedProjects().then(setProjects).catch(() => { });
     laravel.creditsBalance().then(d => setCredits(d.balance)).catch(() => { });
@@ -175,7 +134,7 @@ export default function DashboardPage() {
     }).catch(() => { });
     laravel.activityLogs({ per_page: 5 }).then((res) => { const payload = res.data as any; setRecentActivities(Array.isArray(payload.items) ? payload.items : []); }).catch(() => { });
     laravel.assets().then((res) => {
-      const assets = Array.isArray(res) ? res : res?.data || [];
+      const assets = Array.isArray(res?.data) ? res.data : (res as any)?.data?.items || (Array.isArray(res) ? res : []);
       const summary = { video: 0, image: 0, audio: 0 };
       assets.forEach((a: any) => { const type = a.type || 'unknown'; if (type.includes('video')) summary.video++; else if (type.includes('image')) summary.image++; else if (type.includes('audio')) summary.audio++; });
       setAssetsSummary(summary);
@@ -187,7 +146,7 @@ export default function DashboardPage() {
       const items = data.items || [];
       setShowcaseItems(items);
       const jwt = localStorage.getItem('auth_token');
-      const streamBase = `${(window as any).LARAVEL_URL || 'http://localhost:8000'}/api/showcase/stream/`;
+      const streamBase = `${LARAVEL_URL}/api/showcase/stream/`;
 
       // Hero video
       if (data.hero_stream_token) {
@@ -197,7 +156,9 @@ export default function DashboardPage() {
           });
           if (resp.ok) {
             const blob = await resp.blob();
-            setHeroVideoUrl(URL.createObjectURL(blob));
+            const url = URL.createObjectURL(blob);
+            createdObjectUrls.push(url);
+            setHeroVideoUrl(url);
           }
         } catch {}
       }
@@ -212,12 +173,18 @@ export default function DashboardPage() {
           });
           if (!resp.ok) return;
           const blob = await resp.blob();
-          blobs[item.asset_id || item.id] = URL.createObjectURL(blob);
+          const url = URL.createObjectURL(blob);
+          createdObjectUrls.push(url);
+          blobs[item.asset_id || item.id] = url;
         } catch {}
       }));
       setShowcaseBlobs(blobs);
     }).catch(() => { });
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // Revoke any blob URLs created for hero/showcase media to avoid memory leaks.
+      createdObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
   }, []);
 
   useEffect(() => {
@@ -229,7 +196,8 @@ export default function DashboardPage() {
   useRealtimeJobs({
     onCompleted: (e: JobEvent) => {
       addToast(`Job hoàn thành: ${e.job_id?.slice(0, 8)}...`, 'success');
-      setCredits(prev => (prev ?? 0) - 1 >= 0 ? (prev ?? 0) - 1 : 0);
+      // Re-fetch the real credit balance instead of an optimistic -1 (job cost varies).
+      laravel.creditsBalance().then(d => setCredits(d.balance)).catch(() => {});
       laravel.renderJobs().then((res) => {
         const jobs = Array.isArray(res) ? res : res?.data || [];
         setLiveJobs(jobs.filter((j: any) => j.status === 'processing' || j.status === 'queued').slice(0, 3));
@@ -588,42 +556,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
-
-      {/* ===== VIDEO MODAL ===== */}
-      <AnimatePresence>
-        {playingVideo && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#16141a]/90 backdrop-blur-xl p-4 md:p-6"
-            onClick={() => setPlayingVideo(null)}
-          >
-            <button className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors" onClick={() => setPlayingVideo(null)}>
-              <X className="h-6 w-6" />
-            </button>
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className={cn(
-                "relative w-full rounded-2xl overflow-hidden bg-[#16141a] border border-white/10 shadow-md flex items-center justify-center",
-                (() => {
-                  const item = showcaseItems.find(i => (i.asset_id || i.id) === playingVideo);
-                  if (item?.ratio === '9:16') return 'aspect-[9/16] max-h-[85vh] max-w-[calc(85vh*9/16)]';
-                  if (item?.ratio === '1:1') return 'aspect-square max-h-[85vh] max-w-[85vh]';
-                  if (item?.ratio === '4:3') return 'aspect-[4/3] max-w-4xl max-h-[85vh]';
-                  return 'aspect-video max-w-5xl max-h-[85vh]';
-                })()
-              )}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Dummy video player UI for now */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
-                <div className="h-16 w-16 rounded-full bg-[#FF5A1F]/20 flex items-center justify-center animate-pulse"><Play className="h-8 w-8 text-[#FF5A1F] ml-1" /></div>
-                <p className="text-white font-medium text-center px-4">Đang tải video showcase từ Admin...</p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

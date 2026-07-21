@@ -26,10 +26,6 @@ export function ShareButtons({ url, title }: ShareButtonsProps) {
       case 'twitter':
         window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`, '_blank');
         break;
-      case 'tiktok':
-        navigator.clipboard.writeText(url);
-        addToast('Đã copy liên kết. Mở TikTok và dán vào caption!', 'success');
-        break;
     }
   };
 

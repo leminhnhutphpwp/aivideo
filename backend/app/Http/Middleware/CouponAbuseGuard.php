@@ -52,11 +52,10 @@ class CouponAbuseGuard
         $cap = (int) config('coupon_security.per_ip_daily_cap', 0);
         if ($cap > 0) {
             $key = 'coupon-abuse:' . $request->ip() . ':' . now()->format('Y-m-d');
+            // Seed với TTL 24h TRƯỚC khi tăng (add chỉ set khi key chưa tồn tại). Không bao giờ
+            // put đè lên giá trị sau khi increment — tránh race làm mất lượt đếm song song và reset TTL.
+            Cache::add($key, 0, now()->addDay());
             $count = (int) Cache::increment($key);
-            if ($count === 1) {
-                // Đặt TTL 24h cho lần đếm đầu tiên.
-                Cache::put($key, 1, now()->addDay());
-            }
 
             if ($count > $cap) {
                 return response()->json([

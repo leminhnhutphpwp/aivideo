@@ -24,6 +24,10 @@ function useAuthenticatedMedia(url: string | null): string | null {
 
   useEffect(() => {
     if (!url || !url.startsWith('http')) {
+      if (prevBlobUrl.current) {
+        URL.revokeObjectURL(prevBlobUrl.current);
+        prevBlobUrl.current = null;
+      }
       setBlobUrl(null);
       return;
     }
