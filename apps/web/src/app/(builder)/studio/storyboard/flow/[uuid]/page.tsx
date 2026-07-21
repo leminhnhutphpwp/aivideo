@@ -483,8 +483,6 @@ export default function FlowViewerPage() {
                   <span className="flex items-center gap-1"><Film className="h-3.5 w-3.5" /> {VIDEO_TYPE_LABELS[sb.video_type] ?? sb.video_type}</span>
                   <span className="text-white/15">·</span>
                   <span>{QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</span>
-                  <span className="text-white/15">·</span>
-                  <span>{sb.credits_cost} credits</span>
                   {typeof sb.total_duration === 'number' && sb.total_duration > 0 && <><span className="text-white/15">·</span><span>{sb.total_duration}s</span></>}
                 </div>
               </div>
@@ -507,7 +505,7 @@ export default function FlowViewerPage() {
             <Panel position="top-right">
               <div className="bg-[#18181B] border border-white/[0.06] rounded-2xl p-3 text-[10px] space-y-1.5 text-slate-400 shadow-sm">
                 <div className="flex items-center gap-2 text-slate-400"><Film className="h-3 w-3" /> {VIDEO_TYPE_LABELS[sb.video_type] ?? sb.video_type}</div>
-                <div>CL: {QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</div><div>Credits: {sb.credits_cost}</div>
+                <div>CL: {QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</div>
               </div>
             </Panel>
           </ReactFlow>
@@ -544,7 +542,7 @@ export default function FlowViewerPage() {
           </>}
         </div>
         <div className="flex items-center gap-3 text-[10px] text-slate-600">
-          <span>{sb.scenes?.length || 0} cảnh</span><div className="w-px h-3 bg-white/5" /><span>{sb.credits_cost} credits</span><div className="w-px h-3 bg-white/5" /><span>{QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</span>
+          <span>{sb.scenes?.length || 0} cảnh</span><div className="w-px h-3 bg-white/5" /><span>{QUALITY_TIER_LABELS[sb.quality_tier] ?? sb.quality_tier}</span>
         </div>
       </div>
       <VoiceoverModal

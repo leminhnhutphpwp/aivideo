@@ -5,6 +5,7 @@ import { CommunityCard } from '@/components/community/community-card';
 import { RemixModal } from '@/components/community/remix-modal';
 import { Compass, Trophy, Heart, Archive } from 'lucide-react';
 import Link from 'next/link';
+import { AnimatePresence } from 'motion/react';
 import { AssetCard } from '@/lib/api/community-types';
 import { laravel } from '@/lib/api/client';
 
@@ -37,13 +38,12 @@ export default function SavedLikesPage() {
     setIsDetailsOpen(false);
   };
 
-  const handleLikeChange = async (uuid: string, liked: boolean) => {
-    try {
-      await laravel.communityLike(uuid);
-      if (!liked) {
-        setSavedAssets(prev => prev.filter(a => a.uuid !== uuid));
-      }
-    } catch {}
+  // The card already toggled the like via the API; this is only a notification.
+  // Never re-call the API here. When unliked, drop the item from the saved list.
+  const handleLikeChange = (uuid: string, liked: boolean) => {
+    if (!liked) {
+      setSavedAssets(prev => prev.filter(a => a.uuid !== uuid));
+    }
   };
 
   return (
@@ -106,9 +106,11 @@ export default function SavedLikesPage() {
         </div>
       )}
 
-      {isDetailsOpen && activeAsset && (
-        <RemixModal asset={activeAsset} isOpen={isDetailsOpen} onClose={handleCloseDetails} />
-      )}
+      <AnimatePresence>
+        {isDetailsOpen && activeAsset && (
+          <RemixModal key={activeAsset.uuid} asset={activeAsset} isOpen={isDetailsOpen} onClose={handleCloseDetails} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

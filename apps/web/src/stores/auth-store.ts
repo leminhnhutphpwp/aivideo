@@ -46,7 +46,9 @@ interface AuthState {
   setAuth: (token: string, user: User) => void;
   setUser: (user: User) => void;
   logout: () => void;
-  hydrate: () => void;
+  /** Hydrates auth from storage and wires a cross-tab `storage` listener.
+   * Returns a disposer that removes the listener (call in effect cleanup). */
+  hydrate: () => (() => void) | void;
   refreshToken: () => Promise<boolean>;
 }
 
@@ -108,6 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const newToken = e.newValue;
 
         if (newToken && !currentToken) {
+          // Logged in on another tab — hydrate the session here too.
           (async () => {
             try {
               const user = await laravel.me();
@@ -117,10 +120,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
           })();
         } else if (!newToken && currentToken) {
+          // Logged out on another tab.
           set({ token: null, user: null, loading: false });
+        } else if (newToken && newToken !== currentToken) {
+          // Token rotated on another tab (refresh) — adopt the new token.
+          set({ token: newToken });
         }
       };
       window.addEventListener('storage', handler);
+      return () => window.removeEventListener('storage', handler);
     }
   },
 }));

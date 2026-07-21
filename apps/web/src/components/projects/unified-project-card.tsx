@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Play, Film, Sparkles, Clock, Loader2, Clapperboard } from 'lucide-react';
+import { Play, Film, Layers, Clock, Loader2, Clapperboard } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { fetchRawFile } from '@/lib/api/client';
@@ -11,6 +11,15 @@ import { cn } from '@/lib/utils';
 import { noDownloadImg, noDownloadVideo } from '@/lib/media-protection';
 
 const IS_ACTIVE = new Set(['analyzing', 'processing']);
+
+// Human labels for the storyboard render mode — shown on the card instead of the credit
+// cost. Credits are a pre-render concern; once a project exists we surface *what it is*,
+// and users can review spend detail in their logs when they actually need it.
+const RENDER_MODE_LABELS: Record<string, string> = {
+  single_flow: 'One-Shot',
+  storyboard_image: 'Multi-Panel',
+  multi_scene: 'Ghép cảnh',
+};
 
 export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -176,10 +185,12 @@ export function UnifiedProjectCard({ project }: { project: UnifiedProject }) {
                     <Film className="h-3.5 w-3.5 text-slate-400" />
                     {storyboardMeta.scenesCount} cảnh
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-slate-400" />
-                    {storyboardMeta.creditsCost} credits
-                  </span>
+                  {(RENDER_MODE_LABELS[storyboardMeta.renderMode] || storyboardMeta.qualityTier) && (
+                    <span className="flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-slate-400" />
+                      {RENDER_MODE_LABELS[storyboardMeta.renderMode] || storyboardMeta.qualityTier}
+                    </span>
+                  )}
                 </>
               ) : daemonMeta?.surface ? (
                 <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{daemonMeta.surface}</span>

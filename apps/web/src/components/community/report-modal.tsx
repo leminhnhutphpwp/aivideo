@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { laravel } from '@/lib/api/client';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
+import { useToastStore } from '@/stores/toast-store';
 
 interface ReportModalProps {
   assetUuid: string;
@@ -25,6 +26,7 @@ export function ReportModal({ assetUuid, isOpen, onClose }: ReportModalProps) {
   const [details, setDetails] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const addToast = useToastStore(s => s.addToast);
 
   useScrollLock(isOpen);
 
@@ -43,6 +45,7 @@ export function ReportModal({ assetUuid, isOpen, onClose }: ReportModalProps) {
       }, 2000);
     } catch (error) {
       console.error('Failed to report:', error);
+      addToast('Không thể gửi báo cáo. Vui lòng thử lại sau.', 'error');
     } finally {
       setIsLoading(false);
     }

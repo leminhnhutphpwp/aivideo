@@ -7,6 +7,7 @@ import { Compass, Trophy, Heart, Search, SlidersHorizontal, AlertCircle } from '
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'motion/react';
 import { AssetCard } from '@/lib/api/community-types';
 import { laravel } from '@/lib/api/client';
 import { CustomSelect } from '@/components/ui/select';
@@ -86,13 +87,20 @@ function CommunityContent() {
     router.replace(`?${params.toString()}`);
   };
 
-  const handleLikeChange = async (uuid: string, liked: boolean) => {
-    try {
-      const result = await laravel.communityLike(uuid);
-      setAssets(prev =>
-        prev.map(a => a.uuid === uuid ? { ...a, like_count: result.data.count } : a)
-      );
-    } catch {}
+  // The CommunityCard / RemixModal already call the toggle API themselves and invoke
+  // this callback only as a notification of the new liked state. Do NOT re-call the API
+  // here (that double/triple-fires the toggle). Just mirror the state into the local list.
+  const handleLikeChange = (uuid: string, liked: boolean) => {
+    setAssets(prev =>
+      prev.map(a => {
+        if (a.uuid !== uuid || a.liked_by_me === liked) return a;
+        return {
+          ...a,
+          liked_by_me: liked,
+          like_count: Math.max(0, a.like_count + (liked ? 1 : -1)),
+        };
+      })
+    );
   };
 
   const filteredAssets = selectedStyle === 'all'
@@ -242,14 +250,17 @@ function CommunityContent() {
         </div>
       )}
 
-      {isDetailsOpen && activeAsset && (
-        <RemixModal
-          asset={activeAsset}
-          isOpen={isDetailsOpen}
-          onClose={handleCloseDetails}
-          onLikeChange={handleLikeChange}
-        />
-      )}
+      <AnimatePresence>
+        {isDetailsOpen && activeAsset && (
+          <RemixModal
+            key={activeAsset.uuid}
+            asset={activeAsset}
+            isOpen={isDetailsOpen}
+            onClose={handleCloseDetails}
+            onLikeChange={handleLikeChange}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

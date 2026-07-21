@@ -104,6 +104,20 @@ export default function VideoFeaturePage() {
 
   const hasPrompt = !!scene.prompt.trim();
 
+  // Prefill from a community "Remix" deep-link: /studio/video/text-to-video?remix_prompt=&remix_aspect=
+  // Applied once on mount, then the query is stripped so a later refresh keeps the user's edits.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const rPrompt = sp.get('remix_prompt');
+    const rAspect = sp.get('remix_aspect');
+    if (!rPrompt && !rAspect) return;
+    if (rPrompt) setScene(s => ({ ...s, prompt: rPrompt }));
+    if (rAspect) setAspect(rAspect);
+    window.history.replaceState(null, '', window.location.pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     initDaemonCheck();
     daemon.models().then((data: any) => {
@@ -378,15 +392,13 @@ export default function VideoFeaturePage() {
       delete next[index];
       // Re-index remaining voices
       const reindexed: Record<number, File> = {};
-      let j = 0;
       for (const key of Object.keys(next)) {
         const k = parseInt(key);
-        if (k > index) {
-          reindexed[j] = next[k];
-        } else if (k < index) {
+        if (k < index) {
           reindexed[k] = next[k];
+        } else if (k > index) {
+          reindexed[k - 1] = next[k];
         }
-        j++;
       }
       return reindexed;
     });
@@ -794,7 +806,7 @@ export default function VideoFeaturePage() {
 
             {feature === 'reference-to-video' && config.showLastFrame && (
               <div className="bg-[#16141a] border border-white/12 rounded-2xl p-4 space-y-3">
-                <label className="text-[10px] font-semibold text-slate-500">First frame (tuỳ chọn)</label>
+                <label className="text-[10px] font-semibold text-slate-500">Last frame (tuỳ chọn)</label>
                 {scene.lastFramePreview ? (
                   <div className="relative rounded-xl border border-white/10 overflow-hidden bg-white/[0.02] group max-w-[200px]">
                     <div className="w-full aspect-square relative overflow-hidden bg-[#16141a]">
@@ -805,13 +817,13 @@ export default function VideoFeaturePage() {
                       <X className="h-3 w-3" />
                     </button>
                     <div className="p-2 border-t border-white/12">
-                      <p className="text-[10px] font-medium text-white truncate">{scene.lastFrameImage || 'First frame'}</p>
+                      <p className="text-[10px] font-medium text-white truncate">{scene.lastFrameImage || 'Last frame'}</p>
                     </div>
                   </div>
                 ) : (
                   <button onClick={() => handleOpenPicker(scene.id, 'lastFrame')}
                     className="flex items-center gap-2 h-10 px-4 rounded-xl border border-dashed border-[#FF5A1F]/30 bg-[#FF5A1F]/5 text-xs font-medium text-[#FF5A1F] hover:bg-[#FF5A1F]/10 hover:border-[#FF5A1F]/50 transition-all cursor-pointer">
-                    <ImageIcon className="h-4 w-4" /> Thêm first frame
+                    <ImageIcon className="h-4 w-4" /> Thêm last frame
                   </button>
                 )}
               </div>

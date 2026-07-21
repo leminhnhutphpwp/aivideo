@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Copy, Heart, Share2, Award, Zap, Sparkles, Sliders, Check, MessageCircle, Image as ImageIcon } from 'lucide-react';
+import { X, Copy, Heart, Share2, Award, Zap, Sparkles, Sliders, Check, MessageCircle, Image as ImageIcon, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ import { AssetCard } from '@/lib/api/community-types';
 import { CreatorLevelBadge } from './creator-level-badge';
 import { CommentSection } from './comment-section';
 import { ShareButtons } from './share-buttons';
+import { ReportModal } from './report-modal';
 import { laravel, LARAVEL_URL } from '@/lib/api/client';
 import { useToastStore } from '@/stores/toast-store';
 import { useScrollLock } from '@/hooks/use-scroll-lock';
@@ -26,6 +27,10 @@ function useAuthenticatedMedia(url: string | null): string | null {
 
   useEffect(() => {
     if (!url || !url.startsWith('http')) {
+      if (prevBlobUrl.current) {
+        URL.revokeObjectURL(prevBlobUrl.current);
+        prevBlobUrl.current = null;
+      }
       setBlobUrl(null);
       return;
     }
@@ -126,6 +131,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
   const [likeCount, setLikeCount] = useState(0);
   const [isLoadingRemix, setIsLoadingRemix] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const addToast = useToastStore(s => s.addToast);
 
   useScrollLock(isOpen);
@@ -155,13 +161,14 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
       // Don't block remix if tracking fails
     }
 
-    const params = new URLSearchParams({
-      remix_prompt: asset.prompt,
-      remix_aspect: asset.aspect_ratio,
-    });
+    const params = new URLSearchParams();
+    if (asset.prompt) params.set('remix_prompt', asset.prompt);
+    if (asset.aspect_ratio) params.set('remix_aspect', asset.aspect_ratio);
 
     onClose();
-    router.push(`/studio/text-to-video?${params.toString()}`);
+    // Push straight to the real feature page. The old `/studio/text-to-video` was a
+    // server `redirect()` stub → it dropped the query string, so remix data never arrived.
+    router.push(`/studio/video/text-to-video?${params.toString()}`);
   };
 
   const handleLikeToggle = async () => {
@@ -202,6 +209,7 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
   const imageSrc = mediaBlobUrl || thumbnailBlobUrl;
 
   return (
+    <>
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6 lg:p-6 select-none">
       <motion.div
         initial={{ opacity: 0 }}
@@ -363,6 +371,14 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
                   <span className="text-[10px] font-bold">{asset.comment_count}</span>
                 )}
               </button>
+
+              <button
+                onClick={() => setIsReportOpen(true)}
+                title="Báo cáo tác phẩm"
+                className="h-11 px-4 rounded-xl border border-white/12 hover:border-red-500/30 bg-white/[0.01] hover:bg-red-500/[0.03] text-slate-400 hover:text-red-400 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Flag className="h-4 w-4" />
+              </button>
             </div>
 
             <ShareButtons
@@ -390,5 +406,12 @@ export function RemixModal({ asset, isOpen, onClose, onLikeChange }: RemixModalP
         </div>
       </motion.div>
     </div>
+
+    <ReportModal
+      assetUuid={asset.uuid}
+      isOpen={isReportOpen}
+      onClose={() => setIsReportOpen(false)}
+    />
+    </>
   );
 }

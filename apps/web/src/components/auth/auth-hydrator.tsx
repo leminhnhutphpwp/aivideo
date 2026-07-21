@@ -7,7 +7,8 @@ export function AuthHydrator({ children }: { children: React.ReactNode }) {
   const hydrate = useAuthStore(s => s.hydrate);
 
   useEffect(() => {
-    hydrate();
+    const dispose = hydrate();
+    return () => { dispose?.(); };
   }, [hydrate]);
 
   return <>{children}</>;
