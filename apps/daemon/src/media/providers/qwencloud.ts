@@ -16,7 +16,10 @@ async function fetchWithBackoff(
     if (resp.status !== 429) return resp;
 
     const retryAfter = resp.headers.get('retry-after');
-    const baseWait = retryAfter ? parseInt(retryAfter) * 1000 : baseDelay * Math.pow(2, attempt);
+    // Retry-After may be an HTTP-date rather than seconds; parseInt yields NaN there, which
+    // would make sleep(NaN) a 0ms tight loop — fall back to exponential backoff instead.
+    const retryAfterSec = retryAfter ? parseInt(retryAfter, 10) : NaN;
+    const baseWait = Number.isFinite(retryAfterSec) ? retryAfterSec * 1000 : baseDelay * Math.pow(2, attempt);
     const jitter = Math.random() * 2000 - 1000; // ±1s jitter
     const wait = Math.min(maxDelay, Math.max(0, baseWait + jitter));
 
@@ -367,6 +370,9 @@ export async function renderQwenCloudVideo(ctx: MediaContext, credentials: Provi
         if (!pollResp.ok) {
           pollErrors++;
           logger.warn('QWENCLOUD', `poll ${taskId} failed (${pollErrors}x)`, { status: pollResp.status });
+          // Abort on persistent HTTP errors — `continue` skips the outer catch's threshold
+          // check, so without this a failing endpoint would spin until the 12-min cap.
+          if (pollErrors >= 5) throw new Error(`qwencloud poll ${taskId} failed ${pollErrors}x (last status ${pollResp.status})`);
           continue;
         }
         try { pollData = JSON.parse(pollText); } catch { throw new Error(`qwencloud poll non-JSON: ${truncate(pollText, 200)}`); }

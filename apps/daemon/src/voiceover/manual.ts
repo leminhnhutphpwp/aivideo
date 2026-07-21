@@ -27,12 +27,22 @@ export function checkFfmpeg(): boolean {
   }
 }
 
+const MERGE_TIMEOUT_MS = 5 * 60 * 1000;
+
 export function mergeAudioVideo(videoPath: string, audioPath: string, outputPath: string): Promise<MergedFileMeta> {
   return new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', ['-i', videoPath, '-i', audioPath, '-c:v', 'copy', '-c:a', 'aac', '-map', '0:v:0', '-map', '1:a:0', '-shortest', '-y', outputPath]);
     let stderr = '';
+    // Guard against a hung ffmpeg: without this the promise never settles, leaving the
+    // task stuck 'running' with no webhook and a leaked liveTasks entry.
+    const timer = setTimeout(() => {
+      try { ff.kill('SIGKILL'); } catch {/* already gone */}
+      reject(new Error(`ffmpeg merge timed out after ${Math.round(MERGE_TIMEOUT_MS / 1000)}s`));
+    }, MERGE_TIMEOUT_MS);
+    timer.unref?.();
     ff.stderr?.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
     ff.on('close', (code) => {
+      clearTimeout(timer);
       if (code !== 0) return reject(new Error(`ffmpeg exited with code ${code}: ${stderr.slice(-200)}`));
       try {
         const stat = fs.statSync(outputPath);
@@ -42,6 +52,6 @@ export function mergeAudioVideo(videoPath: string, audioPath: string, outputPath
         reject(new Error(`Failed to stat merged file: ${err.message}`));
       }
     });
-    ff.on('error', (err) => reject(new Error(`ffmpeg spawn failed: ${err.message}`)));
+    ff.on('error', (err) => { clearTimeout(timer); reject(new Error(`ffmpeg spawn failed: ${err.message}`)); });
   });
 }

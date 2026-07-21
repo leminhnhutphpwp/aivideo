@@ -24,6 +24,19 @@ export type LiveMediaTask = {
 
 const liveTasks = new Map<string, LiveMediaTask>();
 
+const TERMINAL_STATUSES = new Set(['done', 'failed', 'interrupted']);
+// Grace period before a terminal task is dropped from the in-memory map. Long enough
+// for in-flight long-poll/GET consumers to still read it; the terminal state is already
+// persisted to SQLite and served from there afterwards.
+const LIVE_TASK_EVICT_MS = 60000;
+
+// Optional db-bound hook, wired at boot, invoked when a TERMINAL webhook is delivered so
+// the "webhook_delivered" flag can be persisted (prevents boot re-fire of old callbacks).
+let onWebhookDelivered: ((taskId: string) => void) | null = null;
+export function setWebhookDeliveredHandler(fn: (taskId: string) => void): void {
+  onWebhookDelivered = fn;
+}
+
 export function isInternalHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
   if (normalized === 'localhost' || normalized === '127.0.0.1' || normalized === '0.0.0.0' || normalized === '[::1]') return true;
@@ -69,6 +82,11 @@ function fireWebhookWithRetry(task: LiveMediaTask, callbackUrl: string, body: st
   sendHttpRequest(callbackUrl, body, headers, 15000).then((result) => {
     if (result.ok) {
       logger.info('WEBHOOK', `Webhook sent for task ${task.id}`, { url: callbackUrl });
+      // Persist delivery for terminal webhooks only, so boot reconciliation won't replay
+      // them. Progress ('running') webhooks are transient and must not set the flag.
+      if (onWebhookDelivered && TERMINAL_STATUSES.has(task.status)) {
+        try { onWebhookDelivered(task.id); } catch {/* best-effort */}
+      }
       return;
     }
     // 4xx (rejected HMAC / validation) — permanent failure, do NOT retry.
@@ -242,6 +260,15 @@ export function appendTaskProgress(task: LiveMediaTask, line: string): void {
 export function notifyTaskWaiters(task: LiveMediaTask): void {
   for (const w of task.waiters) w();
   task.waiters.clear();
+  // Evict terminal tasks from the in-memory map to prevent unbounded growth. Deferred so
+  // late long-poll/GET consumers can still read the entry; state is already persisted.
+  if (TERMINAL_STATUSES.has(task.status)) {
+    const timer = setTimeout(() => {
+      const current = liveTasks.get(task.id);
+      if (current && TERMINAL_STATUSES.has(current.status)) liveTasks.delete(task.id);
+    }, LIVE_TASK_EVICT_MS);
+    timer.unref?.();
+  }
 }
 
 export function getLiveMediaTask(taskId: string): LiveMediaTask | undefined {
