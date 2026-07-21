@@ -130,7 +130,7 @@ class UserController extends Controller
         $user->assignRole('panel_user');
 
         app(MailService::class)->sendToUser('welcome', $user, [
-            'login_url' => url('/login'),
+            'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
         ]);
 
         return response()->json(['success' => true, 'data' => $user], 201);

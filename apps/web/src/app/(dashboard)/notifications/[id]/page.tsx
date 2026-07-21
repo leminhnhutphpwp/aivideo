@@ -6,6 +6,7 @@ import { Bell, ArrowLeft, Info, AlertTriangle, CheckCircle, AlertCircle, Clock, 
 import { motion } from 'motion/react';
 import { laravel } from '@/lib/api/client';
 import { useToastStore } from '@/stores/toast-store';
+import { useNotificationStore, sanitizeNotificationBody } from '@/stores/notification-store';
 
 interface NotificationDetail {
   uuid: string;
@@ -47,6 +48,7 @@ export default function NotificationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [marking, setMarking] = useState(false);
   const addToast = useToastStore(s => s.addToast);
+  const decrementUnread = useNotificationStore(s => s.decrementUnread);
 
   useEffect(() => {
     if (!id) {
@@ -78,6 +80,7 @@ export default function NotificationDetailPage() {
     try {
       await laravel.markNotificationRead(id);
       setNotif(prev => prev ? { ...prev, read: true, read_at: new Date().toISOString() } : prev);
+      decrementUnread();
     } catch {
       // silent
     }
@@ -89,6 +92,7 @@ export default function NotificationDetailPage() {
     try {
       await laravel.markNotificationRead(id);
       setNotif(prev => prev ? { ...prev, read: true, read_at: new Date().toISOString() } : prev);
+      decrementUnread();
       addToast('Đã đánh dấu đã đọc', 'success');
     } catch {
       addToast('Không thể cập nhật', 'error');
@@ -183,7 +187,7 @@ export default function NotificationDetailPage() {
         <div className="p-5 md:p-6 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border border-white/12">
           <div
             className="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: notif.body }}
+            dangerouslySetInnerHTML={{ __html: sanitizeNotificationBody(notif.body) }}
           />
         </div>
 

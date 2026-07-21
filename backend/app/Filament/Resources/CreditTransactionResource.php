@@ -125,7 +125,7 @@ class CreditTransactionResource extends Resource
                             ->label('Số credits')
                             ->required()
                             ->numeric()
-                            ->minValue(1)
+                            ->minValue(-100000)
                             ->maxValue(100000)
                             ->helperText('Nhập số dương để tặng, số âm để trừ credits'),
                         \Filament\Forms\Components\Textarea::make('description')

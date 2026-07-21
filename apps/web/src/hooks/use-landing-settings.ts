@@ -34,9 +34,6 @@ export type ResolvedLandingSettings = {
   gallery_label: string | null;
   gallery_title_line1: string | null;
   gallery_title_line2: string | null;
-  sound_label: string | null;
-  sound_title_line1: string | null;
-  sound_title_line2: string | null;
   ecosystem_label: string | null;
   ecosystem_title_line1: string | null;
   ecosystem_title_line2: string | null;
@@ -50,8 +47,6 @@ export type ResolvedLandingSettings = {
   vision_description_p1: string | null;
   vision_description_p2: string | null;
   footer_copyright: string | null;
-  footer_privacy_url: string | null;
-  footer_terms_url: string | null;
   footer_contact_url: string | null;
 };
 
@@ -91,9 +86,6 @@ const DEFAULTS: ResolvedLandingSettings = {
   gallery_label: "Phong Cách",
   gallery_title_line1: "Tạo ra bởi AI. ",
   gallery_title_line2: "Chất lượng chuyên nghiệp.",
-  sound_label: "Trải Nghiệm Âm Thanh",
-  sound_title_line1: "Cảm Xúc Từ ",
-  sound_title_line2: "Từng Giọng Đọc.",
   ecosystem_label: "Hệ Sinh Thái Toàn Diện",
   ecosystem_title_line1: "Một Nền Tảng.",
   ecosystem_title_line2: "Vạn Khả Năng.",
@@ -107,8 +99,6 @@ const DEFAULTS: ResolvedLandingSettings = {
   vision_description_p1: "Chọn góc máy. Điều chỉnh ánh sáng. Định tâm trạng. Kiểm soát từng khung hình.",
   vision_description_p2: "Đây không phải là bộ lọc — đây là bộ công cụ chuyên nghiệp.",
   footer_copyright: "\u00a9 2026 Wavise Studio",
-  footer_privacy_url: "#",
-  footer_terms_url: "#",
   footer_contact_url: "#",
 };
 

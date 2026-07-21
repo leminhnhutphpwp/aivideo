@@ -28,7 +28,9 @@ class PlanUpgradeResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('status', PlanUpgrade::STATUS_PENDING)->count();
+        $count = static::getModel()::where('status', PlanUpgrade::STATUS_PENDING)->count();
+
+        return $count > 0 ? (string) $count : null;
     }
 
     protected static string | \Illuminate\Contracts\Support\Htmlable | null $navigationBadgeTooltip = 'Số yêu cầu đang chờ duyệt';
@@ -148,7 +150,7 @@ class PlanUpgradeResource extends Resource
                             app(MailService::class)->sendToUser('plan_upgraded', $user, [
                                 'from_plan' => $record->fromPlan?->name ?? 'Free',
                                 'to_plan' => $toPlan?->name ?? 'Unknown',
-                                'login_url' => url('/login'),
+                                'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
                             ]);
                         } catch (\Throwable $e) {
                             \Log::warning('Failed to send plan upgrade notification from admin', [

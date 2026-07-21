@@ -248,6 +248,32 @@ class AuthApiTest extends TestCase
         $response->assertStatus(400);
     }
 
+    /**
+     * Carbon 3 signed-diff regression: một mã tạo hơn 10 phút trước PHẢI hết hạn.
+     * Trước khi fix, now()->diffInMinutes($past) trả số âm nên "> 10" luôn false
+     * và mã cũ vẫn được chấp nhận (lỗ hổng bảo mật).
+     */
+    public function test_verify_reset_code_expired(): void
+    {
+        $code = '123456';
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => 'test@example.com'],
+            ['token' => Hash::make($code), 'created_at' => now()->subMinutes(11)],
+        );
+
+        $response = $this->postJson('/api/auth/verify-reset-code', [
+            'email' => 'test@example.com',
+            'code' => $code,
+        ]);
+
+        $response->assertStatus(400);
+
+        // Mã hết hạn phải bị xoá khỏi bảng.
+        $this->assertDatabaseMissing('password_reset_tokens', [
+            'email' => 'test@example.com',
+        ]);
+    }
+
     public function test_send_verification_success(): void
     {
         $unverifiedUser = User::factory()->create([

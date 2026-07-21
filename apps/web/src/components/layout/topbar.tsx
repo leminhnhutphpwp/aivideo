@@ -17,6 +17,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { t } from '@/lib/i18n';
 import { laravel } from '@/lib/api/client';
+import { useToastStore } from '@/stores/toast-store';
+import { useNotificationStore, sanitizeNotificationBody } from '@/stores/notification-store';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Notification {
@@ -70,8 +72,11 @@ export function Topbar() {
   const router = useRouter();
   const { toggleMobileMenu } = useUIStore();
   const { user, logout } = useAuthStore();
+  const addToast = useToastStore(s => s.addToast);
+  const unreadCount = useNotificationStore(s => s.unreadCount);
+  const refreshUnread = useNotificationStore(s => s.refreshUnread);
+  const resetUnread = useNotificationStore(s => s.resetUnread);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
   const [credits, setCredits] = useState<number>(user?.credits ?? 0);
 
@@ -91,25 +96,33 @@ export function Topbar() {
     return () => { clearInterval(interval); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('focus', onFocus); };
   }, [fetchCredits]);
 
-  useEffect(() => {
-    laravel.notificationsUnreadCount().then((count) => {
-      setUnreadCount(typeof count === 'number' ? count : 0);
-    }).catch(() => {});
+  const refreshNotifs = useCallback(() => {
+    refreshUnread();
     laravel.notifications({ per_page: 5 }).then((res) => {
       setNotifications(res.data || []);
     }).catch(() => {});
-  }, []);
+  }, [refreshUnread]);
+
+  useEffect(() => {
+    refreshNotifs();
+    const onVisibility = () => { if (!document.hidden) refreshNotifs(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    const interval = setInterval(() => {
+      if (!document.hidden) refreshNotifs();
+    }, 30000);
+    const onFocus = () => refreshNotifs();
+    window.addEventListener('focus', onFocus);
+    return () => { clearInterval(interval); document.removeEventListener('visibilitychange', onVisibility); window.removeEventListener('focus', onFocus); };
+  }, [refreshNotifs]);
 
   const handleMarkAllRead = async () => {
-    await laravel.markAllNotificationsRead();
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-  };
-
-  const handleMarkRead = async (id: string) => {
-    await laravel.markNotificationRead(id);
-    setNotifications(prev => prev.map(n => n.uuid === id ? { ...n, read: true } : n));
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    try {
+      await laravel.markAllNotificationsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      resetUnread();
+    } catch {
+      addToast('Không thể đánh dấu đã đọc. Vui lòng thử lại sau.', 'error');
+    }
   };
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -266,7 +279,7 @@ export function Topbar() {
                         </p>
                         <div
                           className="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed"
-                          dangerouslySetInnerHTML={{ __html: notif.body }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeNotificationBody(notif.body) }}
                         />
                         <p className="text-[9px] text-slate-500 mt-1">
                           {notif.sent_at ? new Date(notif.sent_at).toLocaleString('vi-VN') : ''}

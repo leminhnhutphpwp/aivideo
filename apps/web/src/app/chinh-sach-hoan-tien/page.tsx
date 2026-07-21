@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: "Chính sách hoàn tiền & credit",
   description:
     "Chính sách hoàn tiền và credit của Wavise Studio — cách nạp, sử dụng và hoàn credit khi render thất bại.",
-  robots: { index: true, follow: true },
+  // Draft with placeholder company/contact data → keep out of the index until
+  // filled. Still crawlable (follow) so the footer links aren't dead ends.
+  robots: { index: false, follow: true },
+  alternates: { canonical: "/chinh-sach-hoan-tien" },
 };
 
 const toc = [
@@ -20,6 +23,7 @@ const toc = [
 ];
 
 export default function RefundPolicyPage() {
+  {/* TODO(owner): fill real company/contact/tax/effective-date data, then re-enable index + re-add to sitemap */}
   return (
     <LegalLayout
       title="Chính sách hoàn tiền & credit"

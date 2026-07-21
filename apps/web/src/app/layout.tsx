@@ -102,9 +102,11 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(ogImage ? { images: [ogImage] } : {}),
       creator: "@wavise",
     },
-    alternates: {
-      canonical: BASE_URL,
-    },
+    // NOTE: no root-level `alternates.canonical` here — a hardcoded canonical in
+    // the root layout is inherited by every child route that doesn't set its own,
+    // making login/register/legal all emit canonical=`/`. Each route that needs a
+    // canonical (e.g. the legal pages) sets its own in its `metadata`. The home
+    // route `/` self-references by default, which is correct.
     icons: {
       icon: [
         { url: '/favicon.ico', sizes: '48x48' },

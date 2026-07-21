@@ -110,7 +110,7 @@ class SePayWebhookListener
         app(\App\Services\MailService::class)->sendToUser('plan_upgraded', $user, [
             'from_plan' => $upgrade->fromPlan?->name ?? 'Free',
             'to_plan' => $toPlan?->name ?? 'Unknown',
-            'login_url' => url('/login'),
+            'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
         ]);
 
         return true;

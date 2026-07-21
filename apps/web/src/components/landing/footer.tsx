@@ -20,17 +20,17 @@ export function Footer() {
           </span>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <Link href="/dieu-khoan-dich-vu" className="text-xs text-slate-400 hover:text-slate-400 transition-colors font-medium tracking-wide">
+          <Link href="/dieu-khoan-dich-vu" className="text-xs text-slate-400 hover:text-white transition-colors font-medium tracking-wide">
             Điều khoản dịch vụ
           </Link>
-          <Link href="/chinh-sach-bao-mat" className="text-xs text-slate-400 hover:text-slate-400 transition-colors font-medium tracking-wide">
+          <Link href="/chinh-sach-bao-mat" className="text-xs text-slate-400 hover:text-white transition-colors font-medium tracking-wide">
             Chính sách bảo mật
           </Link>
-          <Link href="/chinh-sach-hoan-tien" className="text-xs text-slate-400 hover:text-slate-400 transition-colors font-medium tracking-wide">
+          <Link href="/chinh-sach-hoan-tien" className="text-xs text-slate-400 hover:text-white transition-colors font-medium tracking-wide">
             Hoàn tiền &amp; Credit
           </Link>
           {ls.footer_contact_url && ls.footer_contact_url !== "#" && (
-            <Link href={ls.footer_contact_url} className="text-xs text-slate-400 hover:text-slate-400 transition-colors font-medium tracking-wide">
+            <Link href={ls.footer_contact_url} className="text-xs text-slate-400 hover:text-white transition-colors font-medium tracking-wide">
               Liên hệ
             </Link>
           )}

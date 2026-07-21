@@ -27,7 +27,9 @@ class PendingCreditPurchaseResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('status', PendingCreditPurchase::STATUS_PENDING)->count();
+        $count = static::getModel()::where('status', PendingCreditPurchase::STATUS_PENDING)->count();
+
+        return $count > 0 ? (string) $count : null;
     }
 
     protected static string | \Illuminate\Contracts\Support\Htmlable | null $navigationBadgeTooltip = 'Số yêu cầu đang chờ duyệt';

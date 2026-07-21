@@ -6,9 +6,10 @@ import { Bell, Info, AlertTriangle, CheckCircle, AlertCircle, Check, ChevronLeft
 import { motion } from 'motion/react';
 import { laravel } from '@/lib/api/client';
 import { useToastStore } from '@/stores/toast-store';
+import { useNotificationStore, sanitizeNotificationBody } from '@/stores/notification-store';
 
 interface Notification {
-  id: number;
+  uuid: string;
   title: string;
   body: string;
   type: string;
@@ -47,6 +48,7 @@ export default function NotificationsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const addToast = useToastStore(s => s.addToast);
+  const resetUnread = useNotificationStore(s => s.resetUnread);
 
   const fetchNotifications = async (page: number) => {
     setLoading(true);
@@ -67,9 +69,14 @@ export default function NotificationsPage() {
   }, []);
 
   const handleMarkAllRead = async () => {
-    await laravel.markAllNotificationsRead();
-    setNotifications(prev => prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() })));
-    addToast('Đã đánh dấu tất cả đã đọc', 'success');
+    try {
+      await laravel.markAllNotificationsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() })));
+      resetUnread();
+      addToast('Đã đánh dấu tất cả đã đọc', 'success');
+    } catch {
+      addToast('Không thể đánh dấu đã đọc. Vui lòng thử lại sau.', 'error');
+    }
   };
 
   const filtered = filter === 'unread' ? notifications.filter(n => !n.read) : notifications;
@@ -146,7 +153,9 @@ export default function NotificationsPage() {
         ) : filtered.length === 0 ? (
           <div className="py-32 text-center bg-[#16141a] rounded-2xl border border-white/12 space-y-4">
             <Bell className="h-12 w-12 text-slate-500 mx-auto" />
-            <p className="text-sm text-slate-500 font-medium">Chưa có thông báo nào</p>
+            <p className="text-sm text-slate-500 font-medium">
+              {filter === 'unread' ? 'Không có thông báo chưa đọc' : 'Chưa có thông báo nào'}
+            </p>
           </div>
         ) : (
           filtered.map((notif, idx) => {
@@ -155,11 +164,11 @@ export default function NotificationsPage() {
             const label = TYPE_LABELS[notif.type] || 'Thông tin';
             return (
               <motion.div
-                key={notif.id ?? `notif-${idx}`}
+                key={notif.uuid ?? `notif-${idx}`}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                onClick={() => router.push(`/notifications/${notif.id}`)}
+                onClick={() => router.push(`/notifications/${notif.uuid}`)}
                 className={`p-4 md:p-5 rounded-2xl md:rounded-2xl bg-gradient-to-b from-[#0c0c0c] to-[#080808] border ${!notif.read ? 'border-[#FF5A1F]/20' : 'border-white/12'} hover:border-white/10 transition-all cursor-pointer`}
               >
                 <div className="flex items-start gap-4">
@@ -177,7 +186,7 @@ export default function NotificationsPage() {
                     </div>
                     <div
                       className="text-xs text-slate-500 leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: notif.body }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeNotificationBody(notif.body) }}
                     />
                     <div className="flex items-center justify-between mt-3">
                       <div className="flex items-center gap-2">

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class ThrottleApiRequests
@@ -134,8 +135,16 @@ class ThrottleApiRequests
         return $response;
     }
 
+    // Whitelist IPs change rarely (admin-managed), so a short cache avoids a DB hit on nearly
+    // every API request. A few minutes of staleness on add/remove is acceptable here.
+    protected const WHITELIST_CACHE_TTL = 300; // seconds
+
     protected function isWhitelisted(string $ip): bool
     {
-        return \App\Models\WhitelistIp::where('ip_address', $ip)->exists();
+        return (bool) Cache::remember(
+            'api_whitelist_ip:' . $ip,
+            self::WHITELIST_CACHE_TTL,
+            fn () => \App\Models\WhitelistIp::where('ip_address', $ip)->exists(),
+        );
     }
 }

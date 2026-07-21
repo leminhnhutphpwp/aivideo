@@ -20,7 +20,10 @@ class ManualCreditNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        // Chỉ gửi mail: bảng `notifications` đã được tái mục đích cho admin-broadcast
+        // (schema tuỳ biến, không có notifiable_*/data/read_at) nên DatabaseChannel
+        // của Laravel sẽ ném QueryException khi insert. Bỏ 'database' để tránh crash.
+        return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -34,7 +37,7 @@ class ManualCreditNotification extends Notification implements ShouldQueue
             ->line("Admin vừa {$verb} **{$sign}{$this->amount}** credits cho tài khoản của bạn.")
             ->line("Lý do: {$this->description}")
             ->line("Số dư hiện tại: **{$this->newBalance}** credits")
-            ->action('Xem số dư', url('/credits'))
+            ->action('Xem số dư', rtrim(config('app.frontend_url'), '/') . '/billing')
             ->line('Cảm ơn bạn đã sử dụng dịch vụ!');
     }
 

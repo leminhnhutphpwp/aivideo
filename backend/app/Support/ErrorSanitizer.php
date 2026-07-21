@@ -21,15 +21,23 @@ class ErrorSanitizer
             return false;
         }
 
-        return str_contains($msg, 'OpenAI Generic Image Error')
-            || str_contains($msg, 'Provider')
-            || str_contains($msg, 'HTTP error')
-            || str_contains($msg, 'failed')
-            || (bool) preg_match('/[45][0-9]{2}/', $msg) // 4xx/5xx codes
+        // Lowercase once so the literal leak checks are case-insensitive too (not just the
+        // vendor regex) — "provider request FAILED" must still be caught.
+        $lower = mb_strtolower($msg);
+
+        return str_contains($lower, 'openai generic image error')
+            || str_contains($lower, 'provider')
+            || str_contains($lower, 'http error')
+            || str_contains($lower, 'failed')
+            // Real HTTP status codes only — require an accompanying HTTP/status token or an
+            // actual status phrase, so business numbers ("Cần 500 credits", "480p", "450 ký
+            // tự") are NOT nuked to the generic error.
+            || (bool) preg_match('/\b(?:https?|status(?:\s*code)?)\b[^0-9]{0,12}\b[45]\d{2}\b/', $lower)
+            || (bool) preg_match('/\b[45]\d{2}\b\s*(?:internal server error|service unavailable|bad gateway|gateway timeout|too many requests|not found|unauthorized|forbidden|bad request)\b/', $lower)
             // structural config leaks: "no X base URL", "no X API key", endpoints…
-            || (bool) preg_match('/\b(base ?url|api ?key|access ?key|secret|token|credential|endpoint|model)\b/i', $msg)
+            || (bool) preg_match('/\b(base ?url|api ?key|access ?key|secret|token|credential|endpoint|model)\b/', $lower)
             // any vendor / model name
-            || (bool) preg_match('/\b(qwen|dashscope|alibaba|elevenlabs|cloudflare|ckey|openai|kling|luma|runway|haiper|seedance|wan\d|veo|sora|minimax|pika|stub)\b/i', $msg);
+            || (bool) preg_match('/\b(qwen|dashscope|alibaba|elevenlabs|cloudflare|ckey|openai|kling|luma|runway|haiper|seedance|wan\d|veo|sora|minimax|pika|stub)\b/', $lower);
     }
 
     /** Public-safe error message: generic if it leaks, otherwise unchanged. */
