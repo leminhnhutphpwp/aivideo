@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AssetController extends Controller
@@ -89,32 +90,52 @@ class AssetController extends Controller
         ]);
     }
 
-    protected function streamWithRange(Asset $asset, string $disk): StreamedResponse|null
+    protected function streamFromDisk(Asset $asset, string $disk): StreamedResponse|null
     {
         if (empty(config("filesystems.disks.{$disk}.key"))) return null;
 
+        $storage = Storage::disk($disk);
+
         try {
-            $stream = Storage::disk($disk)->readStream($asset->path);
+            $stream = $storage->readStream($asset->path);
         } catch (\Exception) {
             return null;
         }
-        if ($stream === false) return null;
+        if ($stream === false || $stream === null) return null;
 
-        $size = $asset->size_bytes;
         $mime = $asset->mime_type ?? 'application/octet-stream';
-        $filename = $asset->original_name;
+        $filename = $asset->original_name ?? $asset->uuid;
 
-        return response()->stream(function () use ($stream, $size) {
+        // Use the real object size — size_bytes may be 0 when the daemon omitted it
+        // (AssetService::storeFromS3Key defaults to 0), which would truncate the download.
+        $size = null;
+        try {
+            $size = $storage->size($asset->path);
+        } catch (\Exception) {
+            $size = $asset->size_bytes ?: null;
+        }
+
+        // Sanitize the filename so a `"` in original_name cannot break the header.
+        $headers = [
+            'Content-Type' => $mime,
+            'Content-Disposition' => HeaderUtils::makeDisposition(
+                HeaderUtils::DISPOSITION_INLINE,
+                $filename,
+                'file',
+            ),
+            'X-Asset-UUID' => $asset->uuid,
+            'Cache-Control' => 'private, max-age=3600',
+        ];
+        // Only advertise a length we actually know; range requests are not supported,
+        // so we deliberately do NOT send Accept-Ranges.
+        if ($size !== null) {
+            $headers['Content-Length'] = $size;
+        }
+
+        return response()->stream(function () use ($stream) {
             fpassthru($stream);
             fclose($stream);
-        }, 200, [
-            'Content-Type' => $mime,
-            'Content-Disposition' => 'inline; filename="' . $filename . '"',
-            'Content-Length' => $size,
-            'X-Asset-UUID' => $asset->uuid,
-            'Accept-Ranges' => 'bytes',
-            'Cache-Control' => 'private, max-age=3600',
-        ]);
+        }, 200, $headers);
     }
 
     public function download(Asset $asset, Request $request): StreamedResponse|BinaryFileResponse|JsonResponse
@@ -125,11 +146,11 @@ class AssetController extends Controller
             return response()->json(['error' => 'Download link has expired'], 410);
         }
 
-        $asset->increment('download_count');
-
         // 1. Thử local trước
         $localPath = storage_path("app/{$asset->path}");
         if (file_exists($localPath)) {
+            // Only count a download once the file is actually resolved (a 404 must not inflate the counter).
+            $asset->increment('download_count');
             return response()->file($localPath, [
                 'X-Asset-UUID' => $asset->uuid,
                 'Cache-Control' => 'no-cache',
@@ -144,8 +165,11 @@ class AssetController extends Controller
         };
 
         foreach ($disks as $disk) {
-            $response = $this->streamWithRange($asset, $disk);
-            if ($response !== null) return $response;
+            $response = $this->streamFromDisk($asset, $disk);
+            if ($response !== null) {
+                $asset->increment('download_count');
+                return $response;
+            }
         }
 
         return response()->json(['error' => 'File not found'], 404);
@@ -173,7 +197,29 @@ class AssetController extends Controller
     {
         $this->authorize('delete', $asset);
 
-        // Xoá file trên tất cả storage
+        $this->purgeAsset($asset);
+
+        // Also reclaim the sibling derived preview/thumbnail (separate row + file) for the
+        // same render job, otherwise it is orphaned in storage after the original is deleted.
+        if ($asset->render_job_id && !in_array($asset->type, ['thumbnail', 'preview'], true)) {
+            $siblings = Asset::where('render_job_id', $asset->render_job_id)
+                ->whereIn('type', ['thumbnail', 'preview'])
+                ->where('id', '!=', $asset->id)
+                ->get();
+
+            foreach ($siblings as $sibling) {
+                $this->purgeAsset($sibling);
+            }
+        }
+
+        return response()->json(null, 204);
+    }
+
+    /**
+     * Delete an asset's underlying files (all storage disks + local copy) and soft-delete the row.
+     */
+    protected function purgeAsset(Asset $asset): void
+    {
         foreach (['s3', 's3-external'] as $disk) {
             if (!empty(config("filesystems.disks.{$disk}.key"))) {
                 try {
@@ -184,11 +230,9 @@ class AssetController extends Controller
 
         $localPath = storage_path("app/{$asset->path}");
         if (file_exists($localPath)) {
-            unlink($localPath);
+            @unlink($localPath);
         }
 
         $asset->delete();
-
-        return response()->json(null, 204);
     }
 }

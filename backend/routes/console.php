@@ -6,8 +6,10 @@ Schedule::command('activitylog:clean')->daily();
 Schedule::command('credits:renew')->daily();
 Schedule::command('credits:auto-renew')->daily();
 Schedule::command('events:grant-birthday')->dailyAt('07:00');
-Schedule::command('jobs:check-timeouts')->everyFiveMinutes();
-Schedule::command('credits:release')->hourly();
+// withoutOverlapping: this command has side effects (increments attempts,
+// dispatches RetryFailedJob / HandleJobFailure). A slow run overlapping the next
+// tick would double-dispatch retries and double-count attempts.
+Schedule::command('jobs:check-timeouts')->everyFiveMinutes()->withoutOverlapping();
 Schedule::job(new \App\Jobs\ReleaseStuckCredits)->hourly();
 Schedule::job(new \App\Jobs\CleanupExpiredAssets)->daily();
 Schedule::job(new \App\Jobs\CheckExpiredSubscriptions)->dailyAt('06:00');

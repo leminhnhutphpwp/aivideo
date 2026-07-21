@@ -7,10 +7,17 @@ use App\Models\User;
 use App\Services\MailService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 class SendNotificationJob implements ShouldQueue
 {
     use Queueable;
+
+    // Retry transient SMTP failures. The broadcast path is retry-safe: attach
+    // happens before send (syncWithoutDetaching) so already-notified users are
+    // skipped on re-run — email at most once per user.
+    public int $tries = 3;
+    public int $backoff = 60;
 
     public function __construct(
         public Notification $notification
@@ -47,6 +54,14 @@ class SendNotificationJob implements ShouldQueue
         $this->notification->update([
             'status' => Notification::STATUS_SENT,
             'sent_at' => now(),
+        ]);
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        Log::error('SendNotificationJob failed after retries', [
+            'notification_id' => $this->notification->id,
+            'error' => $e->getMessage(),
         ]);
     }
 

@@ -6,6 +6,14 @@
 
 ## ✅ Recently Completed
 
+### Multi-agent bug sweep ĐỢT 4 — ~44 lỗi fixed (2026-07-22) — ✅ Done + pushed
+- **Cách làm**: 5 agent phân tích (jobs/queue · asset/storage/R2 · daemon providers · web studio/components · web i18n/lib) → 5 agent fix → final sweep.
+- **Verify**: web tsc 0 · daemon tsc 0 · **backend 606 passed / 1910 assertions** (i18n sạch, 0 key thiếu).
+- **HIGH**: **timeout retry tính tiền 2 lần** (release trước re-reserve) · **timeout max-attempt không hoàn tiền + sweep CRASH** (`credits:release` rỗng → dùng HandleJobFailure, xoá command dead) · **AI asset "410 Gone" sau 30 ngày** (isExpired dùng expires_at) · **token hết hạn giết refresh** (gửi raw token) · **`RetryFailedJob` fatal pre-existing** (property `$job` trùng trait → đổi `$renderJob`; retry path trước đây luôn crash prod).
+- **MED**: query timeout hồi sinh job completed · failJob bỏ pipeline · `each()` paging bỏ sót (ReleaseStuckCredits/CleanupExpiredAssets→cursor) · check-timeouts `withoutOverlapping` · HandleJob* `failed()` hook · Content-Length=0 truncate · video thumbnail_path set · destroy() purge WebP mồ côi · zero-byte guard (cloudflare/ckey) · audioKind default speech · storyboard-image blob preview · upload-fail toast · scene-node buttons sống lại · credit-estimation latest-wins · upload-dialog leak · onCancelled wired · refresh race → logout oan · daemon online→offline poll.
+- **LOW**: raw-path leak community (bỏ, theo rule) · Content-Disposition sanitize · download_count sau resolve · "both"→sync R2 · ckey aspect · findMediaModel id-only · typewriter/select/beforeunload · dead code · loginHistory param · tries (Telegram/Notification).
+- **Worklogs**: `backend/worklogs/2026-07-22-{async-layer-credit-invariant,asset-storage}-*.md`, `apps/daemon/worklogs/2026-07-22-provider-bug-fixes.md`, `apps/web/worklogs/2026-07-22-{storyboard-builder,auth-refresh-daemon-media}-*.md`.
+
 ### Multi-agent bug sweep ĐỢT 3 — ~37 lỗi fixed (2026-07-21) — ✅ Done, branch `fix/bug-sweep-round3`
 - **Cách làm**: 5 agent phân tích (Filament admin · email/notifications · web notifications/onboarding · landing/SEO/legal · moderation/ratelimit) → 5 agent fix → final sweep.
 - **Verify**: web tsc 0 · **backend full suite 602 passed** (2 fail: SocialiteTest = **pre-existing**, cũng fail trên main; CommunityFeatureTest query-count = regression whitelist-cache của tôi → đã fix bằng warmup request).

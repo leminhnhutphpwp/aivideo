@@ -6,10 +6,15 @@ use App\Services\TelegramService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 class SendTelegramNotification implements ShouldQueue
 {
     use Dispatchable, Queueable;
+
+    // Retry transient Telegram API/network failures instead of dropping silently.
+    public int $tries = 3;
+    public int $backoff = 30;
 
     /**
      * @param  string  $message  HTML message body to deliver.
@@ -35,5 +40,13 @@ class SendTelegramNotification implements ShouldQueue
         } else {
             $telegram->sendMessage($this->message);
         }
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        Log::error('SendTelegramNotification failed after retries', [
+            'event' => $this->event,
+            'error' => $e->getMessage(),
+        ]);
     }
 }

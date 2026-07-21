@@ -80,14 +80,15 @@ class Asset extends Model
 
     public function isExpired(): bool
     {
-        if ($this->expires_at && $this->expires_at->isPast()) {
-            return true;
+        // Prefer the explicit expiry set at creation (365d for AI assets — see AssetService).
+        // Only fall back to the 30-day rule when no expires_at was ever recorded, so a valid
+        // future expires_at is never overridden. Agrees with CleanupExpiredAssets (keys off expires_at).
+        if ($this->expires_at) {
+            return $this->expires_at->isPast();
         }
-        // Auto-expire after 30 days for non-permanent assets
-        if (!$this->is_public && $this->created_at->diffInDays(now()) > 30) {
-            return true;
-        }
-        return false;
+
+        // Legacy fallback for rows created without an expires_at: expire non-permanent assets after 30 days.
+        return !$this->is_public && $this->created_at->diffInDays(now()) > 30;
     }
 
     public function getUrlAttribute(): string

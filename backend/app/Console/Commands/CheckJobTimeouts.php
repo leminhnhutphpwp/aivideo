@@ -102,28 +102,31 @@ class CheckJobTimeouts extends Command
 
     protected function findTimedOutJobs()
     {
-        $query = RenderJob::where('status', 'processing')
-            ->whereNotNull('started_at');
+        // Keep status='processing' ANDed with the whole timeout OR-group so a
+        // completed/failed job with an old started_at can never be resurrected
+        // by a bare orWhere leaking outside the status constraint.
+        return RenderJob::where('status', 'processing')
+            ->whereNotNull('started_at')
+            ->where(function ($group) {
+                // Check each provider timeout
+                foreach ($this->providerTimeouts as $provider => $minutes) {
+                    if ($provider === 'default') {
+                        continue;
+                    }
 
-        // Check each provider timeout
-        foreach ($this->providerTimeouts as $provider => $minutes) {
-            if ($provider === 'default') {
-                continue;
-            }
+                    $group->orWhere(function ($q) use ($provider, $minutes) {
+                        $q->where('model', 'like', "%{$provider}%")
+                          ->where('started_at', '<', now()->subMinutes($minutes));
+                    });
+                }
 
-            $query->orWhere(function ($q) use ($provider, $minutes) {
-                $q->where('model', 'like', "%{$provider}%")
-                  ->where('started_at', '<', now()->subMinutes($minutes));
-            });
-        }
-
-        // Default timeout for unmatched providers
-        $query->orWhere(function ($q) {
-            $q->whereNotIn('model', ['qwencloud', 'wavespeed', 'volcengine', 'byteplus', 'fal', 'grok'])
-              ->where('started_at', '<', now()->subMinutes($this->providerTimeouts['default']));
-        });
-
-        return $query->get();
+                // Default timeout for unmatched providers
+                $group->orWhere(function ($q) {
+                    $q->whereNotIn('model', ['qwencloud', 'wavespeed', 'volcengine', 'byteplus', 'fal', 'grok'])
+                      ->where('started_at', '<', now()->subMinutes($this->providerTimeouts['default']));
+                });
+            })
+            ->get();
     }
 
     protected function getJobTimeout(RenderJob $job): int
@@ -140,7 +143,13 @@ class CheckJobTimeouts extends Command
     {
         $job->increment('attempts');
 
-        // RetryFailedJob handles credit reserve + daemon resubmission
+        // Release the ORIGINAL reservation BEFORE re-dispatching. RetryFailedJob
+        // re-reserves credits, so without this we'd hold two type='reserved' txns
+        // for one attempt → captured 2× on completion (double-charge). Releasing
+        // first keeps the invariant of exactly one reservation per active attempt.
+        app(CreditService::class)->releaseReserved($job);
+
+        // RetryFailedJob handles credit (re)reserve + daemon resubmission
         RetryFailedJob::dispatch($job);
 
         $this->info("  ✓ RETRYING (attempt {$job->attempts}/{$job->max_attempts})");
@@ -154,15 +163,15 @@ class CheckJobTimeouts extends Command
 
     protected function failJob(RenderJob $job): void
     {
-        $job->status = 'failed';
-        $job->error_message = "Generation timeout after {$job->attempts} attempts (max retries exceeded)";
-        $job->failed_at = now();
-        $job->save();
+        // Go through the proper failure pipeline so reserved credits are released
+        // exactly once, the JobFailed event fires, and the failure email is sent.
+        // HandleJobFailure::handle() calls releaseReserved() + markAsFailed().
+        HandleJobFailure::dispatch(
+            $job,
+            "Generation timeout after {$job->attempts} attempts (max retries exceeded)"
+        );
 
-        // Release reserved credits
-        $this->call('credits:release', ['job' => $job->uuid]);
-
-        $this->error("  ✗ FAILED (max attempts reached)");
+        $this->error("  ✗ FAILED (max attempts reached) — dispatched failure handler");
         
         Log::error('Job failed after max retries', [
             'job_uuid' => $job->uuid,

@@ -88,6 +88,28 @@ class HandleJobFailure implements ShouldQueue
         }
     }
 
+    /**
+     * Default queue tries=1: one shot at cleanup if handle() throws before the
+     * terminal transition (e.g. after releaseReserved but before markAsFailed, or
+     * before either). Guarantee reserved credits are freed and the job lands in a
+     * terminal state so it can't strand in 'processing'. releaseReserved is
+     * idempotent (only refunds type='reserved' rows) → safe to call again.
+     */
+    public function failed(\Throwable $e): void
+    {
+        try {
+            app(CreditService::class)->releaseReserved($this->renderJob);
+            if (! $this->renderJob->fresh()?->isTerminal()) {
+                $this->renderJob->markAsFailed(self::FRIENDLY_MESSAGE);
+            }
+        } catch (\Throwable $inner) {
+            Log::error('HandleJobFailure::failed cleanup error', [
+                'job_uuid' => $this->renderJob->uuid,
+                'error' => $inner->getMessage(),
+            ]);
+        }
+    }
+
     private function extractProvider(): string
     {
         $model = $this->renderJob->model ?? '';

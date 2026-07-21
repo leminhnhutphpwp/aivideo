@@ -128,13 +128,20 @@ class GenerateThumbnail implements ShouldQueue
         @unlink($tempVideo);
 
         if ($process->isSuccessful()) {
-            app(AssetService::class)->storeFromPath(
+            $poster = app(AssetService::class)->storeFromPath(
                 user: $this->renderJob->user,
                 job: $this->renderJob,
                 type: 'thumbnail',
                 sourcePath: $outputPath,
             );
             @unlink($outputPath);
+
+            // Point the feed/preview card at the lightweight JPEG poster instead of the full
+            // video (mirrors handleImage) — CommunityController::formatAssetCard reads this.
+            $this->renderJob->update(['thumbnail_path' => $poster->url]);
+
+            // Mirror the poster to R2 alongside the original.
+            UploadAssetToR2::dispatch($poster);
         } else {
             Log::warning('GenerateThumbnail: ffmpeg failed', [
                 'job_uuid' => $this->renderJob->uuid,

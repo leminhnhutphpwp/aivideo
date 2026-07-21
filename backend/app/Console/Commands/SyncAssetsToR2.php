@@ -24,8 +24,11 @@ class SyncAssetsToR2 extends Command
             return Command::SUCCESS;
         }
 
+        // 'both' = UploadAssetToR2 pushed to R2 but kept the MinIO copy; those still need the
+        // MinIO copy reclaimed. Nothing ever writes the literal 'minio', so it is kept only for
+        // legacy rows. NULL = never synced.
         $query = Asset::where(function ($q) {
-            $q->where("storage_location", "minio")
+            $q->whereIn("storage_location", ["minio", "both"])
               ->orWhereNull("storage_location");
         });
 
