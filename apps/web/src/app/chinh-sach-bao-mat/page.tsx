@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: "Chính sách bảo mật",
   description:
     "Chính sách bảo mật của Wavise Studio — cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu của bạn.",
-  robots: { index: true, follow: true },
+  // Draft with placeholder company/contact data → keep out of the index until
+  // filled. Still crawlable (follow) so the footer links aren't dead ends.
+  robots: { index: false, follow: true },
+  alternates: { canonical: "/chinh-sach-bao-mat" },
 };
 
 const toc = [
@@ -22,6 +25,7 @@ const toc = [
 ];
 
 export default function PrivacyPolicyPage() {
+  {/* TODO(owner): fill real company/contact/tax/effective-date data, then re-enable index + re-add to sitemap */}
   return (
     <LegalLayout
       title="Chính sách bảo mật"

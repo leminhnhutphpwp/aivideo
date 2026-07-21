@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: "Điều khoản dịch vụ",
   description:
     "Điều khoản dịch vụ của Wavise Studio — quyền và nghĩa vụ khi sử dụng nền tảng tạo video AI.",
-  robots: { index: true, follow: true },
+  // Draft with placeholder company/contact data → keep out of the index until
+  // filled. Still crawlable (follow) so the footer links aren't dead ends.
+  robots: { index: false, follow: true },
+  alternates: { canonical: "/dieu-khoan-dich-vu" },
 };
 
 const toc = [
@@ -23,6 +26,7 @@ const toc = [
 ];
 
 export default function TermsOfServicePage() {
+  {/* TODO(owner): fill real company/contact/tax/effective-date data, then re-enable index + re-add to sitemap */}
   return (
     <LegalLayout
       title="Điều khoản dịch vụ"

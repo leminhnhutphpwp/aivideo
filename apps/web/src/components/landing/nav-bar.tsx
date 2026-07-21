@@ -3,18 +3,19 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { GlowButton } from "@/components/landing/ui/glow-button";
+import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
   { name: "Giới thiệu", target: "intro" },
   { name: "Tính năng", target: "director" },
   { name: "Thư viện", target: "gallery" },
-  { name: "Âm thanh", target: "sound" },
   { name: "Hệ sinh thái", target: "ecosystem" },
   { name: "Thống kê", target: "stats" },
   { name: "Câu hỏi", target: "faq" },
 ];
 
 export function NavBar() {
+  const { isLoggedIn } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -120,7 +121,7 @@ export function NavBar() {
             <Link href="/login" className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-widest transition-colors hidden sm:block">
               Đăng nhập
             </Link>
-            <GlowButton href="/dashboard" size="sm" className="uppercase tracking-widest text-[10px] z-[101]">
+            <GlowButton href={isLoggedIn ? "/studio" : "/login"} size="sm" className="uppercase tracking-widest text-[10px] z-[101]">
               Studio
             </GlowButton>
 
