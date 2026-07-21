@@ -13,6 +13,7 @@ use App\Services\CreditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CreditController extends Controller
@@ -102,16 +103,28 @@ class CreditController extends Controller
         // Tạo mã giao dịch ngắn: DH + 8 ký tự ngẫu nhiên
         $transferCode = $this->generateTransferCode('DH');
 
-        $pending = PendingCreditPurchase::create([
-            'user_id' => $user->id,
-            'transfer_code' => $transferCode,
-            'amount' => $payableAmount, // số tiền webhook SePay đối chiếu (đã giảm)
-            'credits' => $credits,
-        ]);
+        // Tạo pending + giữ chỗ coupon trong CÙNG một transaction. reserveForPurchase() chạy
+        // assertRedeemable() dưới lockForUpdate và có thể ném CouponException nếu một request
+        // song song vừa dùng hết slot cuối trong khoảng preview→reserve. Bọc transaction để
+        // pending row được rollback (không thành đơn mồ côi), và trả 422 thay vì 500.
+        try {
+            $pending = DB::transaction(function () use ($user, $transferCode, $payableAmount, $credits, $appliedCoupon, $discount) {
+                $pending = PendingCreditPurchase::create([
+                    'user_id' => $user->id,
+                    'transfer_code' => $transferCode,
+                    'amount' => $payableAmount, // số tiền webhook SePay đối chiếu (đã giảm)
+                    'credits' => $credits,
+                ]);
 
-        // Giữ chỗ lượt coupon (nhả lại nếu đơn hết hạn/huỷ).
-        if ($appliedCoupon) {
-            $this->couponService->reserveForPurchase($appliedCoupon, $user, $pending, $discount);
+                // Giữ chỗ lượt coupon (nhả lại nếu đơn hết hạn/huỷ).
+                if ($appliedCoupon) {
+                    $this->couponService->reserveForPurchase($appliedCoupon, $user, $pending, $discount);
+                }
+
+                return $pending;
+            });
+        } catch (CouponException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
 
         $bankInfo = config('sepay.bank_info', [
