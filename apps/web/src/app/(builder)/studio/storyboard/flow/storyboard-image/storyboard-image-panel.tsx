@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { LARAVEL_URL } from '@/lib/api/client';
 import { noDownloadImg } from '@/lib/media-protection';
+import { useToastStore } from '@/stores/toast-store';
 import { RichSelect } from '@/components/studio/rich-select';
 import {
   CAMERA_OPTIONS, STYLE_OPTIONS, MOOD_OPTIONS, LIGHTING_OPTIONS,
@@ -67,6 +68,7 @@ export function StoryboardImagePanel({
   lastFrameImage,
   onLastFrameImageChange,
 }: StoryboardImagePanelProps) {
+  const addToast = useToastStore(s => s.addToast);
   const [imageOpen, setImageOpen] = useState(true);
   const [skillsOpen, setSkillsOpen] = useState(true);
   const [imageHelpOpen, setImageHelpOpen] = useState(false);
@@ -83,16 +85,34 @@ export function StoryboardImagePanel({
     blobUrlsRef.current = [];
   };
 
+  // Clear (and revoke) the local blob preview whenever the real image url changes
+  // externally — after AI-generate, remove, or an upload that resolves to a stored path.
+  const clearLocalPreview = () => {
+    setLocalPreviewUrl(prev => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+      return null;
+    });
+  };
+
   useEffect(() => {
     return () => revokeBlobs();
   }, []);
+
+  useEffect(() => {
+    clearLocalPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [multiPanelImageUrl]);
 
   const displayUrl = localPreviewUrl
     || (multiPanelImageUrl?.startsWith('storyboards/')
       ? `${LARAVEL_URL}/storage/${multiPanelImageUrl}`
       : multiPanelImageUrl);
 
-  const handleFileSelect = async (accept: string, onChange: (v: string) => void) => {
+  const handleFileSelect = async (
+    accept: string,
+    onChange: (v: string) => void,
+    showPreview = false,
+  ) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;
@@ -101,12 +121,15 @@ export function StoryboardImagePanel({
       if (!file) return;
       const blobUrl = URL.createObjectURL(file);
       trackBlob(blobUrl);
-      setLocalPreviewUrl(blobUrl);
+      if (showPreview) setLocalPreviewUrl(blobUrl);
       try {
         const url = await onUploadFile(file);
         onChange(url);
       } catch {
-        onChange(blobUrl);
+        // Never persist a blob: url into the field — it flows into buildPayload/backend
+        // and is unusable. Surface the failure and drop the throwaway preview instead.
+        addToast('Tải lên thất bại, vui lòng thử lại', 'error');
+        if (showPreview) clearLocalPreview();
       }
     };
     input.click();
@@ -189,7 +212,7 @@ export function StoryboardImagePanel({
                 className="w-full h-28 object-contain"
               />
               <button
-                onClick={() => onMultiPanelImageChange('')}
+                onClick={() => { clearLocalPreview(); onMultiPanelImageChange(''); }}
                 className="absolute top-2 right-2 p-1.5 rounded-lg bg-zinc-950/60 hover:bg-zinc-950/80 text-white/80 hover:text-white transition-all cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
@@ -212,7 +235,7 @@ export function StoryboardImagePanel({
                 </button>
               )}
               <button
-                onClick={() => handleFileSelect('image/jpeg,image/png,image/webp', onMultiPanelImageChange)}
+                onClick={() => handleFileSelect('image/jpeg,image/png,image/webp', onMultiPanelImageChange, true)}
                 className="w-full h-32 rounded-xl border-2 border-dashed border-white/[0.08] hover:border-[#FF5A1F]/40 flex flex-col items-center justify-center gap-2 text-[11px] text-slate-600 hover:text-slate-400 transition-colors bg-white/[0.01] cursor-pointer"
               >
                 <Upload className="h-6 w-6" />

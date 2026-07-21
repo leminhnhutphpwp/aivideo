@@ -26,11 +26,20 @@ function getToken(): string | null {
 
 let refreshPromise: Promise<boolean> | null = null;
 
-async function tryRefreshToken(): Promise<boolean> {
+/**
+ * Refresh the JWT via a single shared, de-duplicated request.
+ * Reads the RAW stored token (NOT `getToken()`, which prunes an expired token
+ * to null) so a token that is past `exp` but still inside tymon's refresh-TTL
+ * can be exchanged for a fresh one — otherwise `/auth/refresh` would be called
+ * with no Authorization header and always fail → forced logout.
+ * All refresh call-sites (reactive 401 retry, the 50-min timer, hydrate)
+ * route through this so tymon never blacklists a token out from under a race.
+ */
+export async function tryRefreshToken(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
     try {
-      const token = getToken();
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       if (!token) return false;
       const res = await fetch(`${LARAVEL_URL}/api/auth/refresh`, {
         method: 'POST',
@@ -255,10 +264,7 @@ export const laravel = {
   },
 
   deleteAsset: (id: string) =>
-    laravelRequest<any>(`/assets/${id}`, { method: 'DELETE' }).catch(e => {
-      if (e.status === 204) return null;
-      throw e;
-    }),
+    laravelRequest<any>(`/assets/${id}`, { method: 'DELETE' }),
 
   plans: () =>
     laravelRequest<{ success: boolean; data: any[] }>('/plans').then(r => r.data),
@@ -391,7 +397,9 @@ export const laravel = {
   },
 
   loginHistory: (params?: { page?: number }) => {
-    const qs = params ? '?' + new URLSearchParams({ page: String(params.page) }).toString() : '';
+    const qs = params ? '?' + new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([_, v]) => v != null).map(([k, v]) => [k, String(v)]))
+    ).toString() : '';
     return laravelRequest<{ data: any[]; meta: any }>(`/settings/login-history${qs}`);
   },
 

@@ -23,6 +23,13 @@ export function Typewriter({ text, speed = 80, delay = 0, className, cursor = tr
     return () => clearTimeout(timer);
   }, [delay]);
 
+  // Reset when the target text changes so a new (possibly shorter) string doesn't stay
+  // frozen showing stale characters from the previous one.
+  useEffect(() => {
+    setDisplayed('');
+    setPhase('typing');
+  }, [text]);
+
   useEffect(() => {
     if (!started) return;
 

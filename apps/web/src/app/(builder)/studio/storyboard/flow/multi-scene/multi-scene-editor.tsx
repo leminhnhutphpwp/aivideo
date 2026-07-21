@@ -288,6 +288,7 @@ export function MultiSceneEditor({ editUuid, initialMode }: { editUuid: string |
     const handler = (e: BeforeUnloadEvent) => {
       if (dirtyRef.current) {
         e.preventDefault();
+        e.returnValue = ''; // Firefox/Safari require a returnValue to show the prompt.
       }
     };
     window.addEventListener('beforeunload', handler);

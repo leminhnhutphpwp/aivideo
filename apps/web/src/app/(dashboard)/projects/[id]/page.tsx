@@ -74,10 +74,8 @@ export default function ProjectDetailPage() {
       setProject(p);
       setTasks(t);
       const jobList: RenderJobRecord[] = (jobsRes as any)?.data?.items || (jobsRes as any)?.data || [];
-      if (jobList.length > 0) {
-        setRenderJob(jobList[0]);
-        setRenderJobs(jobList);
-      }
+      setRenderJobs(jobList);
+      setRenderJob(jobList[0] ?? null);
       setHasActive(t.some((task: TaskRecord) => task.status === 'queued' || task.status === 'running'));
     } catch {
       // project not found
@@ -104,6 +102,7 @@ export default function ProjectDetailPage() {
       onCompleted: onEvent,
       onFailed: onEvent,
       onQueued: onEvent,
+      onCancelled: onEvent,
     });
 
     const interval = setInterval(safeFetch, 30000);

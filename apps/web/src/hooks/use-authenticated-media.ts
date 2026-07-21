@@ -25,6 +25,12 @@ export function useAuthenticatedMedia(url: string | null): string | null {
 
   useEffect(() => {
     if (!url || !url.startsWith('http')) {
+      // Revoke any previously-created blob before clearing — otherwise switching
+      // from a real URL to null leaks the object-URL.
+      if (prevBlobUrl.current) {
+        URL.revokeObjectURL(prevBlobUrl.current);
+        prevBlobUrl.current = null;
+      }
       setBlobUrl(null);
       return;
     }

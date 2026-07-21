@@ -46,18 +46,34 @@ export function CustomSelect({ value, onChange, options, placeholder, className,
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
+  const positionDropdown = useCallback(() => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: 'fixed',
+      top: rect.bottom + 6,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, []);
+
   const handleToggle = useCallback(() => {
-    if (!open && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setDropdownStyle({
-        position: 'fixed',
-        top: rect.bottom + 6,
-        left: rect.left,
-        width: rect.width,
-      });
-    }
+    if (!open) positionDropdown();
     setOpen(!open);
-  }, [open]);
+  }, [open, positionDropdown]);
+
+  // The dropdown is portaled to <body> with fixed positioning, so it won't follow the
+  // trigger when the page or an ancestor scrolls / the window resizes. Recompute while open.
+  useEffect(() => {
+    if (!open) return;
+    const onReflow = () => positionDropdown();
+    window.addEventListener('scroll', onReflow, true);
+    window.addEventListener('resize', onReflow);
+    return () => {
+      window.removeEventListener('scroll', onReflow, true);
+      window.removeEventListener('resize', onReflow);
+    };
+  }, [open, positionDropdown]);
 
   const handleSelect = useCallback((val: string) => {
     onChange(val);
