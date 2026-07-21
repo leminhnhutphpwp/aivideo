@@ -18,7 +18,7 @@ class SePayWebhookController extends Controller
         $expectedToken = config('sepay.webhook_token');
 
         if (empty($expectedToken)) {
-            Log::error('SEPay webhook called but SEPA_WEBHOOK_TOKEN is not set');
+            Log::error('SEPay webhook called but SEPAY_WEBHOOK_TOKEN is not set');
             return response()->json(['error' => 'Service not configured'], 501);
         }
 
