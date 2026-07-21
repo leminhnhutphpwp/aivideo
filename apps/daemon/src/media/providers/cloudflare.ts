@@ -27,9 +27,14 @@ export async function renderCloudflareImage(ctx: MediaContext, credentials: Prov
     }
     if (!imageBlob) throw new Error('cloudflare i2i: no valid reference image');
 
+    const mime = imageData.mime || 'image/png';
+    const refExt = mime.includes('jpeg') || mime.includes('jpg') ? 'jpg'
+      : mime.includes('webp') ? 'webp'
+      : mime.includes('gif') ? 'gif'
+      : 'png';
     const formData = new FormData();
     formData.append('prompt', prompt);
-    formData.append('image', imageBlob, 'reference.png');
+    formData.append('image', imageBlob, `reference.${refExt}`);
     formData.append('model', model);
 
     const resp = await fetch(baseUrl, {
@@ -42,6 +47,7 @@ export async function renderCloudflareImage(ctx: MediaContext, credentials: Prov
       throw new Error(`cloudflare i2i ${resp.status}: ${truncate(errText, 240)}`);
     }
     const arr = await resp.arrayBuffer();
+    if (arr.byteLength === 0) throw new Error('cloudflare i2i returned zero bytes');
     const bytes = Buffer.from(arr);
     return { bytes, providerNote: `cloudflare/${model} · ${bytes.length} bytes`, suggestedExt: '.jpg' };
   }

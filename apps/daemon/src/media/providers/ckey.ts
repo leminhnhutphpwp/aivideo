@@ -39,7 +39,12 @@ export async function renderCKeyImage(ctx: MediaContext, credentials: ProviderCo
   }
   const baseUrl = credentials.baseUrl.replace(/\/$/, '');
   const prompt = (ctx.prompt && ctx.prompt.trim()) || 'A beautiful image';
-  const size = ctx.aspect === '1:1' ? '1024x1024' : ctx.aspect === '16:9' ? '1792x1024' : ctx.aspect === '9:16' ? '1024x1792' : '1024x1024';
+  const size = ctx.aspect === '1:1' ? '1024x1024'
+    : ctx.aspect === '16:9' ? '1792x1024'
+    : ctx.aspect === '9:16' ? '1024x1792'
+    : ctx.aspect === '4:3' ? '1408x1056'
+    : ctx.aspect === '3:4' ? '1056x1408'
+    : '1024x1024';
 
   const body = { model: ctx.wireModel, prompt, n: 1, size, response_format: 'b64_json' };
   const resp = await fetch(`${baseUrl}/images/generations`, {
@@ -58,8 +63,10 @@ export async function renderCKeyImage(ctx: MediaContext, credentials: ProviderCo
     if (!dlResp.ok) throw new Error(`ckey image fetch ${dlResp.status}`);
     const arr = await dlResp.arrayBuffer();
     const bytes = Buffer.from(arr);
+    if (bytes.length === 0) throw new Error('ckey image returned zero bytes');
     return { bytes, providerNote: `ckey/${ctx.wireModel} · ${bytes.length} bytes`, suggestedExt: '.png' };
   }
   const bytes = Buffer.from(b64, 'base64');
+  if (bytes.length === 0) throw new Error('ckey image returned zero bytes');
   return { bytes, providerNote: `ckey/${ctx.wireModel} · ${bytes.length} bytes`, suggestedExt: '.png' };
 }

@@ -98,7 +98,7 @@ export async function generateMedia(args: {
   if (!def) {
     throw new Error(`unknown model: ${resolvedModel}. Pass --model from the registered list (see /api/media/models) or supply provider_id.`);
   }
-  const resolvedAudioKind = surface === 'audio' ? audioKind || 'music' : undefined;
+  const resolvedAudioKind = surface === 'audio' ? audioKind || 'speech' : undefined;
   const allowed = modelsForSurface(surface, resolvedAudioKind);
   if (!allowed.some((m) => m.id === def.id) && !args.providerId) {
     const ids = allowed.map((m) => m.id).join(', ');
