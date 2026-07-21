@@ -69,6 +69,15 @@ export default function AudioStudioPage() {
       addToast('Vui lòng nhập mô tả âm thanh hoặc nội dung thuyết minh', 'warning');
       return;
     }
+    // Voiceover on but no voice picked → the voice/voiceover payload would be silently
+    // dropped by the `voiceId` guard below. Block and tell the user instead.
+    if (voiceoverEnabled && !voiceId) {
+      addToast('Vui lòng chọn giọng đọc', 'warning');
+      return;
+    }
+    // TODO(owner): audio studio has no PricePreview / expected_total (unlike the image
+    // studios) and the duration presets are hardcoded — leaving both as a product decision,
+    // not changing here to avoid scope creep.
     setGenerating(true);
     try {
       const project = await daemon.createProject({ name: prompt.trim().slice(0, 60) || voiceoverText.trim().slice(0, 60), surface: 'audio' });

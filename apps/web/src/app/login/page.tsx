@@ -19,8 +19,8 @@ export default function LoginPage() {
   const setAuth = useAuthStore(s => s.setAuth);
   const token = useAuthStore(s => s.token);
   const loading = useAuthStore(s => s.loading);
-  const [email, setEmail] = useState('minhnhut147nb@gmail.com');
-  const [password, setPassword] = useState('Test@1234');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -189,6 +189,7 @@ export default function LoginPage() {
       showApiResponse({ success: true, message: t('auth.loginSuccess') });
       router.push('/dashboard');
     } catch (err: any) {
+      setError(err?.message || t('auth.loginFailed'));
       showApiError(err, t('auth.loginFailed'));
     } finally {
       setLoginLoading(false);

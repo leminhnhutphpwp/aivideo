@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { laravel } from '@/lib/api/client';
+import { resetEcho } from '@/lib/echo';
 
 interface Plan {
   slug: string;
@@ -45,6 +46,8 @@ interface AuthState {
   loading: boolean;
   setAuth: (token: string, user: User) => void;
   setUser: (user: User) => void;
+  /** Update just the credit balance (e.g. from the `.credits.updated` realtime event). */
+  setCredits: (credits: number) => void;
   logout: () => void;
   /** Hydrates auth from storage and wires a cross-tab `storage` listener.
    * Returns a disposer that removes the listener (call in effect cleanup). */
@@ -64,8 +67,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setUser: (user) => set({ user }),
 
+  setCredits: (credits) =>
+    set((s) => (s.user ? { user: { ...s.user, credits } } : {})),
+
   logout: () => {
     localStorage.removeItem('auth_token');
+    // Tear down the realtime socket so the next login builds a fresh one bound
+    // to the new user/token (the singleton would otherwise stay on the old user).
+    resetEcho();
     set({ token: null, user: null, loading: false });
   },
 
@@ -73,6 +82,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const newToken = await laravel.refresh();
       localStorage.setItem('auth_token', newToken);
+      // No resetEcho() needed: the Echo auth header is a getter that reads the
+      // current token per /api/broadcasting/auth request, so the live socket
+      // keeps its channel subscriptions and picks up the rotated token.
       set({ token: newToken });
       return true;
     } catch {

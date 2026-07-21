@@ -35,6 +35,7 @@ function CallbackContent() {
         setStatus('success');
         setTimeout(() => router.push('/dashboard'), 500);
       } catch {
+        localStorage.removeItem('auth_token');
         setStatus('error');
         setTimeout(() => router.push('/'), 2000);
       }

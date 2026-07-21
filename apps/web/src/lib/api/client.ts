@@ -335,17 +335,17 @@ export const laravel = {
     }),
 
   verifyResetCode: (email: string, code: string) =>
-    laravelRequest<{ success: boolean; message: string; token: string }>('/auth/verify-reset-code', {
+    laravelRequest<{ success: boolean; message: string }>('/auth/verify-reset-code', {
       method: 'POST',
       body: JSON.stringify({ email, code }),
     }),
 
-  resetPassword: (email: string, token: string, password: string, passwordConfirmation?: string) =>
+  resetPassword: (email: string, code: string, password: string, passwordConfirmation?: string) =>
     laravelRequest<{ success: boolean; message: string }>('/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({
         email,
-        token,
+        code,
         password,
         password_confirmation: passwordConfirmation || password,
       }),
@@ -376,8 +376,8 @@ export const laravel = {
       method: 'POST',
       body: JSON.stringify({
         current_password: currentPassword,
-        new_password: newPassword,
-        new_password_confirmation: newPassword,
+        password: newPassword,
+        password_confirmation: newPassword,
       }),
     }),
 

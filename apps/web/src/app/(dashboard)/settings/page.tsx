@@ -440,7 +440,7 @@ function SecurityTab() {
   };
 
   const handleChangePassword = async () => {
-    if (!currentPassword || !newPassword || newPassword.length < 4) return;
+    if (!currentPassword || !newPassword || newPassword.length < 8) return;
     if (newPassword !== newPasswordConfirmation) {
       showApiError(new Error(t('auth.passwordMismatch')), '');
       return;
@@ -512,7 +512,7 @@ function SecurityTab() {
                     className="h-10 px-6 rounded-xl border-white/10 text-xs font-bold">
                     {t('common.cancel')}
                   </Button>
-                  <Button onClick={handleChangePassword} disabled={!currentPassword || !newPassword || newPassword.length < 4 || saving}
+                  <Button onClick={handleChangePassword} disabled={!currentPassword || !newPassword || newPassword.length < 8 || saving}
                     className="h-10 px-6 rounded-xl bg-[#FF5A1F] text-white hover:bg-[#FF5A1F]/90 font-bold text-xs shadow-lg shadow-[#FF5A1F]/20">
                     {saving ? t('common.loading') : t('common.save')}
                   </Button>
@@ -686,12 +686,11 @@ function NotificationsTab() {
   };
 
   const togglePreference = async (type: string, enabled: boolean) => {
-    setPrefs(prev => prev.map(p => p.type === type ? { ...p, enabled } : p));
+    const next = prefs.map(p => p.type === type ? { ...p, enabled } : p);
+    setPrefs(next);
 
     try {
-      const res = await laravel.updateNotificationPreferences(
-        prefs.map(p => p.type === type ? { ...p, enabled } : p)
-      );
+      const res = await laravel.updateNotificationPreferences(next);
       if (res.success) {
         addToast('Đã cập nhật', 'success');
       }

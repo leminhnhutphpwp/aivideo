@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Volume2, Play, Pause, Mic, ChevronDown, Music, Type, AlertCircle } from 'lucide-react';
+import { Volume2, Play, Pause, Mic, Music, Type, AlertCircle } from 'lucide-react';
 import { daemon } from '@/lib/api/client';
 import { CustomSelect } from '@/components/ui/select';
 
@@ -53,6 +53,15 @@ export function VoiceSelector({ value, onChange, onUsableChange }: { value: stri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [available, loading]);
 
+  // Stop any in-flight preview and free its blob URL when the selector unmounts.
+  useEffect(() => () => {
+    const el = audioRef.current;
+    if (el) {
+      el.pause();
+      if (el.src) URL.revokeObjectURL(el.src);
+    }
+  }, []);
+
   const filtered = voices.filter(v => {
     if (accent && v.labels?.accent?.toLowerCase() !== accent.toLowerCase()) return false;
     if (gender && v.labels?.gender?.toLowerCase() !== gender.toLowerCase()) return false;
@@ -103,7 +112,7 @@ export function VoiceSelector({ value, onChange, onUsableChange }: { value: stri
       <div className="flex gap-1.5">
         <CustomSelect
           value={provider}
-          onChange={(v) => { setProvider(v as ProviderType); setAccent(''); setGender(''); }}
+          onChange={(v) => { setProvider(v as ProviderType); setAccent(''); setGender(''); onChange(''); }}
           options={[
             { value: 'default', label: 'Mặc định' },
             { value: 'elevenlabs', label: 'ElevenLabs' },
@@ -151,16 +160,14 @@ export function VoiceSelector({ value, onChange, onUsableChange }: { value: stri
         </div>
       )}
 
-      {/* Voice dropdown */}
+      {/* Current selection summary — non-interactive; the list below is the actual picker. */}
       <div className="relative">
-        <button onClick={() => setLoading(false)} disabled
-          className="w-full h-9 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 text-left cursor-pointer group hover:border-white/20 transition-all outline-none">
+        <div className="w-full h-9 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 text-left">
           <Volume2 className="h-3.5 w-3.5 text-slate-500 shrink-0" />
           <span className="flex-1 text-[11px] text-white truncate">
             {loading ? 'Đang tải...' : selected ? selected.name : 'Chọn giọng...'}
           </span>
-          <ChevronDown className="h-3.5 w-3.5 text-slate-500 transition-transform" />
-        </button>
+        </div>
       </div>
 
       {/* Voice list */}

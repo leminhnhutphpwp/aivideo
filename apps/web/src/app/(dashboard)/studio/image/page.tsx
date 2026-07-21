@@ -31,6 +31,8 @@ export default function ImageStudioPage() {
   const router = useRouter();
   const addToast = useToastStore(s => s.addToast);
   const daemonOk = useDaemonStore(s => s.ok);
+  const user = useAuthStore(s => s.user);
+  const qualityTierCode = (user as any)?.plan?.quality_tier_code;
   const [prompt, setPrompt] = useState('');
   const [aspect, setAspect] = useState('1:1');
   const [style, setStyle] = useState('none');
@@ -81,9 +83,10 @@ export default function ImageStudioPage() {
     }).catch(() => { });
   }, []);
 
-  // Price calculation on mount (images are flat fee, no duration/quantity variance)
+  // Price calculation — recalculates once `user` hydrates so premium/ultra plans
+  // get their correct tier instead of the initial null → 'standard' fallback.
   useEffect(() => {
-    const planTier = ((useAuthStore.getState().user as any)?.plan?.quality_tier_code || 'standard') as string;
+    const planTier = (qualityTierCode || 'standard') as string;
     const quality = planTier === 'ultra' ? 'ultra' : planTier === 'premium' ? 'premium' : 'standard';
 
     if (priceAbortRef.current) {
@@ -109,7 +112,7 @@ export default function ImageStudioPage() {
     }).finally(() => {
       setPriceLoading(false);
     });
-  }, []);
+  }, [qualityTierCode]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -118,10 +121,12 @@ export default function ImageStudioPage() {
     }
     setGenerating(true);
     try {
-      const project = await daemon.createProject({ name: prompt.trim().slice(0, 60), surface: 'image', skillId: style });
+      // "none" is a UI sentinel for "no style" — never send it as a real skill id.
+      const activeStyle = style && style !== 'none' ? style : undefined;
+      const project = await daemon.createProject({ name: prompt.trim().slice(0, 60), surface: 'image', skillId: activeStyle });
       await daemon.generate(project.id, {
         capability: 't2i', prompt: prompt.trim(), surface: 'image',
-        aspect, style: style || undefined,
+        aspect, style: activeStyle,
         ...(priceData?.calculation_id ? { calculation_id: priceData.calculation_id, expected_total: priceData.pricing?.total_credits ?? priceData.total } : {}),
       });
       addToast(t('studio.sentSuccess'), 'success');

@@ -49,6 +49,7 @@ export default function ImageEditingPage() {
   const daemonOk = useDaemonStore(s => s.ok);
   const user = useAuthStore(s => s.user);
   const canUpload = (user as any)?.plan?.slug !== 'free';
+  const qualityTierCode = (user as any)?.plan?.quality_tier_code;
   const [prompt, setPrompt] = useState('');
   const [aspect, setAspect] = useState('1:1');
   const [style, setStyle] = useState('none');
@@ -64,6 +65,12 @@ export default function ImageEditingPage() {
   const priceAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => { initDaemonCheck(); }, []);
+
+  // Revoke all preview object URLs on unmount (removeImage only revokes on manual delete,
+  // so previews surviving a generate → router.push, or a plain unmount, would leak).
+  const previewsRef = useRef<string[]>([]);
+  useEffect(() => { previewsRef.current = referencePreviews; }, [referencePreviews]);
+  useEffect(() => () => { previewsRef.current.forEach(u => URL.revokeObjectURL(u)); }, []);
 
   // Lock body scroll while the example popup is open.
   useEffect(() => {
@@ -98,8 +105,10 @@ export default function ImageEditingPage() {
     }).catch(() => { });
   }, []);
 
+  // Recalculates once `user` hydrates so premium/ultra plans get the correct tier
+  // instead of the initial null → 'standard' fallback.
   useEffect(() => {
-    const planTier = ((useAuthStore.getState().user as any)?.plan?.quality_tier_code || 'standard') as string;
+    const planTier = (qualityTierCode || 'standard') as string;
     const quality = planTier === 'ultra' ? 'ultra' : planTier === 'premium' ? 'premium' : 'standard';
 
     if (priceAbortRef.current) {
@@ -125,7 +134,7 @@ export default function ImageEditingPage() {
     }).finally(() => {
       setPriceLoading(false);
     });
-  }, []);
+  }, [qualityTierCode]);
 
   const MAX_IMAGES = 9;
 
@@ -142,21 +151,40 @@ export default function ImageEditingPage() {
     img.src = url;
   };
 
+  // Append a file + its preview atomically, capped at MAX_IMAGES. The cap is enforced
+  // inside the state updaters (not just a top-of-function read) so a multi-select batch —
+  // whose calls share one stale `referenceFiles` closure — can't push past the limit; the
+  // preview blob URL is revoked when the entry is rejected so it doesn't leak.
+  const appendImage = (file: File, isFirst: boolean) => {
+    let accepted = false;
+    setReferenceFiles(prev => {
+      if (prev.length >= MAX_IMAGES) return prev;
+      accepted = true;
+      return [...prev, file];
+    });
+    const url = URL.createObjectURL(file);
+    setReferencePreviews(prev => {
+      if (prev.length >= MAX_IMAGES) { URL.revokeObjectURL(url); return prev; }
+      return [...prev, url];
+    });
+    if (accepted && isFirst) autoDetectAspect(file);
+  };
+
   const addImage = async (fileOrAsset: File | any) => {
+    if (referenceFiles.length >= MAX_IMAGES) {
+      addToast(`Chỉ được thêm tối đa ${MAX_IMAGES} ảnh`, 'warning');
+      return;
+    }
     const isFirst = referenceFiles.length === 0;
     if (fileOrAsset instanceof File) {
-      if (isFirst) autoDetectAspect(fileOrAsset);
-      setReferenceFiles(prev => [...prev, fileOrAsset]);
-      setReferencePreviews(prev => [...prev, URL.createObjectURL(fileOrAsset)]);
+      appendImage(fileOrAsset, isFirst);
     } else if (fileOrAsset.id && fileOrAsset.previewUrl) {
       try {
         const token = localStorage.getItem('auth_token');
         const res = await fetch(fileOrAsset.downloadUrl, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         const blob = await res.blob();
         const file = new File([blob], fileOrAsset.name, { type: fileOrAsset.mime || blob.type });
-        if (isFirst) autoDetectAspect(file);
-        setReferenceFiles(prev => [...prev, file]);
-        setReferencePreviews(prev => [...prev, URL.createObjectURL(file)]);
+        appendImage(file, isFirst);
       } catch { addToast('Lỗi tải ảnh', 'error'); }
     }
   };
@@ -333,7 +361,7 @@ export default function ImageEditingPage() {
             quantity={1}
           />
         )}
-        <button onClick={handleGenerate} disabled={generating || daemonOk === false}
+        <button onClick={handleGenerate} disabled={!prompt.trim() || generating || daemonOk === false}
           className="w-full h-12 rounded-xl bg-[#FF5A1F] hover:bg-[#FF6A2B] text-white font-bold text-sm transition-all disabled:opacity-50 shadow-sm shadow-[#FF5A1F]/20 flex items-center justify-center gap-2 cursor-pointer">
           {generating ? (
             <><div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Đang xử lý...</>
