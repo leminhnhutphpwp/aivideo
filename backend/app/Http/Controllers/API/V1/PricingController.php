@@ -23,7 +23,7 @@ class PricingController extends Controller
         $videoTypeCode = $request->query('video_type');
         
         // Cache config for 5 minutes
-        $cacheKey = 'pricing:config:' . ($videoTypeCode ?? 'all') . ':' . optional($request->user())->plan_id ?? 'free';
+        $cacheKey = 'pricing:config:' . ($videoTypeCode ?? 'all') . ':' . (optional($request->user())->plan_id ?? 'free');
         
         $config = Cache::remember($cacheKey, 300, function () use ($videoTypeCode) {
             return PricingCalculator::getAvailableOptions($videoTypeCode);
@@ -201,7 +201,7 @@ class PricingController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $perPage = (int) $request->query('per_page', 20);
+        $perPage = min(max((int) $request->query('per_page', 20), 1), 100);
 
         $logs = \App\Models\PricingAuditLog::calculations()
             ->forUser($request->user()->id)

@@ -9,6 +9,7 @@ use App\Services\ContentFilterService;
 use App\Services\UserNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
@@ -19,6 +20,11 @@ class CommentController extends Controller
 
     public function index(Request $request, RenderJob $renderJob): JsonResponse
     {
+        // Endpoint public: không lộ bình luận của asset chưa đăng cộng đồng.
+        if (! $renderJob->isPublished()) {
+            abort(404);
+        }
+
         $limit = min((int) $request->input('limit', 20), 50);
         $offset = (int) $request->input('offset', 0);
 
@@ -42,6 +48,11 @@ class CommentController extends Controller
     {
         $user = $request->user();
 
+        // Chỉ cho phép bình luận trên asset đã đăng lên cộng đồng.
+        if (! $renderJob->isPublished()) {
+            abort(404);
+        }
+
         if ($renderJob->status !== 'completed') {
             return response()->json(['error' => 'Asset chưa hoàn thành'], 422);
         }
@@ -62,7 +73,11 @@ class CommentController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:1000',
-            'parent_id' => 'nullable|exists:comments,id',
+            // Bình luận cha phải thuộc chính asset này (tránh reply chéo sang asset khác).
+            'parent_id' => [
+                'nullable',
+                Rule::exists('comments', 'id')->where('render_job_id', $renderJob->id),
+            ],
         ]);
 
         // Check for sensitive content

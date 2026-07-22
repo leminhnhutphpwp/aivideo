@@ -27,7 +27,7 @@ class ComputeTrending extends Command
 
             $jobs = RenderJob::published()
                 ->where('published_at', '>=', $since)
-                ->with('assets:id,uuid')
+                ->with('assets:id,render_job_id,uuid,path')
                 ->withCount('likes')
                 ->get()
                 ->map(function ($job) use ($settings) {
@@ -41,7 +41,7 @@ class ComputeTrending extends Command
 
             Cache::put("trending:assets:{$period}", $jobs->map(function ($job) {
                 $likeCount = $job->likes_count ?? Like::where('render_job_id', $job->id)->count();
-                $asset = $job->assets()->first();
+                $asset = $job->assets->first();
                 $outputUrl = $asset?->url ?? $job->output_path;
                 return [
                     'uuid' => $job->uuid,

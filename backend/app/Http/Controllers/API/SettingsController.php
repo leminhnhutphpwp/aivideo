@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
@@ -133,10 +134,19 @@ class SettingsController extends Controller
 
     public function updateNotificationPreferences(Request $request): JsonResponse
     {
+        // Giới hạn số lượng và whitelist type/channel để tránh ghi rác vào bảng preferences.
         $request->validate([
-            'preferences' => 'required|array',
-            'preferences.*.type' => 'required|string',
-            'preferences.*.channel' => 'required|string',
+            'preferences' => 'required|array|max:50',
+            'preferences.*.type' => [
+                'required',
+                'string',
+                Rule::in(['job_completed', 'job_failed', 'credits_added', 'credits_refunded']),
+            ],
+            'preferences.*.channel' => [
+                'required',
+                'string',
+                Rule::in(['email']),
+            ],
             'preferences.*.enabled' => 'required|boolean',
         ]);
 

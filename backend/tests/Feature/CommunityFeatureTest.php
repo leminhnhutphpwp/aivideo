@@ -479,6 +479,7 @@ class CommunityFeatureTest extends TestCase
     public function comment_daily_limit_enforced(): void
     {
         $job = $this->createCompletedJob($this->proUser);
+        $job->update(['visibility' => 'sharing', 'published_at' => now()]); // commentable only when published
 
         // Post 50 comments (since the limit is 50)
         for ($i = 0; $i < 50; $i++) {
@@ -507,6 +508,7 @@ class CommunityFeatureTest extends TestCase
     public function user_can_like_and_unlike_asset(): void
     {
         $job = $this->createCompletedJob($this->proUser);
+        $job->update(['visibility' => 'sharing', 'published_at' => now()]); // likeable only when published
 
         // Like
         $res = $this->actingAs($this->freeUser, 'api')
@@ -533,6 +535,7 @@ class CommunityFeatureTest extends TestCase
     public function multiple_users_can_like_same_asset(): void
     {
         $job = $this->createCompletedJob($this->proUser);
+        $job->update(['visibility' => 'sharing', 'published_at' => now()]); // likeable only when published
         $otherUser = User::factory()->create(['plan_id' => $this->freePlan->id, 'credits' => 500]);
 
         $this->actingAs($this->freeUser, 'api')
@@ -559,7 +562,9 @@ class CommunityFeatureTest extends TestCase
         $response = $this->actingAs($this->freeUser, 'api')
             ->postJson("/api/render-jobs/{$job->uuid}/like");
 
-        $response->assertStatus(422);
+        // Unpublished (here: still processing) assets return 404 — the published guard
+        // fires before the completed-status check, so their existence/state isn't revealed.
+        $response->assertStatus(404);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

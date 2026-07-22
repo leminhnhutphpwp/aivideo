@@ -35,7 +35,7 @@ class ComputeReputation extends Command
                 ->whereIn('visibility', ['sharing', 'public'])
                 ->sum('usage_count');
 
-            $accountAgeDays = max(0, (int) now()->diffInDays($user->created_at));
+            $accountAgeDays = max(0, (int) $user->created_at->diffInDays(now()));
 
             $score = (int) floor(
                 ($publishedCount * $settings->rep_pub_weight)
