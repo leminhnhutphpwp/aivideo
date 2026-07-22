@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
 export interface LoadedSkill {
@@ -17,7 +18,7 @@ function resolveSkillsRoot(): string {
     console.log(`[skills-loader] Using SKILLS_DIR: ${envDir}`);
     return envDir;
   }
-  const here = path.dirname(new URL(import.meta.url).pathname);
+  const here = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
     path.resolve(process.cwd(), '..', 'skills'),
     path.resolve(process.cwd(), 'apps', 'skills'),
@@ -38,20 +39,35 @@ const SKILLS_ROOT = resolveSkillsRoot();
 
 const FRONTMATTER_RE = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
 
-function parseFrontmatter(raw: string): Record<string, any> {
+/**
+ * Parses YAML frontmatter. Returns `null` on a YAML parse error so the caller can
+ * skip the skill entirely — never fall back to `{}`, which would let a parse-failed
+ * (possibly `draft`) skill default to published via `isPublishedSkill`. A valid but
+ * non-object document (e.g. empty frontmatter) is treated as an empty object.
+ */
+function parseFrontmatter(raw: string): Record<string, any> | null {
   try {
     const parsed = yaml.load(raw);
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, any>;
     }
-  } catch {}
-  return {};
+    return {};
+  } catch {
+    return null;
+  }
 }
 function parseSkillFile(filePath: string): LoadedSkill | null {
-  const raw = fs.readFileSync(filePath, 'utf-8');
+  let raw: string;
+  try {
+    raw = fs.readFileSync(filePath, 'utf-8');
+  } catch (err) {
+    console.warn(`[skills-loader] Failed to read: ${filePath}`, err);
+    return null;
+  }
   const match = raw.match(FRONTMATTER_RE);
   if (!match) return null;
   const fm = parseFrontmatter(match[1]);
+  if (!fm) { console.warn(`[skills-loader] Malformed frontmatter, skipping: ${filePath}`); return null; }
   const body = match[2].trim();
   const dirName = path.basename(path.dirname(filePath));
   return { id: fm.id || dirName, label: fm.label || fm.label_en || dirName, raw: fm, body, path: filePath, dir: path.dirname(filePath) };
@@ -64,6 +80,7 @@ export function loadSkills(category: string, baseDir?: string): LoadedSkill[] {
     return [];
   }
   const skills: LoadedSkill[] = [];
+  const seenIds = new Set<string>();
   const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
@@ -71,6 +88,8 @@ export function loadSkills(category: string, baseDir?: string): LoadedSkill[] {
     if (!fs.existsSync(skillFile)) continue;
     const parsed = parseSkillFile(skillFile);
     if (!parsed) { console.warn(`[skills-loader] Failed to parse: ${skillFile}`); continue; }
+    if (seenIds.has(parsed.id)) { console.warn(`[skills-loader] Duplicate skill id "${parsed.id}", skipping: ${skillFile}`); continue; }
+    seenIds.add(parsed.id);
     skills.push(parsed);
   }
   console.log(`[skills-loader] Loaded ${skills.length} skills from ${category}`);

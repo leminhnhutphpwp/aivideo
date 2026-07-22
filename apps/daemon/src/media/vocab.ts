@@ -14,12 +14,24 @@ export interface StudioVocab {
   style: string[];
 }
 
-const raw = readFileSync(fileURLToPath(new URL('./studio-vocab.json', import.meta.url)), 'utf8');
-const parsed = JSON.parse(raw) as Record<string, unknown>;
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+}
+
+let parsed: Record<string, unknown> = {};
+try {
+  const raw = readFileSync(fileURLToPath(new URL('./studio-vocab.json', import.meta.url)), 'utf8');
+  const json = JSON.parse(raw);
+  if (json && typeof json === 'object' && !Array.isArray(json)) {
+    parsed = json as Record<string, unknown>;
+  }
+} catch (err) {
+  console.error('[studio-vocab] Failed to load studio-vocab.json, defaulting to empty vocab', err);
+}
 
 export const STUDIO_VOCAB: StudioVocab = {
-  camera: parsed.camera as string[],
-  lighting: parsed.lighting as string[],
-  mood: parsed.mood as string[],
-  style: parsed.style as string[],
+  camera: asStringArray(parsed.camera),
+  lighting: asStringArray(parsed.lighting),
+  mood: asStringArray(parsed.mood),
+  style: asStringArray(parsed.style),
 };
