@@ -124,6 +124,12 @@ function FileInfo({ file, projectId, onFetchFile, aspectRatio }: { file: NonNull
     }
   }, []);
 
+  // Revoke the preview blob URL on unmount to avoid leaks (cards churn via AnimatePresence).
+  // previewUrl only transitions null -> url once, so this cleanup fires the revoke on unmount.
+  useEffect(() => {
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
+
   const handleDownload = async () => {
     if (!file.name || downloading) return;
     setDownloading(true);
@@ -375,11 +381,20 @@ function InputImagePreview({ fileName, label = 'Ảnh gốc', projectId, onFetch
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!fileName) return;
+    if (!fileName) { setLoading(false); return; }
+    let active = true;
+    let localUrl: string | null = null;
+    setLoading(true);
+    setPreviewUrl(null);
     onFetchFile(projectId, fileName)
-      .then(({ blobUrl }) => setPreviewUrl(blobUrl))
+      .then(({ blobUrl }) => {
+        if (active) { localUrl = blobUrl; setPreviewUrl(blobUrl); }
+        else { URL.revokeObjectURL(blobUrl); }
+      })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (active) setLoading(false); });
+    // Revoke the previous blob on re-fetch (deps change) and on unmount.
+    return () => { active = false; if (localUrl) URL.revokeObjectURL(localUrl); };
   }, [fileName, projectId]);
 
   return (

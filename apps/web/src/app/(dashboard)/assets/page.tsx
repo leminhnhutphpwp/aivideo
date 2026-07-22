@@ -27,6 +27,8 @@ interface Asset {
   size: string;
   preview: string;
   date: string;
+  /** Raw sortable timestamp (ms). Used for chronological sort — `date` is display-only. */
+  sortKey: number;
   source: 'laravel' | 'daemon';
   projectId?: string;
   fileName?: string;
@@ -83,6 +85,7 @@ function mapLaravelAsset(a: any): Asset {
     size: formatBytes(a.size_bytes),
     preview: downloadUrl,
     date: a.created_at ? new Date(a.created_at).toLocaleDateString('vi-VN') : '',
+    sortKey: a.created_at ? new Date(a.created_at).getTime() : 0,
     source: 'laravel',
     downloadUrl,
   };
@@ -144,6 +147,7 @@ function AssetsPage() {
                 size: formatBytes(f.size),
                 preview: ext.match(/^(png|jpg|jpeg|webp)$/) ? '' : '',
                 date: f.mtime ? new Date(f.mtime).toLocaleDateString('vi-VN') : '',
+                sortKey: f.mtime ? new Date(f.mtime).getTime() : 0,
                 source: 'daemon',
                 projectId: pid,
                 fileName: f.name,
@@ -158,11 +162,9 @@ function AssetsPage() {
       ...(l.status === 'fulfilled' ? l.value : []),
       ...(d.status === 'fulfilled' ? d.value : []),
     ];
-    allAssets.sort((a, b) => {
-      if (!a.date) return 1;
-      if (!b.date) return -1;
-      return b.date.localeCompare(a.date);
-    });
+    // Sort chronologically (newest first) on the raw timestamp — NOT the formatted
+    // "DD/MM/YYYY" string, which would order by day-of-month.
+    allAssets.sort((a, b) => b.sortKey - a.sortKey);
     setAssets(allAssets);
     setLoading(false);
   }, []);
@@ -446,17 +448,28 @@ function AssetCard({ asset, onDelete, onDownload }: { asset: Asset; onDelete: (a
   const shouldFetch = isImage || isVideo;
   
   useEffect(() => {
-    if (shouldFetch && asset.source === 'daemon' && asset.projectId && asset.fileName) {
+    if (!shouldFetch) return;
+    // Guard against stale writes + revoke the blob on unmount/re-fetch (cards churn via
+    // AnimatePresence on filter/search/paginate/delete).
+    let active = true;
+    let localUrl: string | null = null;
+    setBlobUrl(null);
+    const apply = (url: string) => {
+      if (active) { localUrl = url; setBlobUrl(url); }
+      else { URL.revokeObjectURL(url); }
+    };
+    if (asset.source === 'daemon' && asset.projectId && asset.fileName) {
       fetchRawFile(asset.projectId, asset.fileName)
-        .then(r => setBlobUrl(r.blobUrl))
+        .then(r => apply(r.blobUrl))
         .catch(() => {});
-    } else if (shouldFetch && asset.source === 'laravel' && asset.preview) {
+    } else if (asset.source === 'laravel' && asset.preview) {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       fetch(asset.preview, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
         .then(r => r.blob())
-        .then(blob => setBlobUrl(URL.createObjectURL(blob)))
+        .then(blob => apply(URL.createObjectURL(blob)))
         .catch(() => {});
     }
+    return () => { active = false; if (localUrl) URL.revokeObjectURL(localUrl); };
   }, [shouldFetch, asset.source, asset.projectId, asset.fileName, asset.preview]);
   
   return (

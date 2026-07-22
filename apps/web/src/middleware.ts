@@ -57,6 +57,10 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Run on everything except API routes, Next internals and files with an extension.
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  // Run on everything except API routes, Next internals and real static assets.
+  // We exclude only known static-asset extensions (NOT any path containing a dot)
+  // so routes like /community/creators/john.doe are still gated when needed.
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:ico|png|jpg|jpeg|svg|gif|webp|css|js|woff2?|map|txt|xml|json)$).*)',
+  ],
 };

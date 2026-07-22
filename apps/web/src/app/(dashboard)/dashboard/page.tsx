@@ -30,14 +30,18 @@ function AnimatedCounter({ target, duration = 1500 }: { target: number; duration
   const startTime = useRef<number | null>(null);
   useEffect(() => {
     startTime.current = null;
+    let rafId = 0;
     const animate = (timestamp: number) => {
       if (!startTime.current) startTime.current = timestamp;
       const progress = Math.min((timestamp - startTime.current) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(eased * target));
-      if (progress < 1) requestAnimationFrame(animate);
+      if (progress < 1) rafId = requestAnimationFrame(animate);
     };
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
+    // Cancel the loop on cleanup so a re-run (target updates async) or unmount can't
+    // leave a 2nd loop racing on startTime.current (flicker + setState-after-unmount).
+    return () => cancelAnimationFrame(rafId);
   }, [target, duration]);
   return <span>{count.toLocaleString()}</span>;
 }

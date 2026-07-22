@@ -30,6 +30,7 @@ function CommunityContent() {
   const [assets, setAssets] = useState<AssetCard[]>([]);
   const [selectedStyle, setSelectedStyle] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [sortBy, setSortBy] = useState('trending');
   const [loading, setLoading] = useState(true);
   
@@ -39,7 +40,16 @@ function CommunityContent() {
   const ITEMS_PER_PAGE = 20;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
+  // Debounce the search value (~300ms) so typing doesn't fire a request per keystroke.
   useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    // Ignore-stale-response guard: only the latest run may commit to state, so a slow
+    // earlier request can't overwrite a newer one (mirrors the priceAbortRef pattern).
+    let active = true;
     async function fetchData() {
       setLoading(true);
       try {
@@ -48,18 +58,19 @@ function CommunityContent() {
           newest: 'latest',
           remixes: 'trending',
         };
-        const res = await laravel.communityFeed({ 
-          q: searchQuery || undefined, 
-          sort: sortMap[sortBy] || 'latest' 
+        const res = await laravel.communityFeed({
+          q: debouncedQuery || undefined,
+          sort: sortMap[sortBy] || 'latest'
         });
-        setAssets(res.data.items || []);
+        if (active) setAssets(res.data.items || []);
       } catch {
-        setAssets([]);
+        if (active) setAssets([]);
       }
-      setLoading(false);
+      if (active) setLoading(false);
     }
     fetchData();
-  }, [sortBy, searchQuery]);
+    return () => { active = false; };
+  }, [sortBy, debouncedQuery]);
 
   useEffect(() => {
     const assetUuid = searchParams.get('asset');
