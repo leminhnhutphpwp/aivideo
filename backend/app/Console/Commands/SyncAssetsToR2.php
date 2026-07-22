@@ -33,7 +33,10 @@ class SyncAssetsToR2 extends Command
         });
 
         if ($this->option("force")) {
-            $query = Asset::where("storage_location", "!=", "r2");
+            $query = Asset::where(function ($q) {
+                $q->where("storage_location", "!=", "r2")
+                  ->orWhereNull("storage_location");
+            });
         }
 
         $total = $query->count();

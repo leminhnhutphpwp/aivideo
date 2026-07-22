@@ -1069,7 +1069,9 @@ Respond with ONLY this JSON, no markdown:
                 const mergedName = `voiceover-${meta.name}`;
                 const mergedPath = path.join(PROJECTS_DIR, projectId, mergedName);
                 const merged = await mergeAudioVideo(videoFile, audioFile, mergedPath);
-                meta = { ...merged };
+                // Keep the real provider metadata from the completed video (model/providerId/note/warnings);
+                // only the file identity (name/size/mtime/mime) changes to the merged output.
+                meta = { ...meta, name: merged.name, size: merged.size, mtime: merged.mtime, mime: merged.mime };
               } else if (!checkFfmpeg()) {
                 appendTaskProgress(task, 'FFmpeg không khả dụng — bỏ qua voiceover');
               } else if (!ttsModel) {

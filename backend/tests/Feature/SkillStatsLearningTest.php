@@ -158,6 +158,7 @@ YAML;
     public function test_like_and_unlike_adjust_skill_likes_count(): void
     {
         $job = $this->completedJob(['skill_id' => 'image-direction/natural-photo']);
+        $job->update(['visibility' => 'sharing', 'published_at' => now()]); // likeable only when published
 
         // Like → +1
         $this->actingAs($this->user, 'api')

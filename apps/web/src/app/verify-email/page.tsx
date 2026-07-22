@@ -15,7 +15,7 @@ export default function VerifyEmailPage() {
   const router = useRouter();
   const user = useAuthStore(s => s.user);
   const token = useAuthStore(s => s.token);
-  const setAuth = useAuthStore(s => s.setAuth);
+  const authLoading = useAuthStore(s => s.loading);
   const setUser = useAuthStore(s => s.setUser);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -26,6 +26,9 @@ export default function VerifyEmailPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Chờ store hydrate xong trước khi điều hướng — tránh bị đá về /register
+    // khi refresh cứng (token khởi tạo null, loading:true rồi hydrate async).
+    if (authLoading) return;
     if (!token) {
       router.replace('/register');
       return;
@@ -34,7 +37,7 @@ export default function VerifyEmailPage() {
       router.replace('/dashboard');
       return;
     }
-  }, [token, user, router]);
+  }, [authLoading, token, user, router]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -85,7 +88,7 @@ export default function VerifyEmailPage() {
     if (e.key === 'Enter') handleVerify();
   };
 
-  if (!token) return null;
+  if (authLoading || !token) return null;
 
   return (
     <AuthLayout

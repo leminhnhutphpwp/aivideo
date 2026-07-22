@@ -5,7 +5,7 @@ import path from 'node:path';
 import type { MediaContext } from '../types.js';
 
 export async function generateSimulatedAudio(ctx: MediaContext): Promise<Buffer> {
-  const duration = ctx.duration ?? 3;
+  const duration = Number.isFinite(ctx.duration) && (ctx.duration as number) > 0 ? (ctx.duration as number) : 3;
 
   const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'sim-audio-'));
   const outputPath = path.join(tmpDir, 'output.wav');

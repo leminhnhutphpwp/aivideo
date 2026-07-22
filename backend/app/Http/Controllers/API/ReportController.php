@@ -19,6 +19,11 @@ class ReportController extends Controller
     {
         $user = $request->user();
 
+        // Chỉ cho phép báo cáo asset đã đăng lên cộng đồng (tránh lộ asset private theo UUID).
+        if (! $renderJob->isPublished()) {
+            abort(404);
+        }
+
         $request->validate([
             'reason' => 'required|in:spam,inappropriate,copyright,other',
             'details' => 'nullable|string|max:500',

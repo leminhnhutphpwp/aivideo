@@ -17,7 +17,7 @@ function aspectToResolution(aspect: string | undefined): { width: number; height
 
 export async function generateSimulatedVideo(ctx: MediaContext): Promise<Buffer> {
   const { width, height } = aspectToResolution(ctx.aspect);
-  const duration = ctx.length ?? 5;
+  const duration = Number.isFinite(ctx.length) && (ctx.length as number) > 0 ? (ctx.length as number) : 5;
   const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'sim-video-'));
   const outputPath = path.join(tmpDir, 'output.mp4');
   try {

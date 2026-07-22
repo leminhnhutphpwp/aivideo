@@ -180,6 +180,11 @@ class CommunityController extends Controller
     {
         $user = $request->user();
 
+        // Chỉ cho phép tương tác với asset đã đăng lên cộng đồng (tránh lộ asset private theo UUID).
+        if (! $renderJob->isPublished()) {
+            abort(404);
+        }
+
         if ($renderJob->status !== 'completed') {
             return response()->json(['error' => 'Asset chưa hoàn thành'], 422);
         }
@@ -457,6 +462,11 @@ class CommunityController extends Controller
     public function useAsset(Request $request, RenderJob $renderJob): JsonResponse
     {
         $user = $request->user();
+
+        // Chỉ cho phép tương tác với asset đã đăng lên cộng đồng (tránh lộ asset private theo UUID).
+        if (! $renderJob->isPublished()) {
+            abort(404);
+        }
 
         if ($renderJob->status !== 'completed') {
             return response()->json(['error' => 'Asset chưa hoàn thành'], 422);

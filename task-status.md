@@ -6,6 +6,15 @@
 
 ## ✅ Recently Completed
 
+### Multi-agent bug sweep ĐỢT 6 — ~23 lỗi fixed (2026-07-22) — ✅ Done + pushed
+- **Cách làm**: 5 agent phân tích (seeders/commands · controllers còn lại · daemon ffmpeg · web perf · web shell) → 5 agent fix → final sweep (5 test community cập nhật theo isPublished guard).
+- **Verify**: web tsc 0 · daemon tsc 0 · **backend 606 passed / 1910 assertions**.
+- **HIGH**: community search fetch mỗi phím gõ + stale race → debounce 300ms + ignore-stale.
+- **MED**: like/comment/report/useAsset thiếu `isPublished` guard (tương tác asset private + bắn noti) · comment `parent_id` không scope theo job · SettingsController preferences không cap/whitelist · ComputeReputation Carbon sign → account age=0 · SyncAssetsToR2 `--force` bỏ NULL · **`/api/gemini/analyze` không auth (đốt key) → XOÁ** · verify-email redirect sớm (bỏ qua loading) · blob leak (task-card ×2, assets) · assets sort sai (localeCompare DD/MM/YYYY) · merge voiceover để file hỏng + đè metadata provider.
+- **LOW**: PricingController precedence/per_page clamp · comment index public · thêm `global-error.tsx` · dashboard rAF cancel · sim duration guard · middleware matcher tĩnh-asset · ComputeTrending N+1.
+- **Doc**: thêm mục config go-live (`HORIZON_ADMIN_EMAIL`/`FRONTEND_URL`/community migration) vào `docs/plans/active/security/coupon-security-golive.md`.
+- **Worklogs**: `backend/worklogs/2026-07-22-{api-controller,console-command}-bugfixes.md`, `apps/daemon/worklogs/2026-07-22-voiceover-merge-bugfixes.md`, `apps/web/worklogs/2026-07-22-{perf-rendering,app-shell-route}-bugfixes.md`.
+
 ### Multi-agent bug sweep ĐỢT 5 — ~39 lỗi fixed (2026-07-22) — ✅ Done + pushed
 - **Cách làm**: 5 agent phân tích (migrations/models · config/env/settings · Filament pages/widgets · daemon skills/internals · web long-tail) → 5 agent fix → final sweep (manager sửa 3 regression agent gây ra).
 - **Verify**: web tsc 0 · daemon tsc 0 · **backend 606 passed / 1910 assertions** · community settings migration chạy OK.

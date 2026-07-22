@@ -44,6 +44,16 @@ Endpoint `POST /api/coupons/redeem`, `POST /api/events/{slug}/claim` (+ `validat
   tự chạy `dailyAt('07:00')` **khi admin đã tạo 1 Event `trigger=birthday`** trong `/admin/coupon-events`.
 - Dev **không** có scheduler service → test tay: `docker exec aivideo-app-1 php artisan events:grant-birthday`.
 
+### ☐ Config bắt buộc mới (bug-sweep 2026-07-22)
+- **`HORIZON_ADMIN_EMAIL=<email admin thật>`** (backend `.env`). Gate Horizon dashboard giờ **fail-closed**:
+  nếu không set ở prod (env non-local) → **không ai vào được** `/admin` Horizon. (Trước đây default `admin@example.com`
+  — vừa khoá admin thật vừa mở cho ai có email đó.)
+- **`FRONTEND_URL=https://<domain-web>`** (backend `.env`). Ở prod đây là **origin CORS duy nhất** (localhost chỉ được
+  whitelist khi `APP_ENV=local`). Thiếu → web gọi API bị CORS chặn. Cũng là base cho link trong email (login/reset).
+- **Chạy migration**: `docker compose ... run --rm app php artisan migrate --force` phải chạy để tạo
+  `community.*` settings (`database/settings/2026_07_22_000001_create_community_settings.php`) — thiếu → community feed
+  throw `MissingSettings`. (Nằm trong bước migrate chuẩn của runbook `docs/deployment/README.md §5b`.)
+
 ## Verify sau khi bật
 - E2E: claim/redeem qua BFF với secret đã set → thành công; gọi thẳng Laravel `/api/coupons/redeem` (không qua BFF)
   → 403 (thiếu chữ ký HMAC). Origin lạ → 403. Register/claim hiện thử thách Turnstile.
