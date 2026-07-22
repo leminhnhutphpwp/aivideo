@@ -36,7 +36,7 @@ class AiPromptCompiler
 
     protected function isSimulationMode(): bool
     {
-        if (env('SIMULATION_MODE', false)) {
+        if (config('daemon.simulation_mode')) {
             return true;
         }
 

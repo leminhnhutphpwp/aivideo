@@ -9,6 +9,8 @@ class ApiKey extends Model
 {
     protected $fillable = ['user_id', 'name', 'key', 'prefix', 'last_used_at', 'expires_at', 'revoked'];
 
+    protected $hidden = ['id', 'user_id', 'key'];
+
     protected $casts = [
         'revoked' => 'boolean',
         'last_used_at' => 'datetime',

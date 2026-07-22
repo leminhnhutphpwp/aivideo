@@ -12,7 +12,22 @@ export function expandHomePrefix(raw: string): string {
   return raw;
 }
 
+/**
+ * Guards a resolved directory against path traversal: a project-relative input
+ * (e.g. `../../etc`) must stay inside `projectRoot`. Absolute inputs are an
+ * explicit, deliberate location and are allowed through. Throws on escape.
+ */
+export function assertWithinRoot(resolved: string, projectRoot: string): string {
+  const root = path.resolve(projectRoot);
+  const rel = path.relative(root, resolved);
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error(`path escapes project root: ${resolved}`);
+  }
+  return resolved;
+}
+
 export function resolveProjectRelativePath(raw: string, projectRoot: string): string {
   const expanded = expandHomePrefix(raw);
-  return path.isAbsolute(expanded) ? expanded : path.resolve(projectRoot, expanded);
+  if (path.isAbsolute(expanded)) return expanded;
+  return assertWithinRoot(path.resolve(projectRoot, expanded), projectRoot);
 }

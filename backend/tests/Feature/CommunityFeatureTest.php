@@ -63,24 +63,8 @@ class CommunityFeatureTest extends TestCase
         config(['queue.default' => 'sync']);
         config(['broadcasting.default' => 'null']);
 
-        // Seed CommunitySettings DB rows to avoid MissingSettings at runtime
-        \Illuminate\Support\Facades\DB::table('settings')->insert([
-            ['group' => 'community', 'name' => 'creator_payout_percent', 'payload' => json_encode(25)],
-            ['group' => 'community', 'name' => 'like_weight', 'payload' => json_encode(2)],
-            ['group' => 'community', 'name' => 'view_weight', 'payload' => json_encode(1)],
-            ['group' => 'community', 'name' => 'trending_limit', 'payload' => json_encode(20)],
-            ['group' => 'community', 'name' => 'top_creators_limit', 'payload' => json_encode(10)],
-            ['group' => 'community', 'name' => 'pro_publish_limit', 'payload' => json_encode(5)],
-            ['group' => 'community', 'name' => 'studio_publish_limit', 'payload' => json_encode(20)],
-            ['group' => 'community', 'name' => 'rep_pub_weight', 'payload' => json_encode(10)],
-            ['group' => 'community', 'name' => 'rep_like_weight', 'payload' => json_encode(2)],
-            ['group' => 'community', 'name' => 'rep_usage_weight', 'payload' => json_encode(5)],
-            ['group' => 'community', 'name' => 'rep_age_weight', 'payload' => json_encode(0.5)],
-            ['group' => 'community', 'name' => 'rep_thresholds', 'payload' => json_encode([
-                'newbie' => 0, 'creator' => 100, 'artist' => 500,
-                'director' => 2000, 'producer' => 5000, 'legend' => 10000,
-            ])],
-        ]);
+        // Community settings rows are seeded by the create_community_settings migration
+        // (RefreshDatabase runs it). saveSettings() below overrides specific keys per test.
     }
 
     /** Create a completed render job for testing */

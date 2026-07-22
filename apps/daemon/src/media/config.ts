@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { MEDIA_PROVIDERS } from './models.js';
-import { expandHomePrefix } from '../utils/home-expansion.js';
+import { expandHomePrefix, assertWithinRoot } from '../utils/home-expansion.js';
 
 const PROVIDER_IDS = MEDIA_PROVIDERS.map((p) => p.id);
 type ProviderEntry = { apiKey?: string; baseUrl?: string; model?: string };
@@ -32,7 +32,8 @@ const ENV_KEYS: Record<string, string[]> = {
 
 function resolveOverrideDir(raw: string, projectRoot: string): string {
   const expanded = expandHomePrefix(raw);
-  return path.isAbsolute(expanded) ? expanded : path.resolve(projectRoot, expanded);
+  if (path.isAbsolute(expanded)) return expanded;
+  return assertWithinRoot(path.resolve(projectRoot, expanded), projectRoot);
 }
 
 function envOverrideDir(envName: string, projectRoot: string): string | null {

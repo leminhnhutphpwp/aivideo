@@ -19,8 +19,6 @@ class ServiceCredentialsWidget extends BaseWidget
 
     public function getTableRecords(): \Illuminate\Support\Collection
     {
-        $pmaUrl = config('database.connections.mysql.host', 'http://localhost:8081');
-
         return collect([
             [
                 'service' => 'MinIO Console',

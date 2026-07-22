@@ -18,12 +18,6 @@ class StorageOverviewWidget extends StatsOverviewWidget
         $totalBytes = (int) Asset::sum('size_bytes');
         $totalMb = round($totalBytes / 1048576, 2);
 
-        $byType = Asset::select('type')
-            ->selectRaw('count(*) as count')
-            ->selectRaw('COALESCE(SUM(size_bytes), 0) as bytes')
-            ->groupBy('type')
-            ->pluck('bytes', 'count', 'type');
-
         $videoCount = Asset::where('type', 'video')->count();
         $videoBytes = (int) Asset::where('type', 'video')->sum('size_bytes');
         $thumbnailCount = Asset::where('type', 'thumbnail')->count();
@@ -51,7 +45,7 @@ class StorageOverviewWidget extends StatsOverviewWidget
                 ->color($totalMb > 100 ? 'warning' : 'success'),
 
             Stat::make('Disk', strtoupper($disk ?? 'N/A'))
-                ->description($diskUsed > 0 ? round($diskUsed * 1024, 2) . ' GB used' : 'Chưa có dữ liệu')
+                ->description($diskUsed > 0 ? $diskUsed . ' GB used' : 'Chưa có dữ liệu')
                 ->descriptionIcon('heroicon-m-server')
                 ->color('gray'),
         ];

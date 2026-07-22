@@ -6,6 +6,16 @@
 
 ## ✅ Recently Completed
 
+### Multi-agent bug sweep ĐỢT 5 — ~39 lỗi fixed (2026-07-22) — ✅ Done + pushed
+- **Cách làm**: 5 agent phân tích (migrations/models · config/env/settings · Filament pages/widgets · daemon skills/internals · web long-tail) → 5 agent fix → final sweep (manager sửa 3 regression agent gây ra).
+- **Verify**: web tsc 0 · daemon tsc 0 · **backend 606 passed / 1910 assertions** · community settings migration chạy OK.
+- **HIGH**: **CommunitySettings thiếu settings migration** → vỡ community feed khi deploy DB sạch (đã tạo migration 12 key).
+- **MED**: `env()` ngoài config chết dưới config:cache (**Horizon admin email** → fail-closed; SIMULATION_MODE) · gemini base_url · **ApiKey thiếu `$hidden`** (leak key hash/id) · StorageWidget disk sai 1024× · EmailTemplate test dùng URL admin · **jobs page poll không nhận status Laravel** + thiếu published/visibility · activity-logs sort chỉ 1 trang (thêm `sort` param API) · daemon LOG_LEVEL tắt log · metrics label trùng vỡ scrape · skills loader crash/draft-leak.
+- **LOW**: Comment/Like `$hidden` · CreditSetting div-zero · widget month/avg/dead-code · EmailTemplate render escape (XSS) · cors localhost prod · `.env.docker.example` drift · a11y (dialog/select/toast) · CouponRedeem turnstile reset · CreditPack race · skills dup-id/URL-decode/vocab guard.
+- **⚠️ Go-live**: prod PHẢI set `HORIZON_ADMIN_EMAIL` (gate fail-closed) + `FRONTEND_URL` (origin CORS prod duy nhất) + chạy community settings migration.
+- **Regression agent gây (manager đã fix)**: cors `app()->environment()` lúc bootstrap → `env('APP_ENV')`; `ManageCommunitySettings::getSavedNotificationTitle` phải public; CommunityFeatureTest raw-insert trùng migration → bỏ (migration seed defaults).
+- **Worklogs**: `backend/worklogs/2026-07-22-{config-layer,eloquent-model,filament-widget-email,activity-log-sort}-*.md`, `apps/daemon/worklogs/2026-07-22-internal-bug-fixes.md`, `apps/web/worklogs/2026-07-22-jobs-billing-a11y-bugfixes.md`.
+
 ### Multi-agent bug sweep ĐỢT 4 — ~44 lỗi fixed (2026-07-22) — ✅ Done + pushed
 - **Cách làm**: 5 agent phân tích (jobs/queue · asset/storage/R2 · daemon providers · web studio/components · web i18n/lib) → 5 agent fix → final sweep.
 - **Verify**: web tsc 0 · daemon tsc 0 · **backend 606 passed / 1910 assertions** (i18n sạch, 0 key thiếu).

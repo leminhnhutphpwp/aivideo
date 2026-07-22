@@ -7,7 +7,8 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   error: 3,
 };
 
-const currentLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || (process.env.NODE_ENV === 'production' ? 'info' : 'debug');
+const envLevel = process.env.LOG_LEVEL as LogLevel;
+const currentLevel: LogLevel = envLevel in LOG_LEVELS ? envLevel : (process.env.NODE_ENV === 'production' ? 'info' : 'debug');
 
 function shouldLog(level: LogLevel): boolean {
   return LOG_LEVELS[level] >= LOG_LEVELS[currentLevel];

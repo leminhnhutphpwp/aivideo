@@ -30,6 +30,14 @@ const STATUS_UI: Record<string, { label: string; color: string }> = {
   queued: PENDING_UI, pending: PENDING_UI,
 };
 
+// Shared "still in progress" vocabulary — covers BOTH daemon (queued/running) and
+// Laravel render-job (pending/processing/analyzing/rendering) statuses. Used to decide
+// when the 5s poll should refetch; previously only daemon words were matched, so
+// in-progress Laravel jobs never got polled.
+const IN_PROGRESS_STATUSES = new Set([
+  'queued', 'running', 'pending', 'processing', 'analyzing', 'rendering',
+]);
+
 interface TaskItem {
   taskId: string;
   id?: string;
@@ -54,6 +62,10 @@ interface TaskItem {
   daemon_project_id?: string;
   output_path?: string;
   surface?: string;
+  published_at?: string | null;
+  visibility?: string;
+  moderation_status?: string;
+  aspect_ratio?: string;
 }
 
 export default function JobsPage() {
@@ -105,6 +117,11 @@ export default function JobsPage() {
                 existing.video_type = job.video_type || existing.video_type;
                 existing.capability = job.capability || existing.capability;
                 existing.assets = job.assets;
+                // Carry Laravel-only fields so the publish button + preview reflect real state.
+                existing.published_at = job.published_at;
+                existing.visibility = job.visibility;
+                existing.moderation_status = job.moderation_status;
+                existing.aspect_ratio = job.aspect_ratio ?? existing.aspect_ratio;
                 // Prefer daemon status as it's real-time, unless laravel has an error
                 if (job.status === 'failed' && existing.status !== 'failed') existing.status = 'failed';
                 continue; // Skip adding a duplicate record
@@ -131,6 +148,10 @@ export default function JobsPage() {
               assets: job.assets,
               daemon_project_id: job.daemon_project_id,
               output_path: job.output_path,
+              published_at: job.published_at,
+              visibility: job.visibility,
+              moderation_status: job.moderation_status,
+              aspect_ratio: job.aspect_ratio,
             });
           }
         }
@@ -139,7 +160,9 @@ export default function JobsPage() {
 
         for (const task of all) {
           const tid = (task.taskId || task.id) as string | undefined;
-          if (tid && !watchingRef.current.has(tid) && task.status === 'running') {
+          // Only the daemon can resolve a task id; `laravel:<uuid>` ids are updated via
+          // Reverb events / the poll, not daemon.waitTask.
+          if (tid && !tid.startsWith('laravel:') && !watchingRef.current.has(tid) && task.status === 'running') {
             watchingRef.current.add(tid);
             watchTask(tid);
           }
@@ -175,7 +198,7 @@ export default function JobsPage() {
 
     fetchTasks();
     const interval = setInterval(() => {
-      if (tasksRef.current.some(t => t.status === 'queued' || t.status === 'running')) {
+      if (tasksRef.current.some(t => IN_PROGRESS_STATUSES.has(t.status))) {
         fetchTasks();
       }
     }, 5000);

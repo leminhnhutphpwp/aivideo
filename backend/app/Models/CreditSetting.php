@@ -69,6 +69,12 @@ class CreditSetting extends Model
 
     public static function creditsToVnd(int $credits): float
     {
-        return $credits / static::exchangeRate();
+        $rate = static::exchangeRate();
+        // Guard against divide-by-zero: exchange_rate is admin-editable and could be
+        // set to 0. Fall back to the default rate (0.1) rather than throwing.
+        if ($rate <= 0) {
+            $rate = 0.1;
+        }
+        return $credits / $rate;
     }
 }

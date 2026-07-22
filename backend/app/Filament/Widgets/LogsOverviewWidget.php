@@ -16,11 +16,13 @@ class LogsOverviewWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $emailSentThisMonth = EmailLog::whereMonth('created_at', now()->month)
+        $emailSentThisMonth = EmailLog::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
             ->where('status', 'sent')
             ->count();
 
-        $emailFailedThisMonth = EmailLog::whereMonth('created_at', now()->month)
+        $emailFailedThisMonth = EmailLog::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
             ->where('status', 'failed')
             ->count();
 

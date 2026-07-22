@@ -34,8 +34,8 @@ class EditEmailTemplate extends EditRecord
                     $rendered = $record->render([
                         'name' => auth()->user()?->name ?? 'Người nhận thử',
                         'email' => $data['email'],
-                        'login_url' => url('/admin/login'),
-                        'reset_url' => url('/admin/password/reset'),
+                        'login_url' => rtrim(config('app.frontend_url'), '/') . '/login',
+                        'reset_url' => rtrim(config('app.frontend_url'), '/') . '/reset-password',
                     ]);
 
                     try {
