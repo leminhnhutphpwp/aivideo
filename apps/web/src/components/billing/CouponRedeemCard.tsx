@@ -33,9 +33,14 @@ export function CouponRedeemCard({ onRedeemed }: { onRedeemed: () => void }) {
       addToast(res.message || 'Đổi mã thành công!', 'success');
       setCode('');
       onRedeemed();
+      // Turnstile tokens are single-use — reset after a successful redeem too, else a
+      // second redeem reuses the consumed token and the server rejects it.
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } catch (err: any) {
       addToast(err?.message || 'Mã không hợp lệ', 'error');
       turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } finally {
       setLoading(false);
     }

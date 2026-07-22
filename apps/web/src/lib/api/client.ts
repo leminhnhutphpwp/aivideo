@@ -417,7 +417,7 @@ export const laravel = {
       body: JSON.stringify({ preferences }),
     }),
 
-  activityLogs: (params?: { page?: number; per_page?: number }) => {
+  activityLogs: (params?: { page?: number; per_page?: number; sort?: 'asc' | 'desc' }) => {
     const qs = params ? '?' + new URLSearchParams(
       Object.fromEntries(Object.entries(params).filter(([_, v]) => v != null).map(([k, v]) => [k, String(v)]))
     ).toString() : '';

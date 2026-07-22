@@ -146,13 +146,14 @@ export default function ActivityLogsPage() {
   const [total, setTotal] = useState(0);
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc');
 
-  const fetchLogs = async (p: number) => {
+  const fetchLogs = async (p: number, dir: 'desc' | 'asc' = sortDir) => {
     setLoading(true);
     try {
-      const res = await laravel.activityLogs({ page: p, per_page: 20 });
+      const res = await laravel.activityLogs({ page: p, per_page: 20, sort: dir });
       const payload = res.data as any;
       setLogs(Array.isArray(payload.items) ? payload.items : []);
       setCurrentPage(p);
+      setSortDir(dir);
       setTotalPages(payload.last_page || 1);
       setTotal(payload.total || 0);
     } catch (err) {
@@ -164,14 +165,11 @@ export default function ActivityLogsPage() {
 
   useEffect(() => { fetchLogs(1); }, []);
 
+  // Toggle sort server-side so ALL pages reorder (not just the current 20 rows),
+  // and reset to page 1 since order changed.
   const toggleSort = () => {
     const dir = sortDir === 'desc' ? 'asc' : 'desc';
-    setSortDir(dir);
-    setLogs([...logs].sort((a, b) =>
-      dir === 'desc'
-        ? new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        : new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    ));
+    fetchLogs(1, dir);
   };
 
   const getPageNumbers = (): (number | '...')[] => {

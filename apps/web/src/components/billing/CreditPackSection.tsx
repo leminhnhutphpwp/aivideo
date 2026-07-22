@@ -17,10 +17,6 @@ interface CreditPackSectionProps {
   onConfirmPack: (pack: CreditPack, couponCode?: string) => void;
 }
 
-function calcCredits(price: number, exchangeRate: number): number {
-  return Math.floor(price * exchangeRate);
-}
-
 export function CreditPackSection({
   pendingCount,
   loading,
@@ -28,7 +24,6 @@ export function CreditPackSection({
   onSelectPack,
   onConfirmPack,
 }: CreditPackSectionProps) {
-  const [exchangeRate, setExchangeRate] = useState(0.1);
   const isLocked = pendingCount >= MAX_PENDING_PURCHASES;
   const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount) + '\u0111';
 
@@ -63,12 +58,6 @@ export function CreditPackSection({
   };
 
   useEffect(() => {
-    laravel.creditsSettings().then((settings) => {
-      setExchangeRate(settings.exchange_rate);
-    }).catch(() => {
-      // fallback: exchange_rate default 0.1
-    });
-
     laravel.creditPacks().then((packs) => {
       setCreditPacks(packs);
     }).catch(console.error);
@@ -214,7 +203,9 @@ export function CreditPackSection({
                     </Button>
                     <Button
                       onClick={() => onConfirmPack({ ...pack, credits }, couponApplied?.code)}
-                      disabled={loading}
+                      // Block confirm while a coupon is still validating, or when a code
+                      // was typed but not yet applied — otherwise the discount is dropped.
+                      disabled={loading || couponLoading || (!!couponCode.trim() && !couponApplied)}
                       className="flex-1 h-10 rounded-lg bg-white text-black hover:bg-zinc-200 font-bold text-xs disabled:opacity-50"
                     >
                       {loading ? (

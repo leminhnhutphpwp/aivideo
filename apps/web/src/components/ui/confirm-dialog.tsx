@@ -9,6 +9,8 @@ import { useConfirmStore } from '@/stores/confirm-store';
 export function ConfirmDialog() {
   const { open, options, resolve, close } = useConfirmStore();
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = 'confirm-dialog-title';
 
   useEffect(() => {
     if (open) {
@@ -23,6 +25,24 @@ export function ConfirmDialog() {
       if (e.key === 'Escape') {
         resolve?.(false);
         close();
+        return;
+      }
+      // Focus trap — keep Tab focus cycling inside the dialog.
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     window.addEventListener('keydown', handler);
@@ -54,6 +74,10 @@ export function ConfirmDialog() {
             onClick={handleCancel}
           />
           <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -74,7 +98,7 @@ export function ConfirmDialog() {
                 </div>
               )}
               <div className="flex-1 min-w-0 space-y-2">
-                <h2 className="text-lg font-display font-semibold text-white tracking-tight">
+                <h2 id={titleId} className="text-lg font-display font-semibold text-white tracking-tight">
                   {options.title}
                 </h2>
                 <p className="text-sm text-slate-400 leading-relaxed">

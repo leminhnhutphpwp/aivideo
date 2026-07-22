@@ -22,11 +22,16 @@ export function ToastContainer() {
   const { toasts, removeToast } = useToastStore();
 
   return (
-    <div className="fixed top-5 right-5 z-[300] flex flex-col gap-3 pointer-events-none">
+    <div
+      className="fixed top-5 right-5 z-[300] flex flex-col gap-3 pointer-events-none"
+      aria-live="polite"
+      aria-atomic="false"
+    >
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
             key={toast.id}
+            role={toast.variant === 'error' ? 'alert' : 'status'}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}

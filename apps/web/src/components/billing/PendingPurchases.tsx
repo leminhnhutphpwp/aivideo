@@ -13,20 +13,32 @@ interface PendingPurchasesProps {
 export function PendingPurchases({ onStatusChange }: PendingPurchasesProps) {
   const addToast = useToastStore(s => s.addToast);
   const [pendingPurchases, setPendingPurchases] = useState<any[]>([]);
-  const prevStatusRef = useRef<string>('');
+  // Map transfer_code -> status. Comparing per-code transitions (not the whole joined
+  // string) means a NEW pending row no longer falsely triggers the "status changed" toast;
+  // only an existing request actually changing status does.
+  const prevStatusRef = useRef<Record<string, string>>({});
 
   const loadPendingPurchases = async (silent = false) => {
     try {
       const res: any = await laravel.pendingCreditsPurchases();
       const list = Array.isArray(res) ? res : (res?.data || []);
-      const currStatus = list.map((p: any) => p.status).join(',');
+      const currMap: Record<string, string> = {};
+      for (const p of list) {
+        if (p?.transfer_code != null) currMap[String(p.transfer_code)] = p.status;
+      }
 
-      if (!silent && prevStatusRef.current && prevStatusRef.current !== currStatus) {
+      const prevMap = prevStatusRef.current;
+      const hadPrev = Object.keys(prevMap).length > 0;
+      const changed = Object.keys(prevMap).some(
+        code => code in currMap && currMap[code] !== prevMap[code]
+      );
+
+      if (!silent && hadPrev && changed) {
         addToast('Có cập nhật trạng thái yêu cầu nạp tiền!', 'success');
         onStatusChange();
       }
 
-      prevStatusRef.current = currStatus;
+      prevStatusRef.current = currMap;
       setPendingPurchases(list);
     } catch {
       // ignore
