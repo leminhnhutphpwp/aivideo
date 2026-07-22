@@ -28,17 +28,20 @@ class EmailTemplate extends Model
 
     public function render(array $data = []): array
     {
-        $subject = $this->subject;
-        $body = $this->body;
-
+        // Build replacement map for a single-pass substitution (strtr) so that a
+        // value which itself contains "{{another_key}}" is never re-substituted by
+        // a later pass. URL values are kept raw; all other user-supplied values are
+        // HTML-escaped because the body is sent via Mail::html (raw HTML).
+        $replacements = [];
         foreach ($data as $key => $value) {
-            $subject = str_replace('{{' . $key . '}}', (string) $value, $subject);
-            $body = str_replace('{{' . $key . '}}', (string) $value, $body);
+            $value = (string) $value;
+            $isUrl = str_ends_with($key, '_url') || str_ends_with($key, 'url');
+            $replacements['{{' . $key . '}}'] = $isUrl ? $value : e($value);
         }
 
         return [
-            'subject' => $subject,
-            'body' => $body,
+            'subject' => strtr($this->subject, $replacements),
+            'body' => strtr($this->body, $replacements),
         ];
     }
 }

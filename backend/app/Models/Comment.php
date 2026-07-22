@@ -10,6 +10,8 @@ class Comment extends Model
 {
     protected $fillable = ['user_id', 'render_job_id', 'parent_id', 'content'];
 
+    protected $hidden = ['user_id'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

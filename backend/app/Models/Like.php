@@ -10,6 +10,8 @@ class Like extends Model
 
     protected $fillable = ['user_id', 'render_job_id'];
 
+    protected $hidden = ['user_id'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -9,6 +9,11 @@ return [
     'max_projects_per_user' => env('DAEMON_MAX_PROJECTS_PER_USER', 50),
     'default_model' => env('DAEMON_DEFAULT_MODEL', 'seedance'),
 
+    // Local simulation short-circuit: when true, AiPromptCompiler skips the real
+    // LLM call. Read via config() so it survives `config:cache` (env() returns
+    // null once the config is cached).
+    'simulation_mode' => env('SIMULATION_MODE', false),
+
     // Max total attempts (initial generate + retries) per daemon project. Caps
     // unlimited free retries on a failing project (credits refund on failure).
     'max_attempts_per_project' => env('DAEMON_MAX_ATTEMPTS_PER_PROJECT', 5),

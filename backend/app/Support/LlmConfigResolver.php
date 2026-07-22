@@ -21,7 +21,15 @@ class LlmConfigResolver
             return null;
         }
 
-        $known = ['ckey' => 'https://ckey.vn', 'openai' => 'https://api.openai.com'];
+        // 'gemini' is a first-class daemon provider: media.ts routes providerId==='gemini'
+        // to the fixed Google Generative Language endpoint and ignores this baseUrl
+        // (resolveRequestLlm exempts it from host validation). We still map it to the real
+        // Google host so the payload carries a non-empty, truthful base_url.
+        $known = [
+            'ckey' => 'https://ckey.vn',
+            'openai' => 'https://api.openai.com',
+            'gemini' => 'https://generativelanguage.googleapis.com',
+        ];
         $baseUrl = $s->llm_provider === 'custom'
             ? $s->llm_base_url
             : ($known[$s->llm_provider] ?? '');

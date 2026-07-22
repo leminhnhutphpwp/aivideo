@@ -31,7 +31,7 @@ class ProviderInfoWidget extends StatsOverviewWidget
         $totalDone = $models->sum('completed');
         $totalFail = $models->sum('failed');
         $totalCredits = $models->sum('total_credits');
-        $avgGpu = $models->avg('avg_gpu');
+        $avgGpu = RenderJob::whereNotNull('gpu_seconds')->avg('gpu_seconds');
         $modelCount = $models->count();
 
         $today = now()->startOfDay();

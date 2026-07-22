@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Horizon Admin Email
+    |--------------------------------------------------------------------------
+    |
+    | Email allowed to access the Horizon dashboard in non-local environments
+    | (see App\Providers\HorizonServiceProvider::gate). Read via config() so it
+    | survives `config:cache`. No default — when unset the gate denies everyone.
+    |
+    */
+
+    'admin_email' => env('HORIZON_ADMIN_EMAIL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Horizon Domain
     |--------------------------------------------------------------------------
     |

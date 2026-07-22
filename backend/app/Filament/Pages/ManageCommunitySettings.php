@@ -5,7 +5,6 @@ namespace App\Filament\Pages;
 use App\Settings\CommunitySettings;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -142,13 +141,8 @@ class ManageCommunitySettings extends SettingsPage
             ]);
     }
 
-    public function save(): void
+    public function getSavedNotificationTitle(): ?string
     {
-        parent::save();
-
-        Notification::make()
-            ->title('Đã lưu cấu hình Cộng đồng')
-            ->success()
-            ->send();
+        return 'Đã lưu cấu hình Cộng đồng';
     }
 }

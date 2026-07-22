@@ -172,17 +172,6 @@ class Plan extends Model
         return $this->default_provider ?? 'stub';
     }
 
-    public function allowsFeature(string $feature): bool
-    {
-        return (bool) $this->$feature;
-    }
-
-    public function allowsResolution(string $resolution): bool
-    {
-        $levels = ['720p' => 1, '1080p' => 2, '4K' => 3];
-        return ($levels[$resolution] ?? 0) <= ($levels[$this->max_resolution] ?? 1);
-    }
-
     public function isFree(): bool
     {
         return $this->slug === 'free';

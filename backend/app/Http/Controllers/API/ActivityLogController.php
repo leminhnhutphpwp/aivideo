@@ -38,7 +38,11 @@ class ActivityLogController extends Controller
             $query->whereDate('created_at', '<=', $request->get('date_to'));
         }
 
-        $query->orderBy('created_at', 'desc');
+        $sort = strtolower((string) $request->get('sort', 'desc'));
+        if (!in_array($sort, ['asc', 'desc'], true)) {
+            $sort = 'desc';
+        }
+        $query->orderBy('created_at', $sort);
 
         $perPage = (int) $request->get('per_page', 15);
         $page = $query->paginate($perPage);
